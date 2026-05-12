@@ -226,9 +226,8 @@
         .content {
             flex: 1;
             padding: 30px;
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
+            display: flex;
+            flex-direction: column;
         }
 
         /* FORM PANEL */
@@ -380,6 +379,7 @@
         .tab-content {
             display: none;
             flex: 1;
+            flex-direction: column;
         }
 
         .tab-content.active {
@@ -535,15 +535,16 @@
 
         <!-- TABS -->
         <div class="tab-switch">
-            <button class="tab-button active" onclick="switchTab('documentos')">📄 Documentos</button>
+            <button class="tab-button active" onclick="switchTab('crear')">➕ Crear Documento</button>
+            <button class="tab-button" onclick="switchTab('documentos')">📄 Documentos</button>
             <button class="tab-button" onclick="switchTab('auditoria')">📋 Auditoría</button>
         </div>
 
         <!-- CONTENT -->
-        <div class="content">
-            <!-- TAB: DOCUMENTOS -->
-            <div class="tab-content active" id="documentos-tab" style="grid-column: 1 / -1;">
-                <div class="form-panel">
+        <div class="content" style="grid-template-columns: 1fr;">
+            <!-- TAB: CREAR -->
+            <div class="tab-content active" id="crear-tab">
+                <div class="form-panel" style="max-width: 600px;">
                     <h2 id="formTitle">Nuevo documento</h2>
                     <form id="documentForm" onsubmit="handleSaveDocument(event)">
                         <div class="form-row">
@@ -587,8 +588,11 @@
                         </div>
                     </form>
                 </div>
+            </div>
 
-                <div class="list-panel">
+            <!-- TAB: DOCUMENTOS -->
+            <div class="tab-content" id="documentos-tab">
+                <div class="list-panel" style="width: 100%;">
                     <div class="list-header">📚 Documentos Registrados</div>
                     <div class="table-container">
                         <table>
@@ -613,8 +617,8 @@
             </div>
 
             <!-- TAB: AUDITORÍA -->
-            <div class="tab-content" id="auditoria-tab" style="grid-column: 1 / -1;">
-                <div class="list-panel" style="margin: 0;">
+            <div class="tab-content" id="auditoria-tab">
+                <div class="list-panel" style="width: 100%; margin: 0;">
                     <div class="list-header">🔍 Historial de Cambios</div>
                     <div class="audit-container" id="auditList">
                         <div style="text-align: center; padding: 40px; color: #999;">Cargando auditoría...</div>
