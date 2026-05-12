@@ -328,17 +328,20 @@
             text-transform: capitalize;
         }
 
-        .status-borrador {
+        .status-borrador,
+        .status-en-revisión {
             background: #fef3c7;
             color: #92400e;
         }
 
-        .status-aprobado {
+        .status-aprobado,
+        .status-publicado {
             background: #d1fae5;
             color: #065f46;
         }
 
-        .status-archivado {
+        .status-archivado,
+        .status-obsoleto {
             background: #dbeafe;
             color: #1e40af;
         }
@@ -553,30 +556,59 @@
                     <form id="documentForm" onsubmit="handleSaveDocument(event)">
                         <div class="form-row">
                             <label>Nombre</label>
-                            <input type="text" id="docName" required placeholder="Ej: Contrato BHP Q2 2025">
+                            <input type="text" id="docName" required placeholder="Ej: Procedimiento de Seguridad">
+                        </div>
+                        <div class="form-row">
+                            <label>Código</label>
+                            <input type="text" id="docCodigo" required placeholder="Ej: P04-PMG-001">
                         </div>
                         <div class="form-row">
                             <label>Tipo</label>
-                            <select id="docType" required>
+                            <select id="docTipo" required>
                                 <option value="">-- Seleccionar --</option>
-                                <option value="contrato">Contrato</option>
-                                <option value="factura">Factura</option>
-                                <option value="reporte">Reporte</option>
-                                <option value="propuesta">Propuesta</option>
-                                <option value="otro">Otro</option>
+                                <option value="Manual">Manual</option>
+                                <option value="Procedimiento">Procedimiento</option>
+                                <option value="Capacitación">Capacitación</option>
+                                <option value="QRG">QRG</option>
+                                <option value="Video">Video</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>Alcance</label>
+                            <select id="docAlcance" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Contratista">Contratista</option>
+                                <option value="Empleados">Empleados</option>
+                                <option value="Transversal">Transversal</option>
+                                <option value="Thinking">Thinking</option>
                             </select>
                         </div>
                         <div class="form-row">
                             <label>Estado</label>
-                            <select id="docStatus" required>
-                                <option value="borrador">Borrador</option>
-                                <option value="aprobado">Aprobado</option>
-                                <option value="archivado">Archivado</option>
+                            <select id="docEstado" required>
+                                <option value="Publicado">Publicado</option>
+                                <option value="En revisión">En revisión</option>
+                                <option value="Obsoleto">Obsoleto</option>
                             </select>
                         </div>
                         <div class="form-row">
-                            <label>Fecha vencimiento</label>
-                            <input type="date" id="docDueDate">
+                            <label>Repositorio</label>
+                            <select id="docRepositorio" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="Contract Support">Contract Support</option>
+                                <option value="PMG Center">PMG Center</option>
+                                <option value="Reportabilidad HSS">Reportabilidad HSS</option>
+                                <option value="Rutinas HSS">Rutinas HSS</option>
+                                <option value="Contract Data Center">Contract Data Center</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>Publicado</label>
+                            <input type="date" id="docPublicado" required>
+                        </div>
+                        <div class="form-row">
+                            <label>Versión</label>
+                            <input type="text" id="docVersion" placeholder="Ej: 1.0, 2.1">
                         </div>
                         <div class="form-row">
                             <label>Link Word</label>
@@ -603,16 +635,20 @@
                             <thead>
                                 <tr>
                                     <th>Nombre</th>
+                                    <th>Código</th>
                                     <th>Tipo</th>
+                                    <th>Alcance</th>
                                     <th>Estado</th>
-                                    <th>Vencimiento</th>
-                                    <th>Link</th>
+                                    <th>Repositorio</th>
+                                    <th>Publicado</th>
+                                    <th>Versión</th>
+                                    <th>Mantención</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="documentTable">
                                 <tr>
-                                    <td colspan="6" style="text-align: center; padding: 40px;">Cargando documentos...</td>
+                                    <td colspan="10" style="text-align: center; padding: 40px;">Cargando documentos...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -727,40 +763,57 @@
             const tbody = document.getElementById('documentTable');
             
             if (documents.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">Sin documentos aún</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 40px; color: #999;">Sin documentos aún</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = documents.map(doc => `
-                <tr>
-                    <td><strong>${escapeHtml(doc.name)}</strong></td>
-                    <td><small>${doc.doc_type}</small></td>
-                    <td><span class="status-badge status-${doc.status}">${doc.status}</span></td>
-                    <td><small>${doc.due_date || '-'}</small></td>
-                    <td>
-                        ${doc.data?.link ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" style="color: #F32121; text-decoration: none; font-weight: 500;">Abrir</a>` : '-'}
-                    </td>
-                    <td>
-                        <div class="actions">
-                            <button class="btn-secondary btn-icon" onclick="editDocument('${doc.id}')">✏️</button>
-                            <button class="btn-danger btn-icon" onclick="deleteDocument('${doc.id}')">🗑️</button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = documents.map(doc => {
+                const publicadoDate = new Date(doc.publicado);
+                const hoy = new Date();
+                const mantenerEn = Math.ceil((publicadoDate - hoy) / (1000 * 60 * 60 * 24));
+
+                return `
+                    <tr>
+                        <td><strong>${escapeHtml(doc.name)}</strong></td>
+                        <td><small>${doc.codigo}</small></td>
+                        <td><small>${doc.tipo}</small></td>
+                        <td><small>${doc.alcance}</small></td>
+                        <td><span class="status-badge status-${doc.estado.toLowerCase().replace(' ', '-')}">${doc.estado}</span></td>
+                        <td><small>${doc.repositorio}</small></td>
+                        <td><small>${doc.publicado || '-'}</small></td>
+                        <td><small>${doc.version || '-'}</small></td>
+                        <td><small style="color: ${mantenerEn < 0 ? '#F32121' : '#333'}">${mantenerEn} días</small></td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn-secondary btn-icon" onclick="editDocument('${doc.id}')">✏️</button>
+                                <button class="btn-danger btn-icon" onclick="deleteDocument('${doc.id}')">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         async function handleSaveDocument(e) {
             e.preventDefault();
 
+            const publicadoDate = new Date(document.getElementById('docPublicado').value);
+            const hoy = new Date();
+            const mantenerEn = Math.ceil((publicadoDate - hoy) / (1000 * 60 * 60 * 24));
+
             const data = {
                 name: document.getElementById('docName').value,
-                doc_type: document.getElementById('docType').value,
-                status: document.getElementById('docStatus').value,
-                due_date: document.getElementById('docDueDate').value || null,
+                codigo: document.getElementById('docCodigo').value,
+                tipo: document.getElementById('docTipo').value,
+                alcance: document.getElementById('docAlcance').value,
+                estado: document.getElementById('docEstado').value,
+                repositorio: document.getElementById('docRepositorio').value,
+                publicado: document.getElementById('docPublicado').value,
+                version: document.getElementById('docVersion').value,
                 data: {
                     link: document.getElementById('docLink').value,
                     notes: document.getElementById('docNotes').value,
+                    mantener_en: mantenerEn,
                     created_by_email: currentUser.email
                 }
             };
@@ -812,12 +865,18 @@
             editingDocId = id;
             document.getElementById('formTitle').textContent = 'Editar documento';
             document.getElementById('docName').value = doc.name;
-            document.getElementById('docType').value = doc.doc_type;
-            document.getElementById('docStatus').value = doc.status;
-            document.getElementById('docDueDate').value = doc.due_date || '';
+            document.getElementById('docCodigo').value = doc.codigo || '';
+            document.getElementById('docTipo').value = doc.tipo || '';
+            document.getElementById('docAlcance').value = doc.alcance || '';
+            document.getElementById('docEstado').value = doc.estado || 'En revisión';
+            document.getElementById('docRepositorio').value = doc.repositorio || '';
+            document.getElementById('docPublicado').value = doc.publicado || '';
+            document.getElementById('docVersion').value = doc.version || '';
             document.getElementById('docLink').value = doc.data?.link || '';
             document.getElementById('docNotes').value = doc.data?.notes || '';
             document.getElementById('btnCancel').style.display = 'inline-block';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         async function deleteDocument(id) {
