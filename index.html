@@ -751,15 +751,13 @@
         // AUDITORÍA
         async function logAudit(docId, action, changes) {
             try {
-                const validUUID = generateUUID();
                 await supabaseClient.from('audit_log').insert([{
                     document_id: docId,
-                    changed_by: validUUID,
                     action: action,
                     changes: changes
                 }]);
             } catch (err) {
-                console.warn('Audit local only:', err.message);
+                console.warn('Audit error (no blocker):', err.message);
             }
         }
 
@@ -796,7 +794,7 @@
                             <span class="audit-action">${log.action}</span>
                             <span class="audit-time">${timeStr}</span>
                         </div>
-                        <div class="audit-user">Por: ${log.data?.email || 'Sistema'}</div>
+                        <div class="audit-user">Doc ID: ${log.document_id.slice(0, 8)}...</div>
                         <div class="audit-details">
                             ${JSON.stringify(log.changes || {}, null, 2)}
                         </div>
