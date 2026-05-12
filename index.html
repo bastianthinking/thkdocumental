@@ -669,10 +669,9 @@
                     await logAudit(editingDocId, 'updated', data);
                     showMessage('✓ Documento actualizado', 'success');
                 } else {
-                    const validUUID = generateUUID();
                     const { data: newDoc, error } = await supabaseClient
                         .from('documents')
-                        .insert([{ ...data, created_by: validUUID }])
+                        .insert([{ ...data, created_by: null }])
                         .select();
                     if (error) throw error;
                     await logAudit(newDoc[0].id, 'created', data);
@@ -685,7 +684,7 @@
                     const doc = {
                         id: validUUID,
                         ...data,
-                        created_by: validUUID,
+                        created_by: null,
                         created_at: new Date().toISOString(),
                         updated_at: new Date().toISOString()
                     };
