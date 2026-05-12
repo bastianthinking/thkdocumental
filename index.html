@@ -536,6 +536,15 @@
         let documents = [];
         let auditLogs = [];
 
+        // UUID GENERATOR
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
         // INIT
         async function init() {
             await checkUserLogin();
@@ -660,9 +669,10 @@
                     await logAudit(editingDocId, 'updated', data);
                     showMessage('✓ Documento actualizado', 'success');
                 } else {
+                    const validUUID = generateUUID();
                     const { data: newDoc, error } = await supabaseClient
                         .from('documents')
-                        .insert([{ ...data, created_by: 'uuid-bastian' }])
+                        .insert([{ ...data, created_by: validUUID }])
                         .select();
                     if (error) throw error;
                     await logAudit(newDoc[0].id, 'created', data);
@@ -671,10 +681,11 @@
             } catch (err) {
                 console.warn('Guardando localmente:', err.message);
                 if (!editingDocId) {
+                    const validUUID = generateUUID();
                     const doc = {
-                        id: 'local-' + Date.now(),
+                        id: validUUID,
                         ...data,
-                        created_by: 'uuid-bastian',
+                        created_by: validUUID,
                         created_at: new Date().toISOString(),
                         updated_at: new Date().toISOString()
                     };
@@ -741,9 +752,10 @@
         // AUDITORÍA
         async function logAudit(docId, action, changes) {
             try {
+                const validUUID = generateUUID();
                 await supabaseClient.from('audit_log').insert([{
                     document_id: docId,
-                    changed_by: 'uuid-bastian',
+                    changed_by: validUUID,
                     action: action,
                     changes: changes
                 }]);
