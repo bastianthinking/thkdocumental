@@ -810,6 +810,7 @@
                 repositorio: document.getElementById('docRepositorio').value,
                 publicado: document.getElementById('docPublicado').value,
                 version: document.getElementById('docVersion').value,
+                created_by: null,
                 data: {
                     link: document.getElementById('docLink').value,
                     notes: document.getElementById('docNotes').value,
@@ -830,20 +831,19 @@
                 } else {
                     const { data: newDoc, error } = await supabaseClient
                         .from('documents')
-                        .insert([{ ...data, created_by: null }])
+                        .insert([data])
                         .select();
                     if (error) throw error;
                     await logAudit(newDoc[0].id, 'created', data);
                     showMessage('✓ Documento creado', 'success');
                 }
             } catch (err) {
-                console.warn('Guardando localmente:', err.message);
+                console.warn('Error:', err.message);
                 if (!editingDocId) {
                     const validUUID = generateUUID();
                     const doc = {
                         id: validUUID,
                         ...data,
-                        created_by: null,
                         created_at: new Date().toISOString(),
                         updated_at: new Date().toISOString()
                     };
