@@ -12,43 +12,58 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary-red: #F32121;
+            --primary-blue: #293654;
+            --white: #FFFFFF;
+            --light-gray: #f5f5f5;
+            --dark-gray: #333333;
+            --border: #e0e0e0;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
-            line-height: 1.6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: var(--light-gray);
+            color: var(--dark-gray);
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
+        /* LOGIN PAGE */
         .login-page {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #1a2540 100%);
         }
 
         .login-box {
-            background: #1e293b;
-            padding: 40px;
-            border-radius: 12px;
-            border: 1px solid #334155;
+            background: var(--white);
+            padding: 50px 40px;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-logo img {
+            height: 50px;
+            margin-bottom: 20px;
         }
 
         .login-box h1 {
-            margin-bottom: 10px;
-            color: #f1f5f9;
-            font-size: 24px;
+            margin-bottom: 5px;
+            color: var(--primary-blue);
+            font-size: 26px;
+            font-weight: 700;
         }
 
         .login-box p {
-            color: #cbd5e1;
+            color: #666;
             margin-bottom: 30px;
             font-size: 14px;
         }
@@ -60,9 +75,11 @@
         label {
             display: block;
             margin-bottom: 8px;
-            color: #cbd5e1;
-            font-weight: 500;
-            font-size: 14px;
+            color: var(--dark-gray);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         input[type="email"],
@@ -72,11 +89,11 @@
         select,
         textarea {
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #334155;
-            border-radius: 6px;
-            background: #0f172a;
-            color: #e2e8f0;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--white);
+            color: var(--dark-gray);
             font-size: 14px;
             font-family: inherit;
         }
@@ -85,70 +102,92 @@
         select:focus,
         textarea:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 3px rgba(243, 33, 33, 0.1);
         }
 
         button {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
             font-size: 14px;
             transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .btn-primary {
-            background: #3b82f6;
-            color: white;
+            background: var(--primary-red);
+            color: var(--white);
             width: 100%;
+            margin-top: 10px;
         }
 
         .btn-primary:hover {
-            background: #2563eb;
+            background: #d91e1e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(243, 33, 33, 0.3);
         }
 
         .btn-secondary {
-            background: #475569;
-            color: white;
+            background: var(--primary-blue);
+            color: var(--white);
         }
 
         .btn-secondary:hover {
-            background: #334155;
+            background: #1a2540;
         }
 
         .btn-danger {
             background: #ef4444;
             color: white;
+            font-size: 12px;
+            padding: 6px 10px;
         }
 
         .btn-danger:hover {
             background: #dc2626;
         }
 
-        .btn-sm {
-            padding: 6px 12px;
+        .btn-icon {
+            padding: 6px 10px;
+            margin-right: 6px;
             font-size: 12px;
         }
 
-        .btn-icon {
-            padding: 8px 12px;
-            margin-right: 8px;
-        }
-
+        /* HEADER */
         .header {
+            background: var(--white);
+            border-bottom: 2px solid var(--primary-red);
+            padding: 20px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #334155;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
-        .header h1 {
-            font-size: 28px;
-            color: #f1f5f9;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-logo img {
+            height: 40px;
+        }
+
+        .header-title h1 {
+            font-size: 24px;
+            color: var(--primary-blue);
+            font-weight: 700;
+        }
+
+        .header-title p {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
         }
 
         .header-right {
@@ -158,83 +197,89 @@
         }
 
         .user-info {
-            color: #cbd5e1;
-            font-size: 14px;
+            text-align: right;
+            font-size: 13px;
+            color: var(--dark-gray);
         }
 
+        .user-info strong {
+            display: block;
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .user-info small {
+            color: #999;
+        }
+
+        /* MAIN LAYOUT */
         .main-content {
             display: none;
+            min-height: 100vh;
         }
 
         .main-content.active {
-            display: block;
-        }
-
-        .tabs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #334155;
+            flex-direction: column;
         }
 
-        .tab-button {
-            padding: 12px 20px;
-            background: transparent;
-            border: none;
-            color: #cbd5e1;
-            cursor: pointer;
-            font-weight: 600;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
+        .content {
+            flex: 1;
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
         }
 
-        .tab-button.active {
-            color: #3b82f6;
-            border-bottom-color: #3b82f6;
-        }
-
-        .tab-button:hover {
-            color: #e2e8f0;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .form-section {
-            background: #1e293b;
+        /* FORM PANEL */
+        .form-panel {
+            background: var(--white);
             padding: 25px;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            height: fit-content;
+            position: sticky;
+            top: 30px;
         }
 
-        .form-section h2 {
-            margin-bottom: 20px;
-            color: #f1f5f9;
+        .form-panel h2 {
+            color: var(--primary-blue);
             font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            border-bottom: 2px solid var(--primary-red);
+            padding-bottom: 10px;
         }
 
         .form-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 15px;
             margin-bottom: 15px;
         }
 
-        .form-row.full {
-            grid-template-columns: 1fr;
+        /* LIST PANEL */
+        .list-panel {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .list-header {
+            background: var(--primary-blue);
+            color: var(--white);
+            padding: 20px 25px;
+            border-radius: 8px 8px 0 0;
+            font-size: 16px;
+            font-weight: 700;
         }
 
         .table-container {
-            background: #1e293b;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            overflow: hidden;
+            flex: 1;
+            overflow-y: auto;
+            max-height: calc(100vh - 250px);
         }
 
         table {
@@ -243,66 +288,116 @@
         }
 
         thead {
-            background: #0f172a;
-            border-bottom: 1px solid #334155;
+            background: #f9f9f9;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         th {
-            padding: 15px;
+            padding: 12px 15px;
             text-align: left;
             font-weight: 600;
-            color: #cbd5e1;
-            font-size: 13px;
+            color: var(--primary-blue);
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
         }
 
         td {
             padding: 12px 15px;
-            border-bottom: 1px solid #334155;
-            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
         }
 
         tbody tr:hover {
-            background: #0f172a;
+            background: #fafafa;
         }
 
+        /* STATUS BADGE */
         .status-badge {
             display: inline-block;
-            padding: 4px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             text-transform: capitalize;
         }
 
         .status-borrador {
-            background: #92400e;
-            color: #fef3c7;
+            background: #fef3c7;
+            color: #92400e;
         }
 
         .status-aprobado {
-            background: #064e3b;
-            color: #d1fae5;
+            background: #d1fae5;
+            color: #065f46;
         }
 
         .status-archivado {
-            background: #1e3a8a;
-            color: #dbeafe;
+            background: #dbeafe;
+            color: #1e40af;
         }
 
+        /* ACTIONS */
         .actions {
             display: flex;
-            gap: 8px;
-            justify-content: flex-end;
+            gap: 6px;
+        }
+
+        /* TABS */
+        .tab-switch {
+            display: flex;
+            gap: 0;
+            background: var(--white);
+            padding: 0;
+            margin-bottom: 0;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab-button {
+            padding: 15px 25px;
+            background: transparent;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-button.active {
+            color: var(--primary-red);
+            border-bottom-color: var(--primary-red);
+        }
+
+        .tab-button:hover {
+            color: var(--dark-gray);
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* AUDIT */
+        .audit-container {
+            padding: 25px;
+            overflow-y: auto;
         }
 
         .audit-item {
-            background: #0f172a;
+            background: #f9f9f9;
             padding: 15px;
             border-radius: 6px;
             margin-bottom: 12px;
-            border-left: 3px solid #3b82f6;
+            border-left: 3px solid var(--primary-red);
         }
 
         .audit-header {
@@ -313,79 +408,82 @@
 
         .audit-action {
             font-weight: 600;
-            color: #3b82f6;
-            font-size: 13px;
+            color: var(--primary-red);
+            font-size: 12px;
             text-transform: uppercase;
         }
 
         .audit-time {
-            color: #94a3b8;
+            color: #999;
             font-size: 12px;
-        }
-
-        .audit-user {
-            color: #cbd5e1;
-            font-size: 13px;
-            margin-bottom: 8px;
         }
 
         .audit-details {
-            background: rgba(59, 130, 246, 0.1);
+            background: var(--white);
             padding: 10px;
             border-radius: 4px;
-            font-size: 12px;
-            color: #cbd5e1;
+            font-size: 11px;
+            color: #666;
             font-family: 'Monaco', monospace;
             overflow-x: auto;
         }
 
+        /* MESSAGES */
         .message {
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 14px;
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
         .message.success {
-            background: #064e3b;
-            color: #d1fae5;
-            border: 1px solid #047857;
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
         }
 
         .message.error {
-            background: #7f1d1d;
-            color: #fecaca;
-            border: 1px solid #991b1b;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
         }
 
         .message.info {
-            background: #1e3a8a;
-            color: #dbeafe;
-            border: 1px solid #1e40af;
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
         }
 
-        @media (max-width: 768px) {
-            .form-row {
+        #loginError {
+            color: var(--primary-red);
+            margin-top: 15px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1200px) {
+            .content {
                 grid-template-columns: 1fr;
             }
 
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
+            .form-panel {
+                position: static;
             }
 
-            .header-right {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            table {
-                font-size: 12px;
-            }
-
-            th, td {
-                padding: 10px;
+            .table-container {
+                max-height: 500px;
             }
         }
     </style>
@@ -394,8 +492,10 @@
     <!-- LOGIN PAGE -->
     <div class="login-page" id="loginPage">
         <div class="login-box">
-            <h1>Control Documental</h1>
-            <p>Thinking SpA</p>
+            <div class="login-logo">
+                <img src="https://thinking.cl/logo.png" alt="Thinking SpA" onerror="this.style.display='none'">
+                <h1>Control Documental</h1>
+            </div>
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label>Email</label>
@@ -406,115 +506,119 @@
                     <input type="password" id="loginPassword" required value="thinking2024">
                 </div>
                 <button type="submit" class="btn-primary">Iniciar sesión</button>
-                <div id="loginError" style="color: #fecaca; margin-top: 15px; text-align: center; font-size: 13px; display: none;"></div>
+                <div id="loginError"></div>
             </form>
         </div>
     </div>
 
     <!-- MAIN APP -->
     <div class="main-content" id="mainContent">
-        <div class="container">
-            <!-- HEADER -->
-            <div class="header">
-                <h1>📄 Control Documental</h1>
-                <div class="header-right">
-                    <div class="user-info">
-                        <strong id="userEmailDisplay"></strong><br>
-                        <small id="userRoleDisplay"></small>
-                    </div>
-                    <button class="btn-secondary btn-sm" onclick="handleLogout()">Cerrar sesión</button>
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-left">
+                <div class="header-logo">
+                    <img src="https://thinking.cl/logo.png" alt="Thinking" onerror="this.style.display='none'">
+                </div>
+                <div class="header-title">
+                    <h1>Control Documental</h1>
+                    <p>Thinking SpA</p>
                 </div>
             </div>
-
-            <!-- TABS -->
-            <div class="tabs">
-                <button class="tab-button active" onclick="switchTab('documentos')">Documentos</button>
-                <button class="tab-button" onclick="switchTab('auditoria')">Auditoría</button>
+            <div class="header-right">
+                <div class="user-info">
+                    <strong id="userEmailDisplay"></strong>
+                    <small id="userRoleDisplay"></small>
+                </div>
+                <button class="btn-secondary" onclick="handleLogout()" style="padding: 8px 15px;">Cerrar sesión</button>
             </div>
+        </div>
 
+        <!-- TABS -->
+        <div class="tab-switch">
+            <button class="tab-button active" onclick="switchTab('documentos')">📄 Documentos</button>
+            <button class="tab-button" onclick="switchTab('auditoria')">📋 Auditoría</button>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
             <!-- TAB: DOCUMENTOS -->
-            <div class="tab-content active" id="documentos-tab">
-                <!-- FORMULARIO -->
-                <div class="form-section" id="formSection">
-                    <h2 id="formTitle">Nuevo Documento</h2>
+            <div class="tab-content active" id="documentos-tab" style="grid-column: 1 / -1;">
+                <div class="form-panel">
+                    <h2 id="formTitle">Nuevo documento</h2>
                     <form id="documentForm" onsubmit="handleSaveDocument(event)">
                         <div class="form-row">
-                            <div class="form-group">
-                                <label>Nombre del documento</label>
-                                <input type="text" id="docName" required placeholder="Ej: Contrato BHP Q2 2025">
-                            </div>
-                            <div class="form-group">
-                                <label>Tipo</label>
-                                <select id="docType" required>
-                                    <option value="">-- Seleccionar --</option>
-                                    <option value="contrato">Contrato</option>
-                                    <option value="factura">Factura</option>
-                                    <option value="reporte">Reporte</option>
-                                    <option value="propuesta">Propuesta</option>
-                                    <option value="otro">Otro</option>
-                                </select>
-                            </div>
+                            <label>Nombre</label>
+                            <input type="text" id="docName" required placeholder="Ej: Contrato BHP Q2 2025">
                         </div>
                         <div class="form-row">
-                            <div class="form-group">
-                                <label>Estado</label>
-                                <select id="docStatus" required>
-                                    <option value="borrador">Borrador</option>
-                                    <option value="aprobado">Aprobado</option>
-                                    <option value="archivado">Archivado</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Fecha vencimiento</label>
-                                <input type="date" id="docDueDate">
-                            </div>
+                            <label>Tipo</label>
+                            <select id="docType" required>
+                                <option value="">-- Seleccionar --</option>
+                                <option value="contrato">Contrato</option>
+                                <option value="factura">Factura</option>
+                                <option value="reporte">Reporte</option>
+                                <option value="propuesta">Propuesta</option>
+                                <option value="otro">Otro</option>
+                            </select>
                         </div>
-                        <div class="form-row full">
-                            <div class="form-group">
-                                <label>Link a archivo Word</label>
-                                <input type="text" id="docLink" placeholder="Ej: https://docs.microsoft.com/...">
-                            </div>
+                        <div class="form-row">
+                            <label>Estado</label>
+                            <select id="docStatus" required>
+                                <option value="borrador">Borrador</option>
+                                <option value="aprobado">Aprobado</option>
+                                <option value="archivado">Archivado</option>
+                            </select>
                         </div>
-                        <div class="form-row full">
-                            <div class="form-group">
-                                <label>Notas</label>
-                                <textarea id="docNotes" rows="3" placeholder="Notas adicionales..."></textarea>
-                            </div>
+                        <div class="form-row">
+                            <label>Fecha vencimiento</label>
+                            <input type="date" id="docDueDate">
                         </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button type="submit" class="btn-primary">Guardar documento</button>
-                            <button type="button" class="btn-secondary" onclick="resetForm()" id="btnCancel" style="display: none;">Cancelar</button>
+                        <div class="form-row">
+                            <label>Link Word</label>
+                            <input type="text" id="docLink" placeholder="https://...">
+                        </div>
+                        <div class="form-row">
+                            <label>Notas</label>
+                            <textarea id="docNotes" rows="3" placeholder="Notas adicionales..."></textarea>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" class="btn-primary">Guardar</button>
+                            <button type="button" class="btn-secondary" onclick="resetForm()" id="btnCancel" style="display: none; flex: 1;">Cancelar</button>
                         </div>
                     </form>
                 </div>
 
-                <!-- TABLA -->
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Tipo</th>
-                                <th>Estado</th>
-                                <th>Vencimiento</th>
-                                <th>Link</th>
-                                <th>Creado por</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="documentTable">
-                            <tr>
-                                <td colspan="7" style="text-align: center; padding: 30px;">Cargando documentos...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="list-panel">
+                    <div class="list-header">📚 Documentos Registrados</div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Tipo</th>
+                                    <th>Estado</th>
+                                    <th>Vencimiento</th>
+                                    <th>Link</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="documentTable">
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: 40px;">Cargando documentos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <!-- TAB: AUDITORÍA -->
-            <div class="tab-content" id="auditoria-tab">
-                <div id="auditList" style="max-height: 600px; overflow-y: auto;">
-                    <div style="text-align: center; padding: 30px; color: #94a3b8;">Cargando auditoría...</div>
+            <div class="tab-content" id="auditoria-tab" style="grid-column: 1 / -1;">
+                <div class="list-panel" style="margin: 0;">
+                    <div class="list-header">🔍 Historial de Cambios</div>
+                    <div class="audit-container" id="auditList">
+                        <div style="text-align: center; padding: 40px; color: #999;">Cargando auditoría...</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -525,7 +629,6 @@
         const SUPABASE_URL = 'https://kmrvvbbyekzuzimzahvd.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttcnZ2YmJ5ZWt6dXppbXphaHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTkzNDEsImV4cCI6MjA5NDE3NTM0MX0.FqmTWcjOHX1J3H-VnAXyaFpXZe1jkIf3GD9WJg0yhTA';
 
-        // INIT SUPABASE
         const { createClient } = window.supabase;
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -536,7 +639,6 @@
         let documents = [];
         let auditLogs = [];
 
-        // UUID GENERATOR
         function generateUUID() {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                 const r = Math.random() * 16 | 0;
@@ -545,7 +647,6 @@
             });
         }
 
-        // INIT
         async function init() {
             await checkUserLogin();
             if (currentUser) {
@@ -561,14 +662,13 @@
             const password = document.getElementById('loginPassword').value;
 
             if (email === 'bastian.zuniga@thinking.cl' && password === 'thinking2024') {
-                currentUser = { id: 'uuid-bastian', email: email };
+                currentUser = { id: generateUUID(), email: email };
                 currentUserRole = 'owner';
                 sessionStorage.setItem('user', JSON.stringify(currentUser));
                 sessionStorage.setItem('userRole', currentUserRole);
                 showApp();
             } else {
-                document.getElementById('loginError').textContent = 'Email o contraseña incorrectos';
-                document.getElementById('loginError').style.display = 'block';
+                document.getElementById('loginError').textContent = '❌ Email o contraseña incorrectos';
             }
         }
 
@@ -585,12 +685,11 @@
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('mainContent').classList.add('active');
             document.getElementById('userEmailDisplay').textContent = currentUser.email;
-            document.getElementById('userRoleDisplay').textContent = `Rol: ${currentUserRole.toUpperCase()}`;
+            document.getElementById('userRoleDisplay').textContent = `${currentUserRole.toUpperCase()}`;
         }
 
         function handleLogout() {
             currentUser = null;
-            currentUserRole = null;
             sessionStorage.removeItem('user');
             sessionStorage.removeItem('userRole');
             document.getElementById('loginPage').style.display = 'flex';
@@ -609,7 +708,7 @@
                 if (error) throw error;
                 documents = data || [];
             } catch (err) {
-                console.warn('Supabase offline, usando sesión local:', err.message);
+                console.warn('Supabase offline:', err.message);
                 const stored = sessionStorage.getItem('documents_local');
                 documents = stored ? JSON.parse(stored) : [];
             }
@@ -620,7 +719,7 @@
             const tbody = document.getElementById('documentTable');
             
             if (documents.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px; color: #94a3b8;">Sin documentos aún</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">Sin documentos aún</td></tr>';
                 return;
             }
 
@@ -631,13 +730,12 @@
                     <td><span class="status-badge status-${doc.status}">${doc.status}</span></td>
                     <td><small>${doc.due_date || '-'}</small></td>
                     <td>
-                        ${doc.data?.link ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" style="color: #3b82f6;">Ver</a>` : '-'}
+                        ${doc.data?.link ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" style="color: #F32121; text-decoration: none; font-weight: 500;">Abrir</a>` : '-'}
                     </td>
-                    <td><small>${doc.data?.created_by_email || 'Sistema'}</small></td>
                     <td>
                         <div class="actions">
-                            <button class="btn-secondary btn-sm btn-icon" onclick="editDocument('${doc.id}')">✏️</button>
-                            <button class="btn-danger btn-sm btn-icon" onclick="deleteDocument('${doc.id}')">🗑️</button>
+                            <button class="btn-secondary btn-icon" onclick="editDocument('${doc.id}')">✏️</button>
+                            <button class="btn-danger btn-icon" onclick="deleteDocument('${doc.id}')">🗑️</button>
                         </div>
                     </td>
                 </tr>
@@ -690,14 +788,7 @@
                     };
                     documents.push(doc);
                     sessionStorage.setItem('documents_local', JSON.stringify(documents));
-                    showMessage('✓ Guardado localmente (sin Supabase)', 'info');
-                } else {
-                    const idx = documents.findIndex(d => d.id === editingDocId);
-                    if (idx >= 0) {
-                        documents[idx] = { ...documents[idx], ...data, updated_at: new Date().toISOString() };
-                        sessionStorage.setItem('documents_local', JSON.stringify(documents));
-                        showMessage('✓ Actualizado localmente', 'info');
-                    }
+                    showMessage('✓ Guardado localmente', 'info');
                 }
             }
 
@@ -719,8 +810,6 @@
             document.getElementById('docLink').value = doc.data?.link || '';
             document.getElementById('docNotes').value = doc.data?.notes || '';
             document.getElementById('btnCancel').style.display = 'inline-block';
-
-            document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
         }
 
         async function deleteDocument(id) {
@@ -734,7 +823,7 @@
             } catch (err) {
                 documents = documents.filter(d => d.id !== id);
                 sessionStorage.setItem('documents_local', JSON.stringify(documents));
-                showMessage('✓ Eliminado localmente', 'info');
+                showMessage('✓ Eliminado', 'info');
             }
 
             await loadDocuments();
@@ -757,7 +846,7 @@
                     changes: changes
                 }]);
             } catch (err) {
-                console.warn('Audit error (no blocker):', err.message);
+                console.warn('Audit error:', err.message);
             }
         }
 
@@ -780,7 +869,7 @@
             const auditList = document.getElementById('auditList');
 
             if (auditLogs.length === 0) {
-                auditList.innerHTML = '<div style="text-align: center; padding: 30px; color: #94a3b8;">Sin cambios registrados</div>';
+                auditList.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Sin cambios registrados</div>';
                 return;
             }
 
@@ -794,7 +883,6 @@
                             <span class="audit-action">${log.action}</span>
                             <span class="audit-time">${timeStr}</span>
                         </div>
-                        <div class="audit-user">Doc ID: ${log.document_id.slice(0, 8)}...</div>
                         <div class="audit-details">
                             ${JSON.stringify(log.changes || {}, null, 2)}
                         </div>
@@ -815,7 +903,7 @@
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${type}`;
             msgDiv.textContent = msg;
-            document.querySelector('.container').insertBefore(msgDiv, document.querySelector('.header'));
+            document.body.appendChild(msgDiv);
             setTimeout(() => msgDiv.remove(), 3000);
         }
 
@@ -825,7 +913,6 @@
             return div.innerHTML;
         }
 
-        // START
         init();
     </script>
 </body>
