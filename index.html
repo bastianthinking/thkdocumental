@@ -674,13 +674,14 @@
                                     <th>Repositorio</th>
                                     <th>Publicado</th>
                                     <th>Versión</th>
+                                    <th>Mantención</th>
                                     <th>Link</th>
                                     <th>Notas</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="documentTable">
-                                <tr><td colspan="11" style="text-align: center; padding: 40px;">Cargando documentos...</td></tr>
+                                <tr><td colspan="12" style="text-align: center; padding: 40px;">Cargando documentos...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -814,11 +815,15 @@
         function renderDocuments() {
             const tbody = document.getElementById('documentTable');
             if (documents.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 40px; color: #999;">Sin documentos aún</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="12" style="text-align: center; padding: 40px; color: #999;">Sin documentos aún</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = documents.map(doc => `
+            tbody.innerHTML = documents.map(doc => {
+                const publicadoDate = new Date(doc.publicado);
+                const hoy = new Date();
+                const maintenerEn = Math.ceil((publicadoDate - hoy) / (1000 * 60 * 60 * 24));
+                return `
                 <tr>
                     <td><strong>${escapeHtml(doc.name)}</strong></td>
                     <td><small>${doc.codigo}</small></td>
@@ -828,6 +833,7 @@
                     <td><small>${doc.repositorio}</small></td>
                     <td><small>${doc.publicado || '-'}</small></td>
                     <td><small>${doc.version || '-'}</small></td>
+                    <td><small style="color: ${maintenerEn < 0 ? '#F32121' : '#333'}">${maintenerEn} días</small></td>
                     <td>${doc.data?.link ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" style="color: #F32121; text-decoration: none;">Abrir</a>` : '-'}</td>
                     <td><small title="${doc.data?.notes || ''}">${doc.data?.notes ? doc.data.notes.substring(0, 30) + '...' : '-'}</small></td>
                     <td>
@@ -837,7 +843,7 @@
                         </div>
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
         }
 
         function renderAprobadores() {
