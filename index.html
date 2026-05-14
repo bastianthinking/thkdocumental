@@ -829,6 +829,7 @@
                     <td><small>${doc.repositorio}</small></td>
                     <td><small>${doc.publicado || '-'}</small></td>
                     <td><small>${doc.version || '-'}</small></td>
+                    <td><small style="color: ${maintenerEn < 0 ? '#F32121' : '#333'}">${maintenerEn} días</small></td>
                     <td>${doc.data?.link ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" style="color: #F32121; text-decoration: none;">Abrir</a>` : '-'}</td>
                     <td><small title="${doc.data?.notes || ''}">${doc.data?.notes ? doc.data.notes.substring(0, 30) + '...' : '-'}</small></td>
                     <td>
