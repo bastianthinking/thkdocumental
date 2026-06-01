@@ -128,6 +128,13 @@
             box-shadow: 0 4px 12px rgba(243, 33, 33, 0.3);
         }
 
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         .btn-secondary {
             background: var(--primary-blue);
             color: var(--white);
@@ -209,6 +216,25 @@
             color: #999;
         }
 
+        /* Badge de rol */
+        .role-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .role-badge.owner {
+            background: #293654;
+            color: #fff;
+        }
+        .role-badge.viewer {
+            background: #e0e0e0;
+            color: #555;
+        }
+
         /* MAIN */
         .main-content {
             display: none;
@@ -256,6 +282,11 @@
 
         .tab-button:hover {
             color: var(--dark-gray);
+        }
+
+        /* Ocultar tabs según rol */
+        .owner-only {
+            display: none;
         }
 
         .tab-content {
@@ -336,6 +367,7 @@
         .table-container {
             flex: 1;
             overflow-y: auto;
+            overflow-x: auto;
             max-height: calc(100vh - 250px);
         }
 
@@ -491,6 +523,31 @@
             font-size: 13px;
         }
 
+        /* Loading overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(41, 54, 84, 0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 16px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .loading-overlay.active { display: flex; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top-color: #F32121;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         @media (max-width: 1200px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -499,6 +556,13 @@
     </style>
 </head>
 <body>
+
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <span id="loadingText">Iniciando sesión...</span>
+    </div>
+
     <!-- LOGIN PAGE -->
     <div class="login-page" id="loginPage">
         <div class="login-box">
@@ -506,16 +570,17 @@
                 <img src="https://thinking.cl/logo.png" alt="Thinking SpA" onerror="this.style.display='none'">
                 <h1>Control Documental</h1>
             </div>
+            <p style="text-align:center;">Thinking SpA</p>
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" id="loginEmail" required value="bastian.zuniga@thinking.cl">
+                    <input type="email" id="loginEmail" required placeholder="tucorreo@thinking.cl">
                 </div>
                 <div class="form-group">
                     <label>Contraseña</label>
-                    <input type="password" id="loginPassword" required value="thinking2024">
+                    <input type="password" id="loginPassword" required placeholder="••••••••">
                 </div>
-                <button type="submit" class="btn-primary">Iniciar sesión</button>
+                <button type="submit" class="btn-primary" id="btnLogin">Iniciar sesión</button>
                 <div id="loginError"></div>
             </form>
         </div>
@@ -537,24 +602,24 @@
             <div class="header-right">
                 <div class="user-info">
                     <strong id="userEmailDisplay"></strong>
-                    <small id="userRoleDisplay"></small>
+                    <span class="role-badge" id="userRoleDisplay"></span>
                 </div>
                 <button class="btn-secondary" onclick="handleLogout()" style="padding: 8px 15px;">Cerrar sesión</button>
             </div>
         </div>
 
-        <!-- TABS -->
-        <div class="tab-switch">
-            <button class="tab-button active" onclick="switchTab('crear')">➕ Crear Documento</button>
-            <button class="tab-button" onclick="switchTab('documentos')">📄 Documentos</button>
-            <button class="tab-button" onclick="switchTab('aprobadores')">👥 Aprobadores</button>
-            <button class="tab-button" onclick="switchTab('auditoria')">📋 Auditoría</button>
+        <!-- TABS (se muestran según rol en applyRoleUI) -->
+        <div class="tab-switch" id="tabSwitch">
+            <button class="tab-button owner-only" id="tab-crear" onclick="switchTab('crear', this)">➕ Crear Documento</button>
+            <button class="tab-button active" id="tab-documentos" onclick="switchTab('documentos', this)">📄 Documentos</button>
+            <button class="tab-button owner-only" id="tab-aprobadores" onclick="switchTab('aprobadores', this)">👥 Aprobadores</button>
+            <button class="tab-button owner-only" id="tab-auditoria" onclick="switchTab('auditoria', this)">📋 Auditoría</button>
         </div>
 
         <!-- CONTENT -->
         <div class="content">
-            <!-- TAB: CREAR -->
-            <div class="tab-content active" id="crear-tab">
+            <!-- TAB: CREAR (solo owner) -->
+            <div class="tab-content" id="crear-tab">
                 <div class="form-panel">
                     <h2 id="formTitle">Nuevo documento</h2>
                     <form id="documentForm" onsubmit="handleSaveDocument(event)">
@@ -597,6 +662,8 @@
                                 <select id="docEstado" required>
                                     <option value="Publicado">Publicado</option>
                                     <option value="En revisión">En revisión</option>
+                                    <option value="Borrador">Borrador</option>
+                                    <option value="Archivado">Archivado</option>
                                     <option value="Obsoleto">Obsoleto</option>
                                 </select>
                             </div>
@@ -624,8 +691,8 @@
                                 <input type="text" id="docVersion" placeholder="Ej: 1.0, 2.1">
                             </div>
                             <div>
-                                <label>Constructor</label>
-                                <input type="text" id="docConstructor" placeholder="Nombre del constructor">
+                                <label>Elaborador</label>
+                                <input type="text" id="docElaborador" placeholder="Nombre del elaborador">
                             </div>
                         </div>
                         <div class="form-row">
@@ -641,7 +708,7 @@
                         <div class="form-row full">
                             <div>
                                 <label>Link Word</label>
-                                <input type="text" id="docLink" placeholder="https://...">
+                                <input type="url" id="docLink" placeholder="https://...">
                             </div>
                         </div>
                         <div class="form-row full">
@@ -659,7 +726,7 @@
             </div>
 
             <!-- TAB: DOCUMENTOS -->
-            <div class="tab-content" id="documentos-tab">
+            <div class="tab-content active" id="documentos-tab">
                 <div class="list-panel">
                     <div class="list-header">📚 Documentos Registrados</div>
                     <div class="table-container">
@@ -677,7 +744,7 @@
                                     <th>Mantención</th>
                                     <th>Link</th>
                                     <th>Notas</th>
-                                    <th>Acciones</th>
+                                    <th class="owner-only" id="th-acciones">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="documentTable">
@@ -688,17 +755,17 @@
                 </div>
             </div>
 
-            <!-- TAB: APROBADORES -->
+            <!-- TAB: APROBADORES (solo owner) -->
             <div class="tab-content" id="aprobadores-tab">
                 <div class="list-panel">
-                    <div class="list-header">👥 Constructor, Revisor, Aprobador</div>
+                    <div class="list-header">👥 Elaborador, Revisor, Aprobador</div>
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Documento</th>
                                     <th>Código</th>
-                                    <th>Constructor</th>
+                                    <th>Elaborador</th>
                                     <th>Revisor</th>
                                     <th>Aprobador</th>
                                     <th>Estado</th>
@@ -713,7 +780,7 @@
                 </div>
             </div>
 
-            <!-- TAB: AUDITORÍA -->
+            <!-- TAB: AUDITORÍA (solo owner) -->
             <div class="tab-content" id="auditoria-tab">
                 <div class="list-panel">
                     <div class="list-header">🔍 Historial de Cambios</div>
@@ -726,75 +793,133 @@
     </div>
 
     <script>
+        // ─── CONFIG ───────────────────────────────────────────────────────────
         const SUPABASE_URL = 'https://kmrvvbbyekzuzimzahvd.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttcnZ2YmJ5ZWt6dXppbXphaHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTkzNDEsImV4cCI6MjA5NDE3NTM0MX0.FqmTWcjOHX1J3H-VnAXyaFpXZe1jkIf3GD9WJg0yhTA';
 
         const { createClient } = window.supabase;
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // ─── ESTADO ───────────────────────────────────────────────────────────
         let currentUser = null;
-        let currentUserRole = null;
+        let currentUserRole = null; // 'owner' | 'viewer'
         let editingDocId = null;
         let documents = [];
         let auditLogs = [];
 
-        function generateUUID() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = Math.random() * 16 | 0;
-                const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-        }
-
+        // ─── INIT ─────────────────────────────────────────────────────────────
         async function init() {
-            await checkUserLogin();
-            if (currentUser) {
-                await loadDocuments();
-                await loadAudit();
-            }
+            // Escuchar cambios de sesión de Supabase Auth
+            supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                if (session?.user) {
+                    currentUser = session.user;
+                    await loadUserRole();
+                    applyRoleUI();
+                    await loadDocuments();
+                    if (currentUserRole === 'owner') await loadAudit();
+                } else {
+                    currentUser = null;
+                    currentUserRole = null;
+                    showLogin();
+                }
+            });
+
+            // Verificar sesión existente al cargar
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) showLogin();
         }
 
+        // ─── AUTH ─────────────────────────────────────────────────────────────
         async function handleLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
+            const email    = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
+            const btnLogin = document.getElementById('btnLogin');
+            const errDiv   = document.getElementById('loginError');
 
-            if (email === 'bastian.zuniga@thinking.cl' && password === 'thinking2024') {
-                currentUser = { id: generateUUID(), email: email };
-                currentUserRole = 'owner';
-                sessionStorage.setItem('user', JSON.stringify(currentUser));
-                sessionStorage.setItem('userRole', currentUserRole);
-                showApp();
+            errDiv.textContent = '';
+            btnLogin.disabled = true;
+            btnLogin.textContent = 'Iniciando sesión...';
+            showLoading('Verificando credenciales...');
+
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+            hideLoading();
+            btnLogin.disabled = false;
+            btnLogin.textContent = 'Iniciar sesión';
+
+            if (error) {
+                errDiv.textContent = '❌ Email o contraseña incorrectos';
+            }
+            // Si es exitoso, onAuthStateChange se encarga de mostrar la app
+        }
+
+        async function handleLogout() {
+            showLoading('Cerrando sesión...');
+            await supabaseClient.auth.signOut();
+            hideLoading();
+        }
+
+        // ─── ROL ──────────────────────────────────────────────────────────────
+        async function loadUserRole() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('user_roles')
+                    .select('role')
+                    .eq('user_id', currentUser.id)
+                    .single();
+
+                currentUserRole = (!error && data) ? data.role : 'viewer';
+            } catch {
+                currentUserRole = 'viewer';
+            }
+        }
+
+        function applyRoleUI() {
+            const isOwner = currentUserRole === 'owner';
+
+            // Mostrar/ocultar elementos según rol
+            document.querySelectorAll('.owner-only').forEach(el => {
+                el.style.display = isOwner ? '' : 'none';
+            });
+
+            // Header: email y badge de rol
+            document.getElementById('userEmailDisplay').textContent = currentUser.email;
+            const badge = document.getElementById('userRoleDisplay');
+            badge.textContent = isOwner ? 'OWNER' : 'VIEWER';
+            badge.className = `role-badge ${currentUserRole}`;
+
+            // Si es viewer, activar tab documentos y ocultar crear
+            if (!isOwner) {
+                switchTab('documentos', document.getElementById('tab-documentos'));
             } else {
-                document.getElementById('loginError').textContent = '❌ Email o contraseña incorrectos';
+                switchTab('documentos', document.getElementById('tab-documentos'));
             }
-        }
 
-        function checkUserLogin() {
-            const user = sessionStorage.getItem('user');
-            if (user) {
-                currentUser = JSON.parse(user);
-                currentUserRole = sessionStorage.getItem('userRole') || 'viewer';
-                showApp();
-            }
-        }
-
-        function showApp() {
+            // Mostrar app
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('mainContent').classList.add('active');
-            document.getElementById('userEmailDisplay').textContent = currentUser.email;
-            document.getElementById('userRoleDisplay').textContent = currentUserRole.toUpperCase();
         }
 
-        function handleLogout() {
-            currentUser = null;
-            sessionStorage.removeItem('user');
-            sessionStorage.removeItem('userRole');
+        function showLogin() {
             document.getElementById('loginPage').style.display = 'flex';
             document.getElementById('mainContent').classList.remove('active');
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginError').textContent = '';
             resetForm();
         }
 
+        // ─── LOADING ──────────────────────────────────────────────────────────
+        function showLoading(msg = 'Cargando...') {
+            document.getElementById('loadingText').textContent = msg;
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        // ─── DOCUMENTOS ───────────────────────────────────────────────────────
         async function loadDocuments() {
             try {
                 const { data, error } = await supabaseClient
@@ -809,41 +934,54 @@
                 documents = stored ? JSON.parse(stored) : [];
             }
             renderDocuments();
-            renderAprobadores();
+            if (currentUserRole === 'owner') renderAprobadores();
         }
 
         function renderDocuments() {
-            const tbody = document.getElementById('documentTable');
+            const tbody   = document.getElementById('documentTable');
+            const isOwner = currentUserRole === 'owner';
+
             if (documents.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="12" style="text-align: center; padding: 40px; color: #999;">Sin documentos aún</td></tr>';
+                const cols = isOwner ? 12 : 11;
+                tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align: center; padding: 40px; color: #999;">Sin documentos aún</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = documents.map(doc => {
                 const publicadoDate = new Date(doc.publicado);
-                const hoy = new Date();
-                const maintenerEn = Math.ceil((publicadoDate - hoy) / (1000 * 60 * 60 * 24));
-                return `
-                <tr>
-                    <td><strong>${escapeHtml(doc.name)}</strong></td>
-                    <td><small>${doc.codigo}</small></td>
-                    <td><small>${doc.tipo}</small></td>
-                    <td><small>${doc.alcance}</small></td>
-                    <td><span class="status-badge status-${doc.estado.toLowerCase().replace(' ', '-')}">${doc.estado}</span></td>
-                    <td><small>${doc.repositorio}</small></td>
-                    <td><small>${doc.publicado || '-'}</small></td>
-                    <td><small>${doc.version || '-'}</small></td>
-                    <td><small style="color: ${maintenerEn < 0 ? '#F32121' : '#333'}">${maintenerEn} días</small></td>
-                    <td>${doc.data?.link ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" style="color: #F32121; text-decoration: none;">Abrir</a>` : '-'}</td>
-                    <td><small title="${doc.data?.notes || ''}">${doc.data?.notes ? doc.data.notes.substring(0, 30) + '...' : '-'}</small></td>
+                const hoy           = new Date();
+                const diasDesde     = Math.ceil((hoy - publicadoDate) / (1000 * 60 * 60 * 24));
+                const color         = diasDesde > 365 ? '#F32121' : '#333';
+
+                // Validar link: solo mostrar si comienza con http
+                const linkHtml = (doc.data?.link && doc.data.link.startsWith('http'))
+                    ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" rel="noopener noreferrer" style="color: #F32121; text-decoration: none;">Abrir</a>`
+                    : '-';
+
+                const accionesHtml = isOwner ? `
                     <td>
                         <div class="actions">
                             <button class="btn-secondary btn-icon" onclick="editDocument('${doc.id}')">✏️</button>
                             <button class="btn-danger btn-icon" onclick="deleteDocument('${doc.id}')">🗑️</button>
                         </div>
-                    </td>
-                </tr>
-            `}).join('');
+                    </td>` : '';
+
+                return `
+                <tr>
+                    <td><strong>${escapeHtml(doc.name)}</strong></td>
+                    <td><small>${escapeHtml(doc.codigo || '')}</small></td>
+                    <td><small>${escapeHtml(doc.tipo || '')}</small></td>
+                    <td><small>${escapeHtml(doc.alcance || '')}</small></td>
+                    <td><span class="status-badge status-${(doc.estado || '').toLowerCase().replace(' ', '-')}">${escapeHtml(doc.estado || '')}</span></td>
+                    <td><small>${escapeHtml(doc.repositorio || '')}</small></td>
+                    <td><small>${doc.publicado || '-'}</small></td>
+                    <td><small>${escapeHtml(doc.version || '-')}</small></td>
+                    <td><small style="color: ${color}">${diasDesde} días</small></td>
+                    <td>${linkHtml}</td>
+                    <td><small title="${escapeHtml(doc.data?.notes || '')}">${doc.data?.notes ? escapeHtml(doc.data.notes.substring(0, 30)) + '...' : '-'}</small></td>
+                    ${accionesHtml}
+                </tr>`;
+            }).join('');
         }
 
         function renderAprobadores() {
@@ -856,11 +994,11 @@
             tbody.innerHTML = documents.map(doc => `
                 <tr>
                     <td><strong>${escapeHtml(doc.name)}</strong></td>
-                    <td><small>${doc.codigo}</small></td>
-                    <td><small>${doc.constructor || '-'}</small></td>
-                    <td><small>${doc.revisor || '-'}</small></td>
-                    <td><small>${doc.aprobador || '-'}</small></td>
-                    <td><span class="status-badge status-${doc.estado.toLowerCase().replace(' ', '-')}">${doc.estado}</span></td>
+                    <td><small>${escapeHtml(doc.codigo || '')}</small></td>
+                    <td><small>${escapeHtml(doc.elaborador || '-')}</small></td>
+                    <td><small>${escapeHtml(doc.revisor || '-')}</small></td>
+                    <td><small>${escapeHtml(doc.aprobador || '-')}</small></td>
+                    <td><span class="status-badge status-${(doc.estado || '').toLowerCase().replace(' ', '-')}">${escapeHtml(doc.estado || '')}</span></td>
                     <td><button class="btn-secondary btn-icon" onclick="editDocument('${doc.id}')">✏️</button></td>
                 </tr>
             `).join('');
@@ -868,23 +1006,24 @@
 
         async function handleSaveDocument(e) {
             e.preventDefault();
+            if (currentUserRole !== 'owner') return;
 
             const data = {
-                name: document.getElementById('docName').value,
-                codigo: document.getElementById('docCodigo').value,
-                tipo: document.getElementById('docTipo').value,
-                alcance: document.getElementById('docAlcance').value,
-                estado: document.getElementById('docEstado').value,
+                name:        document.getElementById('docName').value,
+                codigo:      document.getElementById('docCodigo').value,
+                tipo:        document.getElementById('docTipo').value,
+                alcance:     document.getElementById('docAlcance').value,
+                estado:      document.getElementById('docEstado').value,
                 repositorio: document.getElementById('docRepositorio').value,
-                publicado: document.getElementById('docPublicado').value,
-                version: document.getElementById('docVersion').value,
-                constructor: document.getElementById('docConstructor').value,
-                revisor: document.getElementById('docRevisor').value,
-                aprobador: document.getElementById('docAprobador').value,
-                created_by: null,
+                publicado:   document.getElementById('docPublicado').value,
+                version:     document.getElementById('docVersion').value,
+                elaborador:  document.getElementById('docElaborador').value,
+                revisor:     document.getElementById('docRevisor').value,
+                aprobador:   document.getElementById('docAprobador').value,
+                created_by:  currentUser.id,
                 data: {
-                    link: document.getElementById('docLink').value,
-                    notes: document.getElementById('docNotes').value,
+                    link:             document.getElementById('docLink').value,
+                    notes:            document.getElementById('docNotes').value,
                     created_by_email: currentUser.email
                 }
             };
@@ -908,19 +1047,9 @@
                     showMessage('✓ Documento creado', 'success');
                 }
             } catch (err) {
-                console.warn('Error:', err.message);
-                if (!editingDocId) {
-                    const validUUID = generateUUID();
-                    const doc = {
-                        id: validUUID,
-                        ...data,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString()
-                    };
-                    documents.push(doc);
-                    sessionStorage.setItem('documents_local', JSON.stringify(documents));
-                    showMessage('✓ Guardado localmente', 'info');
-                }
+                console.warn('Error al guardar:', err.message);
+                showMessage('❌ Error al guardar: ' + err.message, 'error');
+                return;
             }
 
             resetForm();
@@ -929,32 +1058,34 @@
         }
 
         function editDocument(id) {
+            if (currentUserRole !== 'owner') return;
             const doc = documents.find(d => d.id === id);
             if (!doc) return;
 
             editingDocId = id;
             document.getElementById('formTitle').textContent = 'Editar documento';
-            document.getElementById('docName').value = doc.name;
-            document.getElementById('docCodigo').value = doc.codigo || '';
-            document.getElementById('docTipo').value = doc.tipo || '';
-            document.getElementById('docAlcance').value = doc.alcance || '';
-            document.getElementById('docEstado').value = doc.estado || 'En revisión';
+            document.getElementById('docName').value        = doc.name || '';
+            document.getElementById('docCodigo').value      = doc.codigo || '';
+            document.getElementById('docTipo').value        = doc.tipo || '';
+            document.getElementById('docAlcance').value     = doc.alcance || '';
+            document.getElementById('docEstado').value      = doc.estado || 'En revisión';
             document.getElementById('docRepositorio').value = doc.repositorio || '';
-            document.getElementById('docPublicado').value = doc.publicado || '';
-            document.getElementById('docVersion').value = doc.version || '';
-            document.getElementById('docConstructor').value = doc.constructor || '';
-            document.getElementById('docRevisor').value = doc.revisor || '';
-            document.getElementById('docAprobador').value = doc.aprobador || '';
-            document.getElementById('docLink').value = doc.data?.link || '';
-            document.getElementById('docNotes').value = doc.data?.notes || '';
+            document.getElementById('docPublicado').value   = doc.publicado || '';
+            document.getElementById('docVersion').value     = doc.version || '';
+            document.getElementById('docElaborador').value  = doc.elaborador || '';
+            document.getElementById('docRevisor').value     = doc.revisor || '';
+            document.getElementById('docAprobador').value   = doc.aprobador || '';
+            document.getElementById('docLink').value        = doc.data?.link || '';
+            document.getElementById('docNotes').value       = doc.data?.notes || '';
             document.getElementById('btnCancel').style.display = 'inline-block';
 
-            switchTab('crear');
+            switchTab('crear', document.getElementById('tab-crear'));
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         async function deleteDocument(id) {
-            if (!confirm('¿Eliminar documento?')) return;
+            if (currentUserRole !== 'owner') return;
+            if (!confirm('¿Eliminar documento? Esta acción no se puede deshacer.')) return;
 
             try {
                 const { error } = await supabaseClient.from('documents').delete().eq('id', id);
@@ -962,9 +1093,9 @@
                 await logAudit(id, 'deleted', {});
                 showMessage('✓ Documento eliminado', 'success');
             } catch (err) {
-                documents = documents.filter(d => d.id !== id);
-                sessionStorage.setItem('documents_local', JSON.stringify(documents));
-                showMessage('✓ Eliminado', 'info');
+                console.warn('Error al eliminar:', err.message);
+                showMessage('❌ Error al eliminar', 'error');
+                return;
             }
 
             await loadDocuments();
@@ -972,18 +1103,24 @@
         }
 
         function resetForm() {
-            document.getElementById('documentForm').reset();
+            const form = document.getElementById('documentForm');
+            if (form) form.reset();
             editingDocId = null;
-            document.getElementById('formTitle').textContent = 'Nuevo documento';
-            document.getElementById('btnCancel').style.display = 'none';
+            const ft = document.getElementById('formTitle');
+            if (ft) ft.textContent = 'Nuevo documento';
+            const bc = document.getElementById('btnCancel');
+            if (bc) bc.style.display = 'none';
         }
 
+        // ─── AUDITORÍA ────────────────────────────────────────────────────────
         async function logAudit(docId, action, changes) {
             try {
                 await supabaseClient.from('audit_log').insert([{
                     document_id: docId,
-                    action: action,
-                    changes: changes
+                    action:      action,
+                    user_id:     currentUser.id,
+                    user_email:  currentUser.email,
+                    changes:     changes
                 }]);
             } catch (err) {
                 console.warn('Audit error:', err.message);
@@ -991,6 +1128,7 @@
         }
 
         async function loadAudit() {
+            if (currentUserRole !== 'owner') return;
             try {
                 const { data, error } = await supabaseClient
                     .from('audit_log')
@@ -1007,19 +1145,21 @@
 
         function renderAudit() {
             const auditList = document.getElementById('auditList');
+            if (!auditList) return;
             if (auditLogs.length === 0) {
                 auditList.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Sin cambios registrados</div>';
                 return;
             }
 
             auditList.innerHTML = auditLogs.map(log => {
-                const date = new Date(log.timestamp);
+                const date    = new Date(log.timestamp);
                 const timeStr = date.toLocaleString('es-CL');
+                const quien   = log.user_email ? `<span style="color:#293654;font-weight:600">${escapeHtml(log.user_email)}</span>` : 'Sistema';
                 return `
                     <div class="audit-item">
                         <div class="audit-header">
-                            <span class="audit-action">${log.action}</span>
-                            <span class="audit-time">${timeStr}</span>
+                            <span class="audit-action">${escapeHtml(log.action)}</span>
+                            <span class="audit-time">${timeStr} — ${quien}</span>
                         </div>
                         <div class="audit-details">${JSON.stringify(log.changes || {}, null, 2)}</div>
                     </div>
@@ -1027,13 +1167,16 @@
             }).join('');
         }
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById(`${tab}-tab`).classList.add('active');
+        // ─── TABS ─────────────────────────────────────────────────────────────
+        function switchTab(tab, btnEl) {
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+            const tabContent = document.getElementById(`${tab}-tab`);
+            if (tabContent) tabContent.classList.add('active');
         }
 
+        // ─── UTILS ────────────────────────────────────────────────────────────
         function showMessage(msg, type) {
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${type}`;
@@ -1043,11 +1186,13 @@
         }
 
         function escapeHtml(text) {
+            if (text == null) return '';
             const div = document.createElement('div');
-            div.textContent = text;
+            div.textContent = String(text);
             return div.innerHTML;
         }
 
+        // ─── ARRANQUE ─────────────────────────────────────────────────────────
         init();
     </script>
 </body>
