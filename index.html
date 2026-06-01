@@ -284,9 +284,17 @@
             color: var(--dark-gray);
         }
 
-        /* Ocultar tabs según rol */
+        /* Ocultar tabs según rol — se controla con clase en body */
         .owner-only {
             display: none;
+        }
+
+        body.is-owner .owner-only {
+            display: inline-block;
+        }
+
+        body.is-owner th.owner-only {
+            display: table-cell;
         }
 
         .tab-content {
@@ -878,10 +886,8 @@
         function applyRoleUI() {
             const isOwner = currentUserRole === 'owner';
 
-            // Mostrar/ocultar elementos según rol
-            document.querySelectorAll('.owner-only').forEach(el => {
-                el.style.display = isOwner ? '' : 'none';
-            });
+            // Clase en body para controlar visibilidad de .owner-only via CSS
+            document.body.classList.toggle('is-owner', isOwner);
 
             // Header: email y badge de rol
             document.getElementById('userEmailDisplay').textContent = currentUser.email;
@@ -889,12 +895,8 @@
             badge.textContent = isOwner ? 'OWNER' : 'VIEWER';
             badge.className = `role-badge ${currentUserRole}`;
 
-            // Si es viewer, activar tab documentos y ocultar crear
-            if (!isOwner) {
-                switchTab('documentos', document.getElementById('tab-documentos'));
-            } else {
-                switchTab('documentos', document.getElementById('tab-documentos'));
-            }
+            // Tab inicial: documentos para ambos roles
+            switchTab('documentos', document.getElementById('tab-documentos'));
 
             // Mostrar app
             document.getElementById('loginPage').style.display = 'none';
