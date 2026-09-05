@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Documental - Thinking SpA</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary-red: #F32121;
+            --primary-blue: #293654;
+            --white: #FFFFFF;
+            --light-gray: #f5f5f5;
+            --dark-gray: #333333;
+            --border: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Titillium Web', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--light-gray);
+            color: var(--dark-gray);
+        }
+
+        /* LOGIN */
+        .login-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #1a2540 100%);
+        }
+
+        .login-box {
+            background: var(--white);
+            padding: 50px 40px;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-logo img {
+            height: 50px;
+            margin-bottom: 20px;
+        }
+
+        .login-box h1 {
+            margin-bottom: 5px;
+            color: var(--primary-blue);
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .login-box p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark-gray);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        input[type="text"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--white);
+            color: var(--dark-gray);
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 3px rgba(243, 33, 33, 0.1);
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--primary-red);
+            color: var(--white);
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background: #d91e1e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(243, 33, 33, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background: #1a2540;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            font-size: 12px;
+            padding: 6px 10px;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-icon {
+            padding: 6px 10px;
+            margin-right: 6px;
+            font-size: 12px;
+        }
+
+        /* HEADER */
+        .header {
+            background: var(--white);
+            border-bottom: 2px solid var(--primary-red);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-logo img {
+            height: 40px;
+        }
+
+        .header-title h1 {
+            font-size: 24px;
+            color: var(--primary-blue);
+            font-weight: 700;
+        }
+
+        .header-title p {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 13px;
+            color: var(--dark-gray);
+        }
+
+        .user-info strong {
+            display: block;
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .user-info small {
+            color: #999;
+        }
+
+        /* Badge de rol */
+        .role-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .role-badge.owner {
+            background: #293654;
+            color: #fff;
+        }
+        .role-badge.viewer {
+            background: #e0e0e0;
+            color: #555;
+        }
+
+        /* MAIN */
+        .main-content {
+            display: none;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .main-content.active {
+            display: flex;
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* TABS */
+        .tab-switch {
+            display: flex;
+            gap: 0;
+            background: var(--white);
+            padding: 0;
+            margin-bottom: 0;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab-button {
+            padding: 15px 25px;
+            background: transparent;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-button.active {
+            color: var(--primary-red);
+            border-bottom-color: var(--primary-red);
+        }
+
+        .tab-button:hover {
+            color: var(--dark-gray);
+        }
+
+        /* Ocultar tabs según rol — se controla con clase en body */
+        .owner-only {
+            display: none;
+        }
+
+        body.is-owner .owner-only {
+            display: inline-block;
+        }
+
+        body.is-owner th.owner-only {
+            display: table-cell;
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* FORM PANEL */
+        .form-panel {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .form-panel h2 {
+            color: var(--primary-blue);
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            border-bottom: 2px solid var(--primary-red);
+            padding-bottom: 10px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-row > div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-row > div label {
+            margin-bottom: 8px;
+        }
+
+        .form-row > div input,
+        .form-row > div select,
+        .form-row > div textarea {
+            width: 100%;
+        }
+
+        /* LIST PANEL */
+        .list-panel {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .list-header {
+            background: var(--primary-blue);
+            color: var(--white);
+            padding: 20px 25px;
+            border-radius: 8px 8px 0 0;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .table-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            max-height: calc(100vh - 250px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f9f9f9;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--primary-blue);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .status-borrador,
+        .status-en-revisión {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-aprobado,
+        .status-publicado {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-archivado,
+        .status-obsoleto {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        /* AUDIT */
+        .audit-container {
+            padding: 25px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .audit-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border-left: 3px solid var(--primary-red);
+        }
+
+        .audit-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .audit-action {
+            font-weight: 600;
+            color: var(--primary-red);
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .audit-time {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .audit-details {
+            background: var(--white);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #666;
+            font-family: 'Monaco', monospace;
+            overflow-x: auto;
+        }
+
+        /* MESSAGES */
+        .message {
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .message.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        #loginError {
+            color: var(--primary-red);
+            margin-top: 15px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(41, 54, 84, 0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 16px;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .loading-overlay.active { display: flex; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top-color: #F32121;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 1200px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <span id="loadingText">Iniciando sesión...</span>
+    </div>
+
+    <!-- LOGIN PAGE -->
+    <div class="login-page" id="loginPage">
+        <div class="login-box">
+            <div class="login-logo">
+                <img src="https://thinking.cl/logo.png" alt="Thinking SpA" onerror="this.style.display='none'">
+                <h1>Control Documental</h1>
+            </div>
+            <p style="text-align:center;">Thinking SpA</p>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required placeholder="tucorreo@thinking.cl">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary" id="btnLogin">Iniciar sesión</button>
+                <div id="loginError"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div class="main-content" id="mainContent">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-left">
+                <div class="header-logo">
+                    <img src="https://thinking.cl/logo.png" alt="Thinking" onerror="this.style.display='none'">
+                </div>
+                <div class="header-title">
+                    <h1>Control Documental</h1>
+                    <p>Thinking SpA</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <strong id="userEmailDisplay"></strong>
+                    <span class="role-badge" id="userRoleDisplay"></span>
+                </div>
+                <button class="btn-secondary" onclick="handleLogout()" style="padding: 8px 15px;">Cerrar sesión</button>
+            </div>
+        </div>
+
+        <!-- TABS (se muestran según rol en applyRoleUI) -->
+        <div class="tab-switch" id="tabSwitch">
+            <button class="tab-button owner-only" id="tab-crear" onclick="switchTab('crear', this)">➕ Crear Documento</button>
+            <button class="tab-button active" id="tab-documentos" onclick="switchTab('documentos', this)">📄 Documentos</button>
+            <button class="tab-button owner-only" id="tab-aprobadores" onclick="switchTab('aprobadores', this)">👥 Aprobadores</button>
+            <button class="tab-button owner-only" id="tab-auditoria" onclick="switchTab('auditoria', this)">📋 Auditoría</button>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+            <!-- TAB: CREAR (solo owner) -->
+            <div class="tab-content" id="crear-tab">
+                <div class="form-panel">
+                    <h2 id="formTitle">Nuevo documento</h2>
+                    <form id="documentForm" onsubmit="handleSaveDocument(event)">
+                        <div class="form-row full">
+                            <div>
+                                <label>Nombre</label>
+                                <input type="text" id="docName" required placeholder="Ej: Procedimiento de Seguridad">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div>
+                                <label>Código</label>
+                                <input type="text" id="docCodigo" required placeholder="Ej: P04-PMG-001">
+                            </div>
+                            <div>
+                                <label>Tipo</label>
+                                <select id="docTipo" required>
+                                    <option value="">-- Seleccionar --</option>
+                                    <option value="Manual">Manual</option>
+                                    <option value="Procedimiento">Procedimiento</option>
+                                    <option value="Capacitación">Capacitación</option>
+                                    <option value="QRG">QRG</option>
+                                    <option value="Video">Video</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div>
+                                <label>Alcance</label>
+                                <select id="docAlcance" required>
+                                    <option value="">-- Seleccionar --</option>
+                                    <option value="Contratista">Contratista</option>
+                                    <option value="Empleados">Empleados</option>
+                                    <option value="Transversal">Transversal</option>
+                                    <option value="Thinking">Thinking</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Estado</label>
+                                <select id="docEstado" required>
+                                    <option value="Publicado">Publicado</option>
+                                    <option value="En revisión">En revisión</option>
+                                    <option value="Borrador">Borrador</option>
+                                    <option value="Archivado">Archivado</option>
+                                    <option value="Obsoleto">Obsoleto</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div>
+                                <label>Repositorio</label>
+                                <select id="docRepositorio" required>
+                                    <option value="">-- Seleccionar --</option>
+                                    <option value="Contract Support">Contract Support</option>
+                                    <option value="PMG Center">PMG Center</option>
+                                    <option value="Reportabilidad HSS">Reportabilidad HSS</option>
+                                    <option value="Rutinas HSS">Rutinas HSS</option>
+                                    <option value="Contract Data Center">Contract Data Center</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Publicado</label>
+                                <input type="date" id="docPublicado" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div>
+                                <label>Versión</label>
+                                <input type="text" id="docVersion" placeholder="Ej: 1.0, 2.1">
+                            </div>
+                            <div>
+                                <label>Elaborador</label>
+                                <input type="text" id="docElaborador" placeholder="Nombre del elaborador">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div>
+                                <label>Revisor</label>
+                                <input type="text" id="docRevisor" placeholder="Nombre del revisor">
+                            </div>
+                            <div>
+                                <label>Aprobador</label>
+                                <input type="text" id="docAprobador" placeholder="Nombre del aprobador">
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div>
+                                <label>Link Word</label>
+                                <input type="url" id="docLink" placeholder="https://...">
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div>
+                                <label>Notas</label>
+                                <textarea id="docNotes" rows="3" placeholder="Notas adicionales..."></textarea>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" class="btn-primary">Guardar</button>
+                            <button type="button" class="btn-secondary" onclick="resetForm()" id="btnCancel" style="display: none; flex: 1;">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB: DOCUMENTOS -->
+            <div class="tab-content active" id="documentos-tab">
+                <div class="list-panel">
+                    <div class="list-header">📚 Documentos Registrados</div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Código</th>
+                                    <th>Tipo</th>
+                                    <th>Alcance</th>
+                                    <th>Estado</th>
+                                    <th>Repositorio</th>
+                                    <th>Publicado</th>
+                                    <th>Versión</th>
+                                    <th>Mantención</th>
+                                    <th>Link</th>
+                                    <th>Notas</th>
+                                    <th class="owner-only" id="th-acciones">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="documentTable">
+                                <tr><td colspan="12" style="text-align: center; padding: 40px;">Cargando documentos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: APROBADORES (solo owner) -->
+            <div class="tab-content" id="aprobadores-tab">
+                <div class="list-panel">
+                    <div class="list-header">👥 Elaborador, Revisor, Aprobador</div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Documento</th>
+                                    <th>Código</th>
+                                    <th>Elaborador</th>
+                                    <th>Revisor</th>
+                                    <th>Aprobador</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="aprobadoresTable">
+                                <tr><td colspan="7" style="text-align: center; padding: 40px;">Cargando aprobadores...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: AUDITORÍA (solo owner) -->
+            <div class="tab-content" id="auditoria-tab">
+                <div class="list-panel">
+                    <div class="list-header">🔍 Historial de Cambios</div>
+                    <div class="audit-container" id="auditList">
+                        <div style="text-align: center; padding: 40px; color: #999;">Cargando auditoría...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ─── CONFIG ───────────────────────────────────────────────────────────
+        const SUPABASE_URL = 'https://kmrvvbbyekzuzimzahvd.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttcnZ2YmJ5ZWt6dXppbXphaHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTkzNDEsImV4cCI6MjA5NDE3NTM0MX0.FqmTWcjOHX1J3H-VnAXyaFpXZe1jkIf3GD9WJg0yhTA';
+
+        const { createClient } = window.supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: {
+                storage: window.sessionStorage,
+                persistSession: true,
+                autoRefreshToken: true
+            }
+        });
+
+        // ─── ESTADO ───────────────────────────────────────────────────────────
+        let currentUser = null;
+        let currentUserRole = null; // 'owner' | 'viewer'
+        let editingDocId = null;
+        let documents = [];
+        let auditLogs = [];
+
+        // ─── INIT ─────────────────────────────────────────────────────────────
+        async function init() {
+            // Escuchar cambios de sesión de Supabase Auth
+            supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                if (session?.user) {
+                    currentUser = session.user;
+                    await loadUserRole();
+                    applyRoleUI();
+                    await loadDocuments();
+                    if (currentUserRole === 'owner') await loadAudit();
+                } else {
+                    currentUser = null;
+                    currentUserRole = null;
+                    showLogin();
+                }
+            });
+
+            // Verificar sesión existente al cargar
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) showLogin();
+        }
+
+        // ─── AUTH ─────────────────────────────────────────────────────────────
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email    = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const btnLogin = document.getElementById('btnLogin');
+            const errDiv   = document.getElementById('loginError');
+
+            errDiv.textContent = '';
+            btnLogin.disabled = true;
+            btnLogin.textContent = 'Iniciando sesión...';
+            showLoading('Verificando credenciales...');
+
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+            hideLoading();
+            btnLogin.disabled = false;
+            btnLogin.textContent = 'Iniciar sesión';
+
+            if (error) {
+                errDiv.textContent = '❌ Email o contraseña incorrectos';
+            }
+            // Si es exitoso, onAuthStateChange se encarga de mostrar la app
+        }
+
+        async function handleLogout() {
+            showLoading('Cerrando sesión...');
+            await supabaseClient.auth.signOut();
+            hideLoading();
+        }
+
+        // ─── ROL ──────────────────────────────────────────────────────────────
+        async function loadUserRole() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('user_roles')
+                    .select('role')
+                    .eq('user_id', currentUser.id)
+                    .single();
+
+                currentUserRole = (!error && data) ? data.role : 'viewer';
+            } catch {
+                currentUserRole = 'viewer';
+            }
+        }
+
+        function applyRoleUI() {
+            const isOwner = currentUserRole === 'owner';
+
+            // Clase en body para controlar visibilidad de .owner-only via CSS
+            document.body.classList.toggle('is-owner', isOwner);
+
+            // Header: email y badge de rol
+            document.getElementById('userEmailDisplay').textContent = currentUser.email;
+            const badge = document.getElementById('userRoleDisplay');
+            badge.textContent = isOwner ? 'OWNER' : 'VIEWER';
+            badge.className = `role-badge ${currentUserRole}`;
+
+            // Tab inicial: documentos para ambos roles
+            switchTab('documentos', document.getElementById('tab-documentos'));
+
+            // Mostrar app
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainContent').classList.add('active');
+        }
+
+        function showLogin() {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('mainContent').classList.remove('active');
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginError').textContent = '';
+            resetForm();
+        }
+
+        // ─── LOADING ──────────────────────────────────────────────────────────
+        function showLoading(msg = 'Cargando...') {
+            document.getElementById('loadingText').textContent = msg;
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        // ─── DOCUMENTOS ───────────────────────────────────────────────────────
+        async function loadDocuments() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('documents')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
+                documents = data || [];
+            } catch (err) {
+                console.warn('Supabase offline:', err.message);
+                const stored = sessionStorage.getItem('documents_local');
+                documents = stored ? JSON.parse(stored) : [];
+            }
+            renderDocuments();
+            if (currentUserRole === 'owner') renderAprobadores();
+        }
+
+        function renderDocuments() {
+            const tbody   = document.getElementById('documentTable');
+            const isOwner = currentUserRole === 'owner';
+
+            if (documents.length === 0) {
+                const cols = isOwner ? 12 : 11;
+                tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align: center; padding: 40px; color: #999;">Sin documentos aún</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = documents.map(doc => {
+                const publicadoDate = new Date(doc.publicado);
+                const hoy           = new Date();
+                const diasDesde     = Math.ceil((hoy - publicadoDate) / (1000 * 60 * 60 * 24));
+                const color         = diasDesde > 365 ? '#F32121' : '#333';
+
+                // Validar link: solo mostrar si comienza con http
+                const linkHtml = (doc.data?.link && doc.data.link.startsWith('http'))
+                    ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" rel="noopener noreferrer" style="color: #F32121; text-decoration: none;">Abrir</a>`
+                    : '-';
+
+                const accionesHtml = isOwner ? `
+                    <td>
+                        <div class="actions">
+                            <button class="btn-secondary btn-icon" onclick="editDocument('${doc.id}')">✏️</button>
+                            <button class="btn-danger btn-icon" onclick="deleteDocument('${doc.id}')">🗑️</button>
+                        </div>
+                    </td>` : '';
+
+                return `
+                <tr>
+                    <td><strong>${escapeHtml(doc.name)}</strong></td>
+                    <td><small>${escapeHtml(doc.codigo || '')}</small></td>
+                    <td><small>${escapeHtml(doc.tipo || '')}</small></td>
+                    <td><small>${escapeHtml(doc.alcance || '')}</small></td>
+                    <td><span class="status-badge status-${(doc.estado || '').toLowerCase().replace(' ', '-')}">${escapeHtml(doc.estado || '')}</span></td>
+                    <td><small>${escapeHtml(doc.repositorio || '')}</small></td>
+                    <td><small>${doc.publicado || '-'}</small></td>
+                    <td><small>${escapeHtml(doc.version || '-')}</small></td>
+                    <td><small style="color: ${color}">${diasDesde} días</small></td>
+                    <td>${linkHtml}</td>
+                    <td><small title="${escapeHtml(doc.data?.notes || '')}">${doc.data?.notes ? escapeHtml(doc.data.notes.substring(0, 30)) + '...' : '-'}</small></td>
+                    ${accionesHtml}
+                </tr>`;
+            }).join('');
+        }
+
+        function renderAprobadores() {
+            const tbody = document.getElementById('aprobadoresTable');
+            if (documents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">Sin documentos aún</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = documents.map(doc => `
+                <tr>
+                    <td><strong>${escapeHtml(doc.name)}</strong></td>
+                    <td><small>${escapeHtml(doc.codigo || '')}</small></td>
+                    <td><small>${escapeHtml(doc.elaborador || '-')}</small></td>
+                    <td><small>${escapeHtml(doc.revisor || '-')}</small></td>
+                    <td><small>${escapeHtml(doc.aprobador || '-')}</small></td>
+                    <td><span class="status-badge status-${(doc.estado || '').toLowerCase().replace(' ', '-')}">${escapeHtml(doc.estado || '')}</span></td>
+                    <td><button class="btn-secondary btn-icon" onclick="editDocument('${doc.id}')">✏️</button></td>
+                </tr>
+            `).join('');
+        }
+
+        async function handleSaveDocument(e) {
+            e.preventDefault();
+            if (currentUserRole !== 'owner') return;
+
+            const data = {
+                name:        document.getElementById('docName').value,
+                codigo:      document.getElementById('docCodigo').value,
+                tipo:        document.getElementById('docTipo').value,
+                alcance:     document.getElementById('docAlcance').value,
+                estado:      document.getElementById('docEstado').value,
+                repositorio: document.getElementById('docRepositorio').value,
+                publicado:   document.getElementById('docPublicado').value,
+                version:     document.getElementById('docVersion').value,
+                elaborador:  document.getElementById('docElaborador').value,
+                revisor:     document.getElementById('docRevisor').value,
+                aprobador:   document.getElementById('docAprobador').value,
+                created_by:  currentUser.id,
+                data: {
+                    link:             document.getElementById('docLink').value,
+                    notes:            document.getElementById('docNotes').value,
+                    created_by_email: currentUser.email
+                }
+            };
+
+            try {
+                if (editingDocId) {
+                    const { error } = await supabaseClient
+                        .from('documents')
+                        .update({ ...data, updated_at: new Date().toISOString() })
+                        .eq('id', editingDocId);
+                    if (error) throw error;
+                    await logAudit(editingDocId, 'updated', data);
+                    showMessage('✓ Documento actualizado', 'success');
+                } else {
+                    const { data: newDoc, error } = await supabaseClient
+                        .from('documents')
+                        .insert([data])
+                        .select();
+                    if (error) throw error;
+                    await logAudit(newDoc[0].id, 'created', data);
+                    showMessage('✓ Documento creado', 'success');
+                }
+            } catch (err) {
+                console.warn('Error al guardar:', err.message);
+                showMessage('❌ Error al guardar: ' + err.message, 'error');
+                return;
+            }
+
+            resetForm();
+            await loadDocuments();
+            await loadAudit();
+        }
+
+        function editDocument(id) {
+            if (currentUserRole !== 'owner') return;
+            const doc = documents.find(d => d.id === id);
+            if (!doc) return;
+
+            editingDocId = id;
+            document.getElementById('formTitle').textContent = 'Editar documento';
+            document.getElementById('docName').value        = doc.name || '';
+            document.getElementById('docCodigo').value      = doc.codigo || '';
+            document.getElementById('docTipo').value        = doc.tipo || '';
+            document.getElementById('docAlcance').value     = doc.alcance || '';
+            document.getElementById('docEstado').value      = doc.estado || 'En revisión';
+            document.getElementById('docRepositorio').value = doc.repositorio || '';
+            document.getElementById('docPublicado').value   = doc.publicado || '';
+            document.getElementById('docVersion').value     = doc.version || '';
+            document.getElementById('docElaborador').value  = doc.elaborador || '';
+            document.getElementById('docRevisor').value     = doc.revisor || '';
+            document.getElementById('docAprobador').value   = doc.aprobador || '';
+            document.getElementById('docLink').value        = doc.data?.link || '';
+            document.getElementById('docNotes').value       = doc.data?.notes || '';
+            document.getElementById('btnCancel').style.display = 'inline-block';
+
+            switchTab('crear', document.getElementById('tab-crear'));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function deleteDocument(id) {
+            if (currentUserRole !== 'owner') return;
+            if (!confirm('¿Eliminar documento? Esta acción no se puede deshacer.')) return;
+
+            try {
+                const { error } = await supabaseClient.from('documents').delete().eq('id', id);
+                if (error) throw error;
+                await logAudit(id, 'deleted', {});
+                showMessage('✓ Documento eliminado', 'success');
+            } catch (err) {
+                console.warn('Error al eliminar:', err.message);
+                showMessage('❌ Error al eliminar', 'error');
+                return;
+            }
+
+            await loadDocuments();
+            await loadAudit();
+        }
+
+        function resetForm() {
+            const form = document.getElementById('documentForm');
+            if (form) form.reset();
+            editingDocId = null;
+            const ft = document.getElementById('formTitle');
+            if (ft) ft.textContent = 'Nuevo documento';
+            const bc = document.getElementById('btnCancel');
+            if (bc) bc.style.display = 'none';
+        }
+
+        // ─── AUDITORÍA ────────────────────────────────────────────────────────
+        async function logAudit(docId, action, changes) {
+            try {
+                await supabaseClient.from('audit_log').insert([{
+                    document_id: docId,
+                    action:      action,
+                    user_id:     currentUser.id,
+                    user_email:  currentUser.email,
+                    changes:     changes
+                }]);
+            } catch (err) {
+                console.warn('Audit error:', err.message);
+            }
+        }
+
+        async function loadAudit() {
+            if (currentUserRole !== 'owner') return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('audit_log')
+                    .select('*')
+                    .order('timestamp', { ascending: false });
+                if (error) throw error;
+                auditLogs = data || [];
+            } catch (err) {
+                console.warn('Audit offline');
+                auditLogs = [];
+            }
+            renderAudit();
+        }
+
+        function renderAudit() {
+            const auditList = document.getElementById('auditList');
+            if (!auditList) return;
+            if (auditLogs.length === 0) {
+                auditList.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Sin cambios registrados</div>';
+                return;
+            }
+
+            auditList.innerHTML = auditLogs.map(log => {
+                const date    = new Date(log.timestamp);
+                const timeStr = date.toLocaleString('es-CL');
+                const quien   = log.user_email ? `<span style="color:#293654;font-weight:600">${escapeHtml(log.user_email)}</span>` : 'Sistema';
+                return `
+                    <div class="audit-item">
+                        <div class="audit-header">
+                            <span class="audit-action">${escapeHtml(log.action)}</span>
+                            <span class="audit-time">${timeStr} — ${quien}</span>
+                        </div>
+                        <div class="audit-details">${JSON.stringify(log.changes || {}, null, 2)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ─── TABS ─────────────────────────────────────────────────────────────
+        function switchTab(tab, btnEl) {
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+            const tabContent = document.getElementById(`${tab}-tab`);
+            if (tabContent) tabContent.classList.add('active');
+        }
+
+        // ─── UTILS ────────────────────────────────────────────────────────────
+        function showMessage(msg, type) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${type}`;
+            msgDiv.textContent = msg;
+            document.body.appendChild(msgDiv);
+            setTimeout(() => msgDiv.remove(), 3000);
+        }
+
+        function escapeHtml(text) {
+            if (text == null) return '';
+            const div = document.createElement('div');
+            div.textContent = String(text);
+            return div.innerHTML;
+        }
+
+        // ─── ARRANQUE ─────────────────────────────────────────────────────────
+        init();
+    </script>
+</body>
+</html>
