@@ -757,6 +757,7 @@
             <button class="tab-button active" id="tab-documentos" onclick="switchTab('documentos', this)">📄 Documentos</button>
             <button class="tab-button owner-only" id="tab-aprobadores" onclick="switchTab('aprobadores', this)">👥 Aprobadores</button>
             <button class="tab-button owner-only" id="tab-auditoria" onclick="switchTab('auditoria', this)">📋 Auditoría</button>
+            <button class="tab-button owner-only" id="tab-usuarios" onclick="switchTab('usuarios', this); loadUsers()">👤 Usuarios</button>
         </div>
 
         <!-- CONTENT -->
@@ -971,6 +972,55 @@
                     <div class="list-header">🔍 Historial de Cambios</div>
                     <div class="audit-container" id="auditList">
                         <div style="text-align: center; padding: 40px; color: #999;">Cargando auditoría...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: USUARIOS (solo owner) -->
+            <div class="tab-content" id="usuarios-tab">
+                <div style="display: flex; gap: 20px; flex: 1; min-height: 0;">
+
+                    <!-- Formulario crear usuario -->
+                    <div class="form-panel" style="max-width: 380px; align-self: flex-start;">
+                        <h2>Nuevo usuario</h2>
+                        <form id="userForm" onsubmit="handleCreateUser(event)">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="newUserEmail" required placeholder="correo@empresa.cl">
+                            </div>
+                            <div class="form-group">
+                                <label>Contraseña</label>
+                                <input type="password" id="newUserPassword" required placeholder="Mínimo 6 caracteres" minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label>Rol</label>
+                                <select id="newUserRole" required>
+                                    <option value="viewer">Viewer — solo lectura</option>
+                                    <option value="owner">Owner — acceso completo</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-primary" id="btnCreateUser">Crear usuario</button>
+                        </form>
+                    </div>
+
+                    <!-- Lista de usuarios -->
+                    <div class="list-panel" style="flex: 1;">
+                        <div class="list-header">👥 Usuarios registrados</div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>Rol</th>
+                                        <th>Creado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTable">
+                                    <tr><td colspan="4" style="text-align:center; padding:40px; color:#999;">Cargando usuarios...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1498,6 +1548,130 @@
             const div = document.createElement('div');
             div.textContent = String(text);
             return div.innerHTML;
+        }
+
+        // ─── USUARIOS ─────────────────────────────────────────────────────────
+        let users = [];
+
+        async function loadUsers() {
+            if (currentUserRole !== 'owner') return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('user_roles')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
+                users = data || [];
+            } catch (err) {
+                console.warn('Error cargando usuarios:', err.message);
+                users = [];
+            }
+            renderUsers();
+        }
+
+        function renderUsers() {
+            const tbody = document.getElementById('usersTable');
+            if (!tbody) return;
+
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:#999;">Sin usuarios registrados</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = users.map(u => {
+                const isMe = u.user_id === currentUser?.id;
+                const fecha = u.created_at ? new Date(u.created_at).toLocaleDateString('es-CL') : '-';
+                const roleBadge = u.role === 'owner'
+                    ? '<span class="role-badge owner">OWNER</span>'
+                    : '<span class="role-badge viewer">VIEWER</span>';
+
+                return `
+                <tr>
+                    <td><strong>${escapeHtml(u.email || '-')}</strong>${isMe ? ' <small style="color:#999;">(tú)</small>' : ''}</td>
+                    <td>${roleBadge}</td>
+                    <td><small>${fecha}</small></td>
+                    <td>
+                        <div class="actions">
+                            ${!isMe ? `
+                            <button class="btn-secondary btn-icon" title="Cambiar rol"
+                                onclick="toggleUserRole('${u.user_id}', '${u.role}')">
+                                ${u.role === 'owner' ? '👁️ Viewer' : '🔑 Owner'}
+                            </button>
+                            <button class="btn-danger btn-icon" title="Quitar acceso"
+                                onclick="removeUser('${u.user_id}', '${escapeHtml(u.email || '')}')">
+                                🗑️
+                            </button>` : '<small style="color:#999;">—</small>'}
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function handleCreateUser(e) {
+            e.preventDefault();
+            const email    = document.getElementById('newUserEmail').value.trim();
+            const password = document.getElementById('newUserPassword').value;
+            const role     = document.getElementById('newUserRole').value;
+            const btn      = document.getElementById('btnCreateUser');
+
+            btn.disabled = true;
+            btn.textContent = 'Creando...';
+            showLoading('Creando usuario...');
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                const res = await supabaseClient.functions.invoke('create-user', {
+                    body: { email, password, role },
+                    headers: { Authorization: `Bearer ${session.access_token}` }
+                });
+
+                if (res.error || res.data?.error) {
+                    throw new Error(res.data?.error || res.error.message);
+                }
+
+                showMessage(`✓ Usuario ${email} creado como ${role}`, 'success');
+                document.getElementById('userForm').reset();
+                await loadUsers();
+            } catch (err) {
+                showMessage('❌ Error: ' + err.message, 'error');
+            } finally {
+                hideLoading();
+                btn.disabled = false;
+                btn.textContent = 'Crear usuario';
+            }
+        }
+
+        async function toggleUserRole(userId, currentRole) {
+            const newRole = currentRole === 'owner' ? 'viewer' : 'owner';
+            if (!confirm(`¿Cambiar rol a ${newRole}?`)) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('user_roles')
+                    .update({ role: newRole })
+                    .eq('user_id', userId);
+                if (error) throw error;
+                showMessage(`✓ Rol actualizado a ${newRole}`, 'success');
+                await loadUsers();
+            } catch (err) {
+                showMessage('❌ Error al cambiar rol: ' + err.message, 'error');
+            }
+        }
+
+        async function removeUser(userId, email) {
+            if (!confirm(`¿Quitar acceso a ${email}? El usuario seguirá existiendo en Supabase Auth pero no podrá ingresar a la app.`)) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('user_roles')
+                    .delete()
+                    .eq('user_id', userId);
+                if (error) throw error;
+                showMessage(`✓ Acceso removido para ${email}`, 'success');
+                await loadUsers();
+            } catch (err) {
+                showMessage('❌ Error al remover usuario: ' + err.message, 'error');
+            }
         }
 
         // ─── ARRANQUE ─────────────────────────────────────────────────────────
