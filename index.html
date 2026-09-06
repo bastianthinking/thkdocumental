@@ -667,6 +667,18 @@
             margin: 4px 0;
         }
 
+        .btn-renovar {
+            background: #f59e0b;
+            color: #fff;
+            font-size: 11px;
+            padding: 5px 9px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        .btn-renovar:hover { background: #d97706; }
+
         /* AUDIT */
         .audit-container {
             padding: 25px;
@@ -1335,9 +1347,14 @@
                     ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" rel="noopener noreferrer" style="color: #F32121; text-decoration: none;" onclick="event.stopPropagation()">Abrir</a>`
                     : '-';
 
+                const renovarBtn = (isOwner && diasDesde > 365)
+                    ? `<button class="btn-renovar btn-icon" title="Renovar mantención a hoy" onclick="event.stopPropagation(); renovarDoc('${doc.id}')">🔄 Renovar</button>`
+                    : '';
+
                 const accionesHtml = isOwner ? `
                     <td>
                         <div class="actions">
+                            ${renovarBtn}
                             <button class="btn-secondary btn-icon" onclick="event.stopPropagation(); editDocument('${doc.id}')">✏️</button>
                             <button class="btn-danger btn-icon" onclick="event.stopPropagation(); deleteDocument('${doc.id}')">🗑️</button>
                         </div>
@@ -1674,6 +1691,28 @@
             if (bc) bc.style.display = 'none';
         }
 
+        async function renovarDoc(id) {
+            if (currentUserRole !== 'owner') return;
+            const doc = documents.find(d => d.id === id);
+            if (!doc) return;
+            if (!confirm(`¿Renovar mantención de "${doc.name}"?\nSe actualizará la fecha Publicado a hoy.`)) return;
+
+            const hoy = new Date().toISOString().split('T')[0];
+            try {
+                const { error } = await supabaseClient
+                    .from('documents')
+                    .update({ publicado: hoy, updated_at: new Date().toISOString() })
+                    .eq('id', id);
+                if (error) throw error;
+                await logAudit(id, 'renovated', { name: doc.name, publicado: hoy });
+                showMessage(`✓ Mantención renovada para "${doc.name}"`, 'success');
+                await loadDocuments();
+                await loadAudit();
+            } catch (err) {
+                showMessage('❌ Error al renovar: ' + err.message, 'error');
+            }
+        }
+
         // ─── AUDITORÍA ────────────────────────────────────────────────────────
         async function logAudit(docId, action, changes) {
             try {
@@ -1713,17 +1752,46 @@
                 return;
             }
 
+            const actionLabel = { created: 'Creó', updated: 'Actualizó', deleted: 'Eliminó', renovated: 'Renovó' };
+            const actionColor = { created: '#10b981', updated: '#f59e0b', deleted: '#ef4444', renovated: '#3b82f6' };
+
+            const fieldLabel = {
+                name: 'Nombre', codigo: 'Código', tipo: 'Tipo', alcance: 'Alcance',
+                estado: 'Estado', repositorio: 'Repositorio', publicado: 'Publicado',
+                version: 'Versión', elaborador: 'Elaborador', revisor: 'Revisor', aprobador: 'Aprobador'
+            };
+
             auditList.innerHTML = auditLogs.map(log => {
                 const date    = new Date(log.timestamp);
-                const timeStr = date.toLocaleString('es-CL');
-                const quien   = log.user_email ? `<span style="color:#293654;font-weight:600">${escapeHtml(log.user_email)}</span>` : 'Sistema';
+                const timeStr = date.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' })
+                              + ' ' + date.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+                const quien   = log.user_email ? escapeHtml(log.user_email) : 'Sistema';
+                const accion  = actionLabel[log.action] || log.action;
+                const color   = actionColor[log.action] || '#999';
+                const c       = log.changes || {};
+                const docName = c.name ? `<strong>${escapeHtml(c.name)}</strong>` : `<em>documento eliminado</em>`;
+
+                // Campos relevantes en formato legible
+                const campos = Object.entries(fieldLabel)
+                    .filter(([key]) => c[key])
+                    .map(([key, label]) => `<span style="background:#f0f0f0;padding:2px 8px;border-radius:12px;font-size:11px;margin:2px;display:inline-block;">
+                        <strong>${label}:</strong> ${escapeHtml(String(c[key]))}
+                    </span>`)
+                    .join('');
+
+                const linkHtml = c.data?.link
+                    ? `<span style="background:#f0f0f0;padding:2px 8px;border-radius:12px;font-size:11px;margin:2px;display:inline-block;">
+                        <strong>Link:</strong> <a href="${escapeHtml(c.data.link)}" target="_blank" rel="noopener" style="color:#F32121;">ver documento</a>
+                       </span>`
+                    : '';
+
                 return `
                     <div class="audit-item">
                         <div class="audit-header">
-                            <span class="audit-action">${escapeHtml(log.action)}</span>
-                            <span class="audit-time">${timeStr} — ${quien}</span>
+                            <span class="audit-action" style="color:${color};">${accion} ${docName}</span>
+                            <span class="audit-time">${timeStr} · ${quien}</span>
                         </div>
-                        <div class="audit-details">${JSON.stringify(log.changes || {}, null, 2)}</div>
+                        <div style="margin-top:8px;line-height:2;">${campos}${linkHtml}</div>
                     </div>
                 `;
             }).join('');
