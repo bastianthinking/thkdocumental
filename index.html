@@ -444,6 +444,141 @@
             gap: 6px;
         }
 
+        /* FILTER BAR */
+        .filter-bar {
+            padding: 15px 20px;
+            background: #f9f9f9;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-bar input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+
+        .filter-bar select {
+            padding: 8px 12px;
+            font-size: 13px;
+            min-width: 140px;
+        }
+
+        .btn-clear {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: #666;
+            padding: 8px 14px;
+            font-size: 12px;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .btn-clear:hover {
+            background: var(--border);
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(41,54,84,0.6);
+            z-index: 500;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 680px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            background: var(--primary-blue);
+            color: var(--white);
+            padding: 20px 25px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--white);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+            opacity: 0.8;
+        }
+
+        .modal-close:hover { opacity: 1; }
+
+        .modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .modal-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .modal-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .modal-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #999;
+        }
+
+        .modal-value {
+            font-size: 14px;
+            color: var(--dark-gray);
+        }
+
+        .modal-divider {
+            grid-column: 1 / -1;
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 4px 0;
+        }
+
         /* AUDIT */
         .audit-container {
             padding: 25px;
@@ -737,6 +872,35 @@
             <div class="tab-content active" id="documentos-tab">
                 <div class="list-panel">
                     <div class="list-header">📚 Documentos Registrados</div>
+                    <div class="filter-bar">
+                        <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre o código..." oninput="applyFilters()">
+                        <select id="filterEstado" onchange="applyFilters()">
+                            <option value="">Todos los estados</option>
+                            <option value="Publicado">Publicado</option>
+                            <option value="En revisión">En revisión</option>
+                            <option value="Borrador">Borrador</option>
+                            <option value="Archivado">Archivado</option>
+                            <option value="Obsoleto">Obsoleto</option>
+                        </select>
+                        <select id="filterTipo" onchange="applyFilters()">
+                            <option value="">Todos los tipos</option>
+                            <option value="Manual">Manual</option>
+                            <option value="Procedimiento">Procedimiento</option>
+                            <option value="Capacitación">Capacitación</option>
+                            <option value="QRG">QRG</option>
+                            <option value="Video">Video</option>
+                        </select>
+                        <select id="filterRepositorio" onchange="applyFilters()">
+                            <option value="">Todos los repositorios</option>
+                            <option value="Contract Support">Contract Support</option>
+                            <option value="PMG Center">PMG Center</option>
+                            <option value="Reportabilidad HSS">Reportabilidad HSS</option>
+                            <option value="Rutinas HSS">Rutinas HSS</option>
+                            <option value="Contract Data Center">Contract Data Center</option>
+                        </select>
+                        <button class="btn-clear" onclick="clearFilters()">✕ Limpiar</button>
+                        <span id="filterCount" style="font-size:12px; color:#999;"></span>
+                    </div>
                     <div class="table-container">
                         <table>
                             <thead>
@@ -759,6 +923,19 @@
                                 <tr><td colspan="12" style="text-align: center; padding: 40px;">Cargando documentos...</td></tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL DETALLE -->
+            <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+                <div class="modal-box">
+                    <div class="modal-header">
+                        <h3 id="modalTitle">Detalle del documento</h3>
+                        <button class="modal-close" onclick="closeModalDirect()">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-grid" id="modalContent"></div>
                     </div>
                 </div>
             </div>
@@ -945,51 +1122,174 @@
             if (currentUserRole === 'owner') renderAprobadores();
         }
 
-        function renderDocuments() {
+        function renderDocuments(filtered = null) {
             const tbody   = document.getElementById('documentTable');
             const isOwner = currentUserRole === 'owner';
+            const list    = filtered ?? documents;
 
-            if (documents.length === 0) {
+            if (list.length === 0) {
                 const cols = isOwner ? 12 : 11;
-                tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align: center; padding: 40px; color: #999;">Sin documentos aún</td></tr>`;
+                const msg  = filtered ? 'Sin resultados para los filtros aplicados' : 'Sin documentos aún';
+                tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align: center; padding: 40px; color: #999;">${msg}</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = documents.map(doc => {
+            tbody.innerHTML = list.map(doc => {
                 const publicadoDate = new Date(doc.publicado);
                 const hoy           = new Date();
                 const diasDesde     = Math.ceil((hoy - publicadoDate) / (1000 * 60 * 60 * 24));
                 const color         = diasDesde > 365 ? '#F32121' : '#333';
 
-                // Validar link: solo mostrar si comienza con http
                 const linkHtml = (doc.data?.link && doc.data.link.startsWith('http'))
-                    ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" rel="noopener noreferrer" style="color: #F32121; text-decoration: none;">Abrir</a>`
+                    ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" rel="noopener noreferrer" style="color: #F32121; text-decoration: none;" onclick="event.stopPropagation()">Abrir</a>`
                     : '-';
 
                 const accionesHtml = isOwner ? `
                     <td>
                         <div class="actions">
-                            <button class="btn-secondary btn-icon" onclick="editDocument('${doc.id}')">✏️</button>
-                            <button class="btn-danger btn-icon" onclick="deleteDocument('${doc.id}')">🗑️</button>
+                            <button class="btn-secondary btn-icon" onclick="event.stopPropagation(); editDocument('${doc.id}')">✏️</button>
+                            <button class="btn-danger btn-icon" onclick="event.stopPropagation(); deleteDocument('${doc.id}')">🗑️</button>
                         </div>
                     </td>` : '';
 
+                const notesShort = doc.data?.notes
+                    ? (doc.data.notes.length > 30 ? escapeHtml(doc.data.notes.substring(0, 30)) + '...' : escapeHtml(doc.data.notes))
+                    : '-';
+
                 return `
-                <tr>
+                <tr style="cursor:pointer;" onclick="openModal('${doc.id}')">
                     <td><strong>${escapeHtml(doc.name)}</strong></td>
                     <td><small>${escapeHtml(doc.codigo || '')}</small></td>
                     <td><small>${escapeHtml(doc.tipo || '')}</small></td>
                     <td><small>${escapeHtml(doc.alcance || '')}</small></td>
-                    <td><span class="status-badge status-${(doc.estado || '').toLowerCase().replace(' ', '-')}">${escapeHtml(doc.estado || '')}</span></td>
+                    <td><span class="status-badge status-${(doc.estado || '').toLowerCase().replaceAll(' ', '-')}">${escapeHtml(doc.estado || '')}</span></td>
                     <td><small>${escapeHtml(doc.repositorio || '')}</small></td>
                     <td><small>${doc.publicado || '-'}</small></td>
                     <td><small>${escapeHtml(doc.version || '-')}</small></td>
                     <td><small style="color: ${color}">${diasDesde} días</small></td>
                     <td>${linkHtml}</td>
-                    <td><small title="${escapeHtml(doc.data?.notes || '')}">${doc.data?.notes ? escapeHtml(doc.data.notes.substring(0, 30)) + '...' : '-'}</small></td>
+                    <td><small title="${escapeHtml(doc.data?.notes || '')}">${notesShort}</small></td>
                     ${accionesHtml}
                 </tr>`;
             }).join('');
+        }
+
+        // ─── FILTROS ──────────────────────────────────────────────────────────
+        function applyFilters() {
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            const estado = document.getElementById('filterEstado').value;
+            const tipo   = document.getElementById('filterTipo').value;
+            const repo   = document.getElementById('filterRepositorio').value;
+
+            const filtered = documents.filter(doc => {
+                const matchSearch = !search ||
+                    (doc.name || '').toLowerCase().includes(search) ||
+                    (doc.codigo || '').toLowerCase().includes(search);
+                const matchEstado = !estado || doc.estado === estado;
+                const matchTipo   = !tipo   || doc.tipo === tipo;
+                const matchRepo   = !repo   || doc.repositorio === repo;
+                return matchSearch && matchEstado && matchTipo && matchRepo;
+            });
+
+            const countEl = document.getElementById('filterCount');
+            if (search || estado || tipo || repo) {
+                countEl.textContent = `${filtered.length} de ${documents.length} documentos`;
+            } else {
+                countEl.textContent = '';
+            }
+
+            renderDocuments(filtered);
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterEstado').value = '';
+            document.getElementById('filterTipo').value = '';
+            document.getElementById('filterRepositorio').value = '';
+            document.getElementById('filterCount').textContent = '';
+            renderDocuments();
+        }
+
+        // ─── MODAL DETALLE ────────────────────────────────────────────────────
+        function openModal(id) {
+            const doc = documents.find(d => d.id === id);
+            if (!doc) return;
+
+            const publicadoDate = new Date(doc.publicado);
+            const hoy           = new Date();
+            const diasDesde     = Math.ceil((hoy - publicadoDate) / (1000 * 60 * 60 * 24));
+            const colorDias     = diasDesde > 365 ? '#F32121' : '#065f46';
+
+            const linkHtml = (doc.data?.link && doc.data.link.startsWith('http'))
+                ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" rel="noopener noreferrer" style="color:#F32121;">Abrir documento</a>`
+                : '-';
+
+            document.getElementById('modalTitle').textContent = doc.name;
+            document.getElementById('modalContent').innerHTML = `
+                <div class="modal-field">
+                    <span class="modal-label">Código</span>
+                    <span class="modal-value">${escapeHtml(doc.codigo || '-')}</span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-label">Estado</span>
+                    <span class="modal-value"><span class="status-badge status-${(doc.estado || '').toLowerCase().replaceAll(' ', '-')}">${escapeHtml(doc.estado || '-')}</span></span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-label">Tipo</span>
+                    <span class="modal-value">${escapeHtml(doc.tipo || '-')}</span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-label">Alcance</span>
+                    <span class="modal-value">${escapeHtml(doc.alcance || '-')}</span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-label">Repositorio</span>
+                    <span class="modal-value">${escapeHtml(doc.repositorio || '-')}</span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-label">Versión</span>
+                    <span class="modal-value">${escapeHtml(doc.version || '-')}</span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-label">Publicado</span>
+                    <span class="modal-value">${doc.publicado || '-'}</span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-label">Mantención</span>
+                    <span class="modal-value" style="color:${colorDias}; font-weight:600;">${diasDesde} días</span>
+                </div>
+                <hr class="modal-divider">
+                <div class="modal-field">
+                    <span class="modal-label">Elaborador</span>
+                    <span class="modal-value">${escapeHtml(doc.elaborador || '-')}</span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-label">Revisor</span>
+                    <span class="modal-value">${escapeHtml(doc.revisor || '-')}</span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-label">Aprobador</span>
+                    <span class="modal-value">${escapeHtml(doc.aprobador || '-')}</span>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-label">Link</span>
+                    <span class="modal-value">${linkHtml}</span>
+                </div>
+                <div class="modal-field full">
+                    <span class="modal-label">Notas</span>
+                    <span class="modal-value">${escapeHtml(doc.data?.notes || '-')}</span>
+                </div>
+            `;
+
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal(event) {
+            if (event.target === document.getElementById('modalOverlay')) closeModalDirect();
+        }
+
+        function closeModalDirect() {
+            document.getElementById('modalOverlay').classList.remove('active');
         }
 
         function renderAprobadores() {
