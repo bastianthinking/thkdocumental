@@ -163,57 +163,58 @@
 
         /* HEADER */
         .header {
-            background: var(--white);
-            border-bottom: 2px solid var(--primary-red);
-            padding: 20px 30px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #1e2d47 100%);
+            border-bottom: 3px solid var(--primary-red);
+            padding: 16px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 16px rgba(41,54,84,0.25);
         }
 
         .header-left {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
         }
 
-        .header-logo img {
-            height: 40px;
+        .header-logo img { height: 38px; }
+
+        .header-divider {
+            width: 1px;
+            height: 36px;
+            background: rgba(255,255,255,0.2);
         }
 
         .header-title h1 {
-            font-size: 24px;
-            color: var(--primary-blue);
+            font-size: 20px;
+            color: #fff;
             font-weight: 700;
+            letter-spacing: 0.3px;
         }
 
         .header-title p {
-            font-size: 12px;
-            color: #999;
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
             margin-top: 2px;
         }
 
         .header-right {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             align-items: center;
         }
 
         .user-info {
             text-align: right;
             font-size: 13px;
-            color: var(--dark-gray);
         }
 
         .user-info strong {
             display: block;
-            color: var(--primary-blue);
+            color: #fff;
             font-weight: 600;
-        }
-
-        .user-info small {
-            color: #999;
+            font-size: 13px;
         }
 
         /* Badge de rol */
@@ -221,19 +222,44 @@
             display: inline-block;
             padding: 2px 10px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
         }
         .role-badge.owner {
-            background: #293654;
+            background: var(--primary-red);
             color: #fff;
         }
         .role-badge.viewer {
-            background: #e0e0e0;
-            color: #555;
+            background: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.85);
         }
+
+        .btn-ghost {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 7px 14px;
+            font-size: 12px;
+            border-radius: 4px;
+            text-transform: none;
+            letter-spacing: 0;
+            font-weight: 600;
+        }
+        .btn-ghost:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .btn-logout {
+            background: var(--primary-red);
+            color: #fff;
+            padding: 7px 16px;
+            font-size: 12px;
+            border-radius: 4px;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        .btn-logout:hover { background: #d91e1e; }
 
         /* MAIN */
         .main-content {
@@ -258,21 +284,26 @@
             display: flex;
             gap: 0;
             background: var(--white);
-            padding: 0;
+            padding: 0 16px;
             margin-bottom: 0;
-            border-bottom: 2px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
         }
 
         .tab-button {
-            padding: 15px 25px;
+            padding: 14px 20px;
             background: transparent;
             border: none;
-            color: #666;
+            color: #888;
             cursor: pointer;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             border-bottom: 3px solid transparent;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
         }
 
         .tab-button.active {
@@ -280,8 +311,9 @@
             border-bottom-color: var(--primary-red);
         }
 
-        .tab-button:hover {
-            color: var(--dark-gray);
+        .tab-button:hover:not(.active) {
+            color: var(--primary-blue);
+            background: #f9f9f9;
         }
 
         /* Ocultar tabs según rol — se controla con clase en body */
@@ -385,32 +417,30 @@
         }
 
         thead {
-            background: #f9f9f9;
+            background: var(--primary-blue);
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
         th {
-            padding: 12px 15px;
+            padding: 11px 15px;
             text-align: left;
             font-weight: 600;
-            color: var(--primary-blue);
-            font-size: 12px;
+            color: rgba(255,255,255,0.85);
+            font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.7px;
         }
 
         td {
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--border);
+            padding: 11px 15px;
+            border-bottom: 1px solid #f0f0f0;
             font-size: 13px;
         }
 
-        tbody tr:hover {
-            background: #fafafa;
-        }
+        tbody tr:nth-child(even) { background: #fafbfc; }
+        tbody tr:hover { background: #eef2ff !important; cursor: pointer; }
 
         .status-badge {
             display: inline-block;
@@ -442,6 +472,64 @@
         .actions {
             display: flex;
             gap: 6px;
+        }
+
+        /* STATS CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 20px 22px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-left: 4px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .stat-card.total  { border-left-color: var(--primary-blue); }
+        .stat-card.ok     { border-left-color: #10b981; }
+        .stat-card.review { border-left-color: #f59e0b; }
+        .stat-card.alert  { border-left-color: var(--primary-red); }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #999;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            line-height: 1;
+        }
+
+        .stat-card.alert .stat-value { color: var(--primary-red); }
+        .stat-card.ok .stat-value    { color: #10b981; }
+        .stat-card.review .stat-value { color: #f59e0b; }
+
+        .stat-sub {
+            font-size: 11px;
+            color: #bbb;
+        }
+
+        @media (max-width: 900px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         /* FILTER BAR */
@@ -737,6 +825,7 @@
                 <div class="header-logo">
                     <img src="https://thinking.cl/logo.png" alt="Thinking" onerror="this.style.display='none'">
                 </div>
+                <div class="header-divider"></div>
                 <div class="header-title">
                     <h1>Control Documental</h1>
                     <p>Thinking SpA</p>
@@ -747,7 +836,8 @@
                     <strong id="userEmailDisplay"></strong>
                     <span class="role-badge" id="userRoleDisplay"></span>
                 </div>
-                <button class="btn-secondary" onclick="handleLogout()" style="padding: 8px 15px;">Cerrar sesión</button>
+                <button class="btn-ghost" onclick="openPasswordModal()">🔑 Contraseña</button>
+                <button class="btn-logout" onclick="handleLogout()">Cerrar sesión</button>
             </div>
         </div>
 
@@ -871,6 +961,31 @@
 
             <!-- TAB: DOCUMENTOS -->
             <div class="tab-content active" id="documentos-tab">
+
+                <!-- STATS -->
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card total">
+                        <span class="stat-label">Total documentos</span>
+                        <span class="stat-value" id="statTotal">—</span>
+                        <span class="stat-sub">en el sistema</span>
+                    </div>
+                    <div class="stat-card ok">
+                        <span class="stat-label">Publicados</span>
+                        <span class="stat-value" id="statPublicados">—</span>
+                        <span class="stat-sub">vigentes</span>
+                    </div>
+                    <div class="stat-card review">
+                        <span class="stat-label">En revisión</span>
+                        <span class="stat-value" id="statRevision">—</span>
+                        <span class="stat-sub">pendientes de aprobación</span>
+                    </div>
+                    <div class="stat-card alert">
+                        <span class="stat-label">Mantención vencida</span>
+                        <span class="stat-value" id="statVencidos">—</span>
+                        <span class="stat-sub">más de 365 días</span>
+                    </div>
+                </div>
+
                 <div class="list-panel">
                     <div class="list-header">📚 Documentos Registrados</div>
                     <div class="filter-bar">
@@ -924,6 +1039,30 @@
                                 <tr><td colspan="12" style="text-align: center; padding: 40px;">Cargando documentos...</td></tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL CAMBIAR CONTRASEÑA -->
+            <div class="modal-overlay" id="passwordModalOverlay" onclick="closePasswordModal(event)">
+                <div class="modal-box" style="max-width: 400px;">
+                    <div class="modal-header">
+                        <h3>🔑 Cambiar contraseña</h3>
+                        <button class="modal-close" onclick="closePasswordModalDirect()">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="passwordForm" onsubmit="handleChangePassword(event)">
+                            <div class="form-group">
+                                <label>Nueva contraseña</label>
+                                <input type="password" id="newPassword" required minlength="6" placeholder="Mínimo 6 caracteres">
+                            </div>
+                            <div class="form-group">
+                                <label>Confirmar contraseña</label>
+                                <input type="password" id="confirmPassword" required minlength="6" placeholder="Repite la contraseña">
+                            </div>
+                            <div id="passwordError" style="color: var(--primary-red); font-size: 13px; margin-bottom: 12px;"></div>
+                            <button type="submit" class="btn-primary" id="btnChangePassword">Cambiar contraseña</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -1173,6 +1312,7 @@
         }
 
         function renderDocuments(filtered = null) {
+            renderStats();
             const tbody   = document.getElementById('documentTable');
             const isOwner = currentUserRole === 'owner';
             const list    = filtered ?? documents;
@@ -1222,6 +1362,69 @@
                     ${accionesHtml}
                 </tr>`;
             }).join('');
+        }
+
+        // ─── ESTADÍSTICAS ────────────────────────────────────────────────────
+        function renderStats() {
+            const hoy = new Date();
+            const total      = documents.length;
+            const publicados = documents.filter(d => d.estado === 'Publicado').length;
+            const revision   = documents.filter(d => d.estado === 'En revisión' || d.estado === 'Borrador').length;
+            const vencidos   = documents.filter(d => {
+                if (!d.publicado) return false;
+                const dias = Math.ceil((hoy - new Date(d.publicado)) / (1000 * 60 * 60 * 24));
+                return dias > 365;
+            }).length;
+
+            document.getElementById('statTotal').textContent      = total;
+            document.getElementById('statPublicados').textContent = publicados;
+            document.getElementById('statRevision').textContent   = revision;
+            document.getElementById('statVencidos').textContent   = vencidos;
+        }
+
+        // ─── CONTRASEÑA ───────────────────────────────────────────────────────
+        function openPasswordModal() {
+            document.getElementById('passwordForm').reset();
+            document.getElementById('passwordError').textContent = '';
+            document.getElementById('passwordModalOverlay').classList.add('active');
+        }
+
+        function closePasswordModal(event) {
+            if (event.target === document.getElementById('passwordModalOverlay')) closePasswordModalDirect();
+        }
+
+        function closePasswordModalDirect() {
+            document.getElementById('passwordModalOverlay').classList.remove('active');
+        }
+
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const newPwd     = document.getElementById('newPassword').value;
+            const confirmPwd = document.getElementById('confirmPassword').value;
+            const errDiv     = document.getElementById('passwordError');
+            const btn        = document.getElementById('btnChangePassword');
+
+            errDiv.textContent = '';
+
+            if (newPwd !== confirmPwd) {
+                errDiv.textContent = 'Las contraseñas no coinciden.';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Cambiando...';
+
+            const { error } = await supabaseClient.auth.updateUser({ password: newPwd });
+
+            btn.disabled = false;
+            btn.textContent = 'Cambiar contraseña';
+
+            if (error) {
+                errDiv.textContent = '❌ Error: ' + error.message;
+            } else {
+                closePasswordModalDirect();
+                showMessage('✓ Contraseña actualizada correctamente', 'success');
+            }
         }
 
         // ─── FILTROS ──────────────────────────────────────────────────────────
