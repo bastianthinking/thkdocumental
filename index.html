@@ -1189,14 +1189,17 @@
 
         // ─── INIT ─────────────────────────────────────────────────────────────
         async function init() {
-            // Escuchar cambios de sesión de Supabase Auth
             supabaseClient.auth.onAuthStateChange(async (event, session) => {
                 if (session?.user) {
+                    const firstLogin = !currentUser;
                     currentUser = session.user;
-                    await loadUserRole();
-                    applyRoleUI();
-                    await loadDocuments();
-                    if (currentUserRole === 'owner') await loadAudit();
+                    // Solo en primer login o SIGNED_IN real, no en TOKEN_REFRESHED
+                    if (firstLogin || event === 'SIGNED_IN') {
+                        await loadUserRole();
+                        applyRoleUI(true);
+                        await loadDocuments();
+                        if (currentUserRole === 'owner') await loadAudit();
+                    }
                 } else {
                     currentUser = null;
                     currentUserRole = null;
@@ -1204,7 +1207,6 @@
                 }
             });
 
-            // Verificar sesión existente al cargar
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) showLogin();
         }
@@ -1255,22 +1257,21 @@
             }
         }
 
-        function applyRoleUI() {
+        function applyRoleUI(switchToDefault = false) {
             const isOwner = currentUserRole === 'owner';
 
-            // Clase en body para controlar visibilidad de .owner-only via CSS
             document.body.classList.toggle('is-owner', isOwner);
 
-            // Header: email y badge de rol
             document.getElementById('userEmailDisplay').textContent = currentUser.email;
             const badge = document.getElementById('userRoleDisplay');
             badge.textContent = isOwner ? 'OWNER' : 'VIEWER';
             badge.className = `role-badge ${currentUserRole}`;
 
-            // Tab inicial: documentos para ambos roles
-            switchTab('documentos', document.getElementById('tab-documentos'));
+            // Solo cambiar de tab en el primer login, no en refrescos de token
+            if (switchToDefault) {
+                switchTab('documentos', document.getElementById('tab-documentos'));
+            }
 
-            // Mostrar app
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('mainContent').classList.add('active');
         }
