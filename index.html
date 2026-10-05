@@ -169,41 +169,56 @@
             font-size: 12px;
         }
 
-        /* HEADER */
-        .header {
+        /* SIDEBAR */
+        .sidebar {
             background: var(--navy-dark);
+            width: 248px;
+            flex-shrink: 0;
+            padding: 22px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .sidebar-brand { padding: 0 10px; }
+
+        .sidebar-logo {
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.1px;
+        }
+
+        .sidebar-logo span { color: var(--primary-red); }
+
+        .sidebar-sub {
+            font-size: 11px;
+            color: rgba(255,255,255,0.45);
+            margin-top: 2px;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        /* TOPBAR */
+        .topbar {
+            background: var(--white);
             padding: 16px 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: var(--shadow-md);
+            border-bottom: 1px solid var(--border);
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .header-logo img { height: 38px; }
-
-        .header-divider {
-            width: 1px;
-            height: 36px;
-            background: rgba(255,255,255,0.2);
-        }
-
-        .header-title h1 {
-            font-size: 19px;
-            color: #fff;
-            font-weight: 800;
-            letter-spacing: 0.1px;
-        }
-
-        .header-title p {
+        .topbar-eyebrow {
             font-size: 11px;
-            color: rgba(255,255,255,0.5);
-            margin-top: 2px;
+            font-weight: 800;
+            color: var(--primary-red);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
         }
 
         .header-right {
@@ -219,8 +234,8 @@
 
         .user-info strong {
             display: block;
-            color: #fff;
-            font-weight: 600;
+            color: var(--dark-gray);
+            font-weight: 700;
             font-size: 13px;
         }
 
@@ -239,21 +254,21 @@
             color: #fff;
         }
         .role-badge.viewer {
-            background: rgba(255,255,255,0.15);
-            color: rgba(255,255,255,0.85);
+            background: var(--light-gray);
+            color: var(--muted);
         }
 
         .btn-ghost {
-            background: rgba(255,255,255,0.08);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.16);
+            background: var(--light-gray);
+            color: var(--dark-gray);
+            border: 1px solid var(--border);
             padding: 8px 15px;
             font-size: 12px;
             border-radius: var(--radius-sm);
             font-weight: 600;
         }
         .btn-ghost:hover {
-            background: rgba(255,255,255,0.16);
+            background: var(--border);
         }
         .btn-logout {
             background: var(--primary-red);
@@ -268,55 +283,58 @@
         .main-content {
             display: none;
             min-height: 100vh;
-            flex-direction: column;
         }
 
         .main-content.active {
             display: flex;
+            flex-direction: row;
         }
 
-        .content {
+        .app-main {
             flex: 1;
-            padding: 30px;
+            min-width: 0;
             display: flex;
             flex-direction: column;
         }
 
-        /* TABS */
-        .tab-switch {
+        .content {
+            flex: 1;
+            padding: 28px 32px;
             display: flex;
-            gap: 0;
-            background: var(--white);
-            padding: 0 16px;
-            margin-bottom: 0;
-            border-bottom: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
+            flex-direction: column;
+            background: var(--light-gray);
         }
 
+        /* TABS (sidebar nav) */
         .tab-button {
-            padding: 14px 20px;
+            padding: 11px 14px;
             background: transparent;
             border: none;
-            color: var(--muted);
+            border-radius: var(--radius-sm);
+            color: rgba(255,255,255,0.6);
             cursor: pointer;
-            font-weight: 700;
-            font-size: 13px;
-            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            font-size: 13.5px;
             transition: all 0.15s;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
             white-space: nowrap;
+            text-align: left;
+            width: 100%;
         }
 
+        .tab-button span:first-child { font-size: 15px; }
+
         .tab-button.active {
-            color: var(--primary-red);
-            border-bottom-color: var(--primary-red);
+            color: #fff;
+            font-weight: 700;
+            background: rgba(255,255,255,0.1);
         }
 
         .tab-button:hover:not(.active) {
-            color: var(--primary-blue);
-            background: #f9f9f9;
+            color: #fff;
+            background: rgba(255,255,255,0.06);
         }
 
         /* Ocultar tabs según rol — se controla con clase en body */
@@ -330,6 +348,10 @@
 
         body.is-owner th.owner-only {
             display: table-cell;
+        }
+
+        body.is-owner .sidebar-nav .owner-only {
+            display: flex;
         }
 
         .tab-content {
@@ -810,6 +832,23 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        @media (max-width: 860px) {
+            .main-content.active { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                align-items: center;
+                overflow-x: auto;
+                gap: 20px;
+                padding: 12px 16px;
+            }
+            .sidebar-brand { padding: 0; flex-shrink: 0; }
+            .sidebar-sub { display: none; }
+            .sidebar-nav { flex-direction: row; }
+            .tab-button { width: auto; }
+            .topbar { padding: 14px 20px; flex-wrap: wrap; gap: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -845,39 +884,39 @@
 
     <!-- MAIN APP -->
     <div class="main-content" id="mainContent">
-        <!-- HEADER -->
-        <div class="header">
-            <div class="header-left">
-                <div class="header-logo">
-                    <img src="https://thinking.cl/logo.png" alt="Thinking" onerror="this.style.display='none'">
-                </div>
-                <div class="header-divider"></div>
-                <div class="header-title">
-                    <h1>Control Documental</h1>
-                    <p>Thinking SpA</p>
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-logo">Control<span>.</span>Documental</div>
+                <p class="sidebar-sub">Thinking SpA</p>
+            </div>
+
+            <!-- TABS (se muestran según rol en applyRoleUI) -->
+            <nav class="sidebar-nav" id="tabSwitch">
+                <button class="tab-button owner-only" id="tab-crear" onclick="switchTab('crear', this)"><span>➕</span><span>Crear Documento</span></button>
+                <button class="tab-button active" id="tab-documentos" onclick="switchTab('documentos', this)"><span>📄</span><span>Documentos</span></button>
+                <button class="tab-button owner-only" id="tab-aprobadores" onclick="switchTab('aprobadores', this)"><span>👥</span><span>Aprobadores</span></button>
+                <button class="tab-button owner-only" id="tab-auditoria" onclick="switchTab('auditoria', this)"><span>📋</span><span>Auditoría</span></button>
+                <button class="tab-button owner-only" id="tab-usuarios" onclick="switchTab('usuarios', this); loadUsers()"><span>👤</span><span>Usuarios</span></button>
+            </nav>
+        </aside>
+
+        <div class="app-main">
+            <!-- TOPBAR -->
+            <div class="topbar">
+                <span class="topbar-eyebrow">WORKSPACE</span>
+                <div class="header-right">
+                    <div class="user-info">
+                        <strong id="userEmailDisplay"></strong>
+                        <span class="role-badge" id="userRoleDisplay"></span>
+                    </div>
+                    <button class="btn-ghost" onclick="openPasswordModal()">🔑 Contraseña</button>
+                    <button class="btn-logout" onclick="handleLogout()">Cerrar sesión</button>
                 </div>
             </div>
-            <div class="header-right">
-                <div class="user-info">
-                    <strong id="userEmailDisplay"></strong>
-                    <span class="role-badge" id="userRoleDisplay"></span>
-                </div>
-                <button class="btn-ghost" onclick="openPasswordModal()">🔑 Contraseña</button>
-                <button class="btn-logout" onclick="handleLogout()">Cerrar sesión</button>
-            </div>
-        </div>
 
-        <!-- TABS (se muestran según rol en applyRoleUI) -->
-        <div class="tab-switch" id="tabSwitch">
-            <button class="tab-button owner-only" id="tab-crear" onclick="switchTab('crear', this)">➕ Crear Documento</button>
-            <button class="tab-button active" id="tab-documentos" onclick="switchTab('documentos', this)">📄 Documentos</button>
-            <button class="tab-button owner-only" id="tab-aprobadores" onclick="switchTab('aprobadores', this)">👥 Aprobadores</button>
-            <button class="tab-button owner-only" id="tab-auditoria" onclick="switchTab('auditoria', this)">📋 Auditoría</button>
-            <button class="tab-button owner-only" id="tab-usuarios" onclick="switchTab('usuarios', this); loadUsers()">👤 Usuarios</button>
-        </div>
-
-        <!-- CONTENT -->
-        <div class="content">
+            <!-- CONTENT -->
+            <div class="content">
             <!-- TAB: CREAR (solo owner) -->
             <div class="tab-content" id="crear-tab">
                 <div class="form-panel">
@@ -1189,6 +1228,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 
