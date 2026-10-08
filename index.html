@@ -1310,7 +1310,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Contraseña</label>
-                                <input type="password" id="newUserPassword" required placeholder="Mínimo 6 caracteres" minlength="6">
+                                <input type="password" id="newUserPassword" placeholder="Opcional — vacío: entra con link por correo" minlength="6">
                             </div>
                             <div class="form-group">
                                 <label>Rol</label>
@@ -2511,27 +2511,40 @@
             showLoading('Creando usuario...');
 
             try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                // La edge function create-user solo conoce owner/viewer: un aprobador se crea
-                // como viewer y luego se le asigna el rol.
-                const res = await supabaseClient.functions.invoke('create-user', {
-                    body: { email, password, role: role === 'aprobador' ? 'viewer' : role },
-                    headers: { Authorization: `Bearer ${session.access_token}` }
-                });
+                // 1) Si ya tiene cuenta en Supabase Auth (p. ej. se le quitó el acceso), solo se asigna el rol
+                const { data: existia, error: rpcErr } = await supabaseClient
+                    .rpc('assign_role_by_email', { p_email: email, p_role: role });
+                if (rpcErr) throw new Error(rpcErr.message);
 
-                if (res.error || res.data?.error) {
-                    throw new Error(res.data?.error || res.error.message);
+                if (existia) {
+                    showMessage(`✓ ${email} ya tenía cuenta: se le asignó el rol ${role}`, 'success');
+                } else {
+                    // 2) Cuenta nueva. Sin contraseña se genera una aleatoria y la persona entra con el link por correo.
+                    const pwd = password || crypto.randomUUID() + 'Aa1!';
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    // La edge function create-user solo conoce owner/viewer: el rol final se asigna después
+                    const res = await supabaseClient.functions.invoke('create-user', {
+                        body: { email, password: pwd, role: role === 'aprobador' ? 'viewer' : role },
+                        headers: { Authorization: `Bearer ${session.access_token}` }
+                    });
+
+                    if (res.error || res.data?.error) {
+                        // En respuestas no-2xx el detalle viene en error.context (Response)
+                        let detalle = res.data?.error;
+                        if (!detalle && res.error?.context?.json) {
+                            try { detalle = (await res.error.context.json())?.error; } catch { /* sin cuerpo JSON */ }
+                        }
+                        throw new Error(detalle || res.error.message);
+                    }
+
+                    if (role === 'aprobador') {
+                        const { error } = await supabaseClient
+                            .rpc('assign_role_by_email', { p_email: email, p_role: 'aprobador' });
+                        if (error) throw new Error('Usuario creado, pero no se pudo asignar rol aprobador: ' + error.message);
+                    }
+
+                    showMessage(`✓ Usuario ${email} creado como ${role}`, 'success');
                 }
-
-                if (role === 'aprobador') {
-                    const { error } = await supabaseClient
-                        .from('user_roles')
-                        .update({ role: 'aprobador' })
-                        .eq('email', email);
-                    if (error) throw new Error('Usuario creado, pero no se pudo asignar rol aprobador: ' + error.message);
-                }
-
-                showMessage(`✓ Usuario ${email} creado como ${role}`, 'success');
                 await loadStaffUsers();
                 document.getElementById('userForm').reset();
                 await loadUsers();
