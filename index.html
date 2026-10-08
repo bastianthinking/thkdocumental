@@ -91,6 +91,7 @@
         input[type="password"],
         input[type="text"],
         input[type="date"],
+        input[type="url"],
         select,
         textarea {
             width: 100%;
@@ -576,6 +577,32 @@
             white-space: pre-wrap;
         }
 
+        /* CATÁLOGOS */
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            align-items: start;
+        }
+        .catalog-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .catalog-item .name { flex: 1; }
+        .catalog-item.inactive .name { color: var(--muted); text-decoration: line-through; }
+        .catalog-item button { padding: 4px 8px; font-size: 11px; }
+        .catalog-add {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+        }
+        .catalog-add input { padding: 8px 10px; font-size: 13px; }
+        .catalog-add button { padding: 8px 12px; white-space: nowrap; }
+
         .login-divider {
             text-align: center;
             color: var(--muted);
@@ -988,6 +1015,7 @@
                 <button class="tab-button owner-only" id="tab-aprobadores" onclick="switchTab('aprobadores', this)"><span>👥</span><span>Aprobadores</span></button>
                 <button class="tab-button owner-only" id="tab-auditoria" onclick="switchTab('auditoria', this)"><span>📋</span><span>Auditoría</span></button>
                 <button class="tab-button owner-only" id="tab-usuarios" onclick="switchTab('usuarios', this); loadUsers()"><span>👤</span><span>Usuarios</span></button>
+                <button class="tab-button owner-only" id="tab-catalogos" onclick="switchTab('catalogos', this)"><span>🗂️</span><span>Catálogos</span></button>
             </nav>
         </aside>
 
@@ -1025,37 +1053,17 @@
                             </div>
                             <div>
                                 <label>Tipo</label>
-                                <select id="docTipo" required>
-                                    <option value="">-- Seleccionar --</option>
-                                    <option value="Manual">Manual</option>
-                                    <option value="Procedimiento">Procedimiento</option>
-                                    <option value="Capacitación">Capacitación</option>
-                                    <option value="QRG">QRG</option>
-                                    <option value="Video">Video</option>
-                                </select>
+                                <select id="docTipo" required data-catalog="tipo"></select>
                             </div>
                         </div>
                         <div class="form-row">
                             <div>
                                 <label>Alcance</label>
-                                <select id="docAlcance" required>
-                                    <option value="">-- Seleccionar --</option>
-                                    <option value="Contratista">Contratista</option>
-                                    <option value="Empleados">Empleados</option>
-                                    <option value="Transversal">Transversal</option>
-                                    <option value="Thinking">Thinking</option>
-                                </select>
+                                <select id="docAlcance" required data-catalog="alcance"></select>
                             </div>
                             <div>
                                 <label>Repositorio</label>
-                                <select id="docRepositorio" required>
-                                    <option value="">-- Seleccionar --</option>
-                                    <option value="Contract Support">Contract Support</option>
-                                    <option value="PMG Center">PMG Center</option>
-                                    <option value="Reportabilidad HSS">Reportabilidad HSS</option>
-                                    <option value="Rutinas HSS">Rutinas HSS</option>
-                                    <option value="Contract Data Center">Contract Data Center</option>
-                                </select>
+                                <select id="docRepositorio" required data-catalog="repositorio"></select>
                             </div>
                         </div>
                         <div class="form-row">
@@ -1151,22 +1159,8 @@
                             <option value="Archivado">Archivado</option>
                             <option value="Obsoleto">Obsoleto</option>
                         </select>
-                        <select id="filterTipo" onchange="applyFilters()">
-                            <option value="">Todos los tipos</option>
-                            <option value="Manual">Manual</option>
-                            <option value="Procedimiento">Procedimiento</option>
-                            <option value="Capacitación">Capacitación</option>
-                            <option value="QRG">QRG</option>
-                            <option value="Video">Video</option>
-                        </select>
-                        <select id="filterRepositorio" onchange="applyFilters()">
-                            <option value="">Todos los repositorios</option>
-                            <option value="Contract Support">Contract Support</option>
-                            <option value="PMG Center">PMG Center</option>
-                            <option value="Reportabilidad HSS">Reportabilidad HSS</option>
-                            <option value="Rutinas HSS">Rutinas HSS</option>
-                            <option value="Contract Data Center">Contract Data Center</option>
-                        </select>
+                        <select id="filterTipo" onchange="applyFilters()" data-catalog-filter="tipo" data-all-label="Todos los tipos"></select>
+                        <select id="filterRepositorio" onchange="applyFilters()" data-catalog-filter="repositorio" data-all-label="Todos los repositorios"></select>
                         <button class="btn-clear" onclick="clearFilters()">✕ Limpiar</button>
                         <span id="filterCount" style="font-size:12px; color:#999;"></span>
                     </div>
@@ -1254,6 +1248,16 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <!-- TAB: CATÁLOGOS (solo owner) -->
+            <div class="tab-content" id="catalogos-tab">
+                <p class="wf-hint">Valores disponibles al crear documentos. Desactivar oculta el valor en documentos nuevos sin afectar a los existentes; renombrar actualiza también los documentos que lo usan.</p>
+                <div class="catalog-grid">
+                    <div class="list-panel" data-catalog-admin="tipo"></div>
+                    <div class="list-panel" data-catalog-admin="alcance"></div>
+                    <div class="list-panel" data-catalog-admin="repositorio"></div>
                 </div>
             </div>
 
@@ -1386,6 +1390,7 @@
                             return;
                         }
                         applyRoleUI(true);
+                        await loadCatalog();
                         if (currentUserRole === 'owner') await loadStaffUsers();
                         await loadDocuments();
                         if (currentUserRole === 'owner') await loadAudit();
@@ -1527,7 +1532,10 @@
             }
             renderDocuments();
             renderPendientes();
-            if (currentUserRole === 'owner') renderAprobadores();
+            if (currentUserRole === 'owner') {
+                renderAprobadores();
+                renderCatalogAdmin(); // actualiza conteo de uso
+            }
         }
 
         function estadoBadge(estado) {
@@ -1951,6 +1959,188 @@
                 </tr>`).join('');
         }
 
+        // ─── CATÁLOGOS (Tipo, Alcance, Repositorio) ───────────────────────────
+        const CATALOG_LABELS = { tipo: 'Tipo', alcance: 'Alcance', repositorio: 'Repositorio' };
+        // Respaldo si la tabla catalog_options aún no existe
+        const CATALOG_DEFAULTS = {
+            tipo:        ['Manual', 'Procedimiento', 'Capacitación', 'QRG', 'Video'],
+            alcance:     ['Contratista', 'Empleados', 'Transversal', 'Thinking'],
+            repositorio: ['Contract Support', 'PMG Center', 'Reportabilidad HSS', 'Rutinas HSS', 'Contract Data Center']
+        };
+        let catalog = [];
+
+        async function loadCatalog() {
+            const { data, error } = await supabaseClient
+                .from('catalog_options')
+                .select('id, category, value, sort_order, active')
+                .order('sort_order')
+                .order('value');
+            if (error) {
+                console.warn('Catálogos no disponibles, usando valores por defecto:', error.message);
+                catalog = Object.entries(CATALOG_DEFAULTS).flatMap(([category, values]) =>
+                    values.map((value, i) => ({ id: null, category, value, sort_order: i, active: true })));
+            } else {
+                catalog = data || [];
+            }
+            populateCatalogSelects();
+            renderCatalogAdmin();
+        }
+
+        function populateCatalogSelects() {
+            // Formulario: solo valores activos
+            document.querySelectorAll('select[data-catalog]').forEach(sel => {
+                const cat  = sel.dataset.catalog;
+                const prev = sel.value;
+                sel.innerHTML = '<option value="">-- Seleccionar --</option>' +
+                    catalog.filter(o => o.category === cat && o.active)
+                           .map(o => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.value)}</option>`).join('');
+                ensureOption(sel, prev);
+            });
+            // Filtros: todos, incluso inactivos (hay documentos antiguos que los usan)
+            document.querySelectorAll('select[data-catalog-filter]').forEach(sel => {
+                const cat  = sel.dataset.catalogFilter;
+                const prev = sel.value;
+                sel.innerHTML = `<option value="">${escapeHtml(sel.dataset.allLabel)}</option>` +
+                    catalog.filter(o => o.category === cat)
+                           .map(o => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.value)}</option>`).join('');
+                sel.value = prev;
+            });
+        }
+
+        // Si un documento usa un valor inactivo, se agrega al select para no perderlo al editar
+        function ensureOption(sel, value) {
+            if (!value) { sel.value = ''; return; }
+            if (![...sel.options].some(o => o.value === value)) {
+                sel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(value)}">${escapeHtml(value)} (inactivo)</option>`);
+            }
+            sel.value = value;
+        }
+
+        function renderCatalogAdmin() {
+            if (currentUserRole !== 'owner') return;
+            document.querySelectorAll('[data-catalog-admin]').forEach(panel => {
+                const cat   = panel.dataset.catalogAdmin;
+                const items = catalog.filter(o => o.category === cat);
+                const enUso = v => documents.filter(d => d[cat] === v).length;
+
+                panel.innerHTML = `
+                    <div class="list-header">${CATALOG_LABELS[cat]}</div>
+                    ${items.map(o => `
+                        <div class="catalog-item ${o.active ? '' : 'inactive'}">
+                            <span class="name">${escapeHtml(o.value)} <small style="color:#999;">(${enUso(o.value)})</small></span>
+                            <button class="btn-secondary" title="Subir" onclick="moveCatalogOption('${o.id}', -1)">↑</button>
+                            <button class="btn-secondary" title="Renombrar" onclick="renameCatalogOption('${o.id}')">✏️</button>
+                            <button class="btn-secondary" title="${o.active ? 'Desactivar' : 'Activar'}" onclick="toggleCatalogOption('${o.id}')">${o.active ? '⏸' : '▶'}</button>
+                            <button class="btn-danger" title="Eliminar" onclick="deleteCatalogOption('${o.id}')">🗑️</button>
+                        </div>`).join('') || '<div class="catalog-item"><small style="color:#999;">Sin valores</small></div>'}
+                    <form class="catalog-add" onsubmit="addCatalogOption(event, '${cat}')">
+                        <input type="text" required placeholder="Nuevo valor...">
+                        <button type="submit" class="btn-secondary">+ Agregar</button>
+                    </form>`;
+            });
+        }
+
+        function catalogItem(id) {
+            const item = catalog.find(o => o.id === id);
+            if (!item || !item.id) {
+                showMessage('Primero corre la migración 002_catalogos.sql en Supabase', 'error');
+                return null;
+            }
+            return item;
+        }
+
+        async function afterCatalogChange(msg) {
+            showMessage(msg, 'success');
+            await loadCatalog();
+        }
+
+        async function addCatalogOption(e, cat) {
+            e.preventDefault();
+            const input = e.target.querySelector('input');
+            const value = input.value.trim();
+            if (!value) return;
+            if (catalog.some(o => o.category === cat && o.value.toLowerCase() === value.toLowerCase())) {
+                showMessage('Ese valor ya existe', 'error');
+                return;
+            }
+            const maxOrder = Math.max(0, ...catalog.filter(o => o.category === cat).map(o => o.sort_order));
+            const { error } = await supabaseClient
+                .from('catalog_options')
+                .insert([{ category: cat, value, sort_order: maxOrder + 1 }]);
+            if (error) { showMessage('❌ ' + error.message, 'error'); return; }
+            await afterCatalogChange(`✓ "${value}" agregado a ${CATALOG_LABELS[cat]}`);
+        }
+
+        async function renameCatalogOption(id) {
+            const item = catalogItem(id);
+            if (!item) return;
+            const nuevo = prompt(`Nuevo nombre para "${item.value}":`, item.value)?.trim();
+            if (!nuevo || nuevo === item.value) return;
+            if (catalog.some(o => o.category === item.category && o.id !== id && o.value.toLowerCase() === nuevo.toLowerCase())) {
+                showMessage('Ya existe un valor con ese nombre', 'error');
+                return;
+            }
+
+            const usados = documents.filter(d => d[item.category] === item.value).length;
+            if (usados && !confirm(`${usados} documento(s) usan "${item.value}". Se actualizarán a "${nuevo}". ¿Continuar?`)) return;
+
+            showLoading('Renombrando...');
+            const { error } = await supabaseClient.from('catalog_options').update({ value: nuevo }).eq('id', id);
+            if (!error && usados) {
+                const { error: docErr } = await supabaseClient
+                    .from('documents')
+                    .update({ [item.category]: nuevo, updated_at: new Date().toISOString() })
+                    .eq(item.category, item.value);
+                if (docErr) showMessage('⚠️ Catálogo renombrado, pero falló al actualizar documentos: ' + docErr.message, 'error');
+            }
+            hideLoading();
+            if (error) { showMessage('❌ ' + error.message, 'error'); return; }
+            await loadDocuments();
+            await afterCatalogChange(`✓ Renombrado a "${nuevo}"`);
+        }
+
+        async function toggleCatalogOption(id) {
+            const item = catalogItem(id);
+            if (!item) return;
+            const { error } = await supabaseClient.from('catalog_options').update({ active: !item.active }).eq('id', id);
+            if (error) { showMessage('❌ ' + error.message, 'error'); return; }
+            await afterCatalogChange(`✓ "${item.value}" ${item.active ? 'desactivado' : 'activado'}`);
+        }
+
+        async function deleteCatalogOption(id) {
+            const item = catalogItem(id);
+            if (!item) return;
+            const usados = documents.filter(d => d[item.category] === item.value).length;
+            if (usados) {
+                showMessage(`"${item.value}" está en uso en ${usados} documento(s). Desactívalo en vez de eliminarlo.`, 'error');
+                return;
+            }
+            if (!confirm(`¿Eliminar "${item.value}" de ${CATALOG_LABELS[item.category]}?`)) return;
+            const { error } = await supabaseClient.from('catalog_options').delete().eq('id', id);
+            if (error) { showMessage('❌ ' + error.message, 'error'); return; }
+            await afterCatalogChange(`✓ "${item.value}" eliminado`);
+        }
+
+        // Intercambia el orden con el valor anterior de la misma categoría
+        async function moveCatalogOption(id, dir) {
+            const item = catalogItem(id);
+            if (!item) return;
+            const items = catalog.filter(o => o.category === item.category);
+            const idx   = items.findIndex(o => o.id === id);
+            const other = items[idx + dir];
+            if (!other) return;
+            // Reasigna orden secuencial para evitar empates
+            const reordered = [...items];
+            [reordered[idx], reordered[idx + dir]] = [reordered[idx + dir], reordered[idx]];
+            showLoading('Reordenando...');
+            const results = await Promise.all(reordered.map((o, i) =>
+                supabaseClient.from('catalog_options').update({ sort_order: i + 1 }).eq('id', o.id)));
+            hideLoading();
+            const err = results.find(r => r.error)?.error;
+            if (err) { showMessage('❌ ' + err.message, 'error'); return; }
+            await loadCatalog();
+        }
+
         // ─── REVISORES / APROBADORES ASIGNABLES ───────────────────────────────
         async function loadStaffUsers() {
             const { data, error } = await supabaseClient
@@ -2070,10 +2260,11 @@
             document.getElementById('formTitle').textContent = 'Editar documento';
             document.getElementById('docName').value        = doc.name || '';
             document.getElementById('docCodigo').value      = doc.codigo || '';
-            document.getElementById('docTipo').value        = doc.tipo || '';
-            document.getElementById('docAlcance').value     = doc.alcance || '';
+            populateCatalogSelects(); // limpia opciones "(inactivo)" de una edición anterior
+            ensureOption(document.getElementById('docTipo'), doc.tipo);
+            ensureOption(document.getElementById('docAlcance'), doc.alcance);
+            ensureOption(document.getElementById('docRepositorio'), doc.repositorio);
             document.getElementById('docEstadoInfo').value  = doc.estado || '';
-            document.getElementById('docRepositorio').value = doc.repositorio || '';
             document.getElementById('docPublicado').value   = doc.publicado || '';
             document.getElementById('docVersion').value     = doc.version || '';
             document.getElementById('docElaborador').value  = doc.elaborador || '';
