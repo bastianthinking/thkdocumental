@@ -1395,6 +1395,11 @@
                         await loadDocuments();
                         if (currentUserRole === 'owner') await loadAudit();
                     }
+                    // Llegó desde el link "Restablecer contraseña": pedir la nueva de inmediato
+                    if (event === 'PASSWORD_RECOVERY' && currentUserRole) {
+                        openPasswordModal();
+                        showMessage('Define tu nueva contraseña', 'info');
+                    }
                 } else {
                     currentUser = null;
                     currentUserRole = null;
@@ -2370,7 +2375,7 @@
                 return;
             }
 
-            const actionLabel = { created: 'Creó', updated: 'Actualizó', deleted: 'Eliminó', renovated: 'Renovó', ...WF_ACTION_LABELS };
+            const actionLabel = { created: 'Creó', updated: 'Actualizó', deleted: 'Eliminó', renovated: 'Renovó', password_reset: 'Envió reset de contraseña a', ...WF_ACTION_LABELS };
             const actionColor = { created: '#10b981', updated: '#f59e0b', deleted: '#ef4444', renovated: '#3b82f6',
                                   aprobar: '#0f9d63', aprobar_revision: '#0f9d63', publicar: '#0f9d63',
                                   observar: '#b91c1c', enviar_revision: '#6d28d9' };
@@ -2489,6 +2494,10 @@
                         <div class="actions">
                             ${!isMe ? `
                             ${roleSelect}
+                            <button class="btn-secondary btn-icon" title="Enviar link para restablecer contraseña"
+                                onclick="sendPasswordReset('${escapeHtml(u.email || '')}')">
+                                🔑
+                            </button>
                             <button class="btn-danger btn-icon" title="Quitar acceso"
                                 onclick="removeUser('${u.user_id}', '${escapeHtml(u.email || '')}')">
                                 🗑️
@@ -2576,6 +2585,25 @@
             } catch (err) {
                 showMessage('❌ Error al cambiar rol: ' + err.message, 'error');
                 await loadUsers();
+            }
+        }
+
+        // El owner no define la contraseña: envía un link y el usuario elige la suya
+        async function sendPasswordReset(email) {
+            if (!email) return;
+            if (!confirm(`¿Enviar a ${email} un link para restablecer su contraseña?`)) return;
+
+            showLoading('Enviando link...');
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + window.location.pathname
+            });
+            hideLoading();
+
+            if (error) {
+                showMessage('❌ No se pudo enviar: ' + error.message, 'error');
+            } else {
+                showMessage(`✓ Link de restablecimiento enviado a ${email}`, 'success');
+                await logAudit(null, 'password_reset', { name: email });
             }
         }
 
