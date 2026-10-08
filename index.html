@@ -1058,32 +1058,42 @@
                         </div>
                         <div class="form-row">
                             <div>
+                                <label>Área solicitante</label>
+                                <select id="docArea" required data-catalog="area" onchange="applyAreaDefaultAprobador()"></select>
+                            </div>
+                            <div>
                                 <label>Alcance</label>
                                 <select id="docAlcance" required data-catalog="alcance"></select>
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div>
                                 <label>Repositorio</label>
                                 <select id="docRepositorio" required data-catalog="repositorio"></select>
                             </div>
-                        </div>
-                        <div class="form-row">
                             <div>
                                 <label>Versión</label>
                                 <input type="text" id="docVersion" placeholder="Ej: 1.0, 2.1">
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div>
                                 <label>Elaborador</label>
-                                <input type="text" id="docElaborador" placeholder="Nombre del elaborador">
+                                <select id="docElaborador" data-first-label="-- Seleccionar --"></select>
+                            </div>
+                            <div>
+                                <label>Revisor (opcional · forma)</label>
+                                <select id="docRevisor" data-first-label="Sin revisor — va directo a aprobación"></select>
                             </div>
                         </div>
                         <div class="form-row">
                             <div>
-                                <label>Revisor</label>
-                                <select id="docRevisor"><option value="">-- Seleccionar --</option></select>
+                                <label>Aprobador (fondo)</label>
+                                <select id="docAprobador" data-first-label="-- Seleccionar --"></select>
                             </div>
                             <div>
-                                <label>Aprobador</label>
-                                <select id="docAprobador"><option value="">-- Seleccionar --</option></select>
+                                <label>Estado</label>
+                                <input type="text" id="docEstadoInfo" value="Borrador" disabled>
                             </div>
                         </div>
                         <div class="form-row">
@@ -1091,15 +1101,12 @@
                                 <label>Publicado</label>
                                 <input type="date" id="docPublicado">
                             </div>
-                            <div>
-                                <label>Estado</label>
-                                <input type="text" id="docEstadoInfo" value="Borrador" disabled>
-                            </div>
+                            <div></div>
                         </div>
-                        <p class="wf-hint">El estado avanza solo con el flujo de aprobación (abre el documento desde la lista). La fecha de publicación se completa al publicar.</p>
+                        <p class="wf-hint">El aprobador se sugiere según el área. Revisor y aprobador deben ser distintos del elaborador. El estado avanza solo con el flujo de aprobación (abre el documento desde la lista); la fecha de publicación se completa al publicar.</p>
                         <div class="form-row full">
                             <div>
-                                <label>Link Word</label>
+                                <label>Link PDF (versión aprobada)</label>
                                 <input type="url" id="docLink" placeholder="https://...">
                             </div>
                         </div>
@@ -1161,6 +1168,7 @@
                         </select>
                         <select id="filterTipo" onchange="applyFilters()" data-catalog-filter="tipo" data-all-label="Todos los tipos"></select>
                         <select id="filterRepositorio" onchange="applyFilters()" data-catalog-filter="repositorio" data-all-label="Todos los repositorios"></select>
+                        <select id="filterArea" onchange="applyFilters()" data-catalog-filter="area" data-all-label="Todas las áreas"></select>
                         <button class="btn-clear" onclick="clearFilters()">✕ Limpiar</button>
                         <span id="filterCount" style="font-size:12px; color:#999;"></span>
                     </div>
@@ -1255,6 +1263,7 @@
             <div class="tab-content" id="catalogos-tab">
                 <p class="wf-hint">Valores disponibles al crear documentos. Desactivar oculta el valor en documentos nuevos sin afectar a los existentes; renombrar actualiza también los documentos que lo usan.</p>
                 <div class="catalog-grid">
+                    <div class="list-panel" data-catalog-admin="area"></div>
                     <div class="list-panel" data-catalog-admin="tipo"></div>
                     <div class="list-panel" data-catalog-admin="alcance"></div>
                     <div class="list-panel" data-catalog-admin="repositorio"></div>
@@ -1316,7 +1325,7 @@
                                 <label>Rol</label>
                                 <select id="newUserRole" required>
                                     <option value="viewer">Viewer — solo lectura</option>
-                                    <option value="aprobador">Aprobador — revisa y aprueba</option>
+                                    <option value="aprobador">Revisor/Aprobador — revisa y aprueba</option>
                                     <option value="owner">Owner — acceso completo</option>
                                 </select>
                             </div>
@@ -1375,6 +1384,9 @@
         // Etapas del flujo (diagrama BPMN "Proceso de elaboración de material")
         const WF_STEPS = ['Borrador', 'En revisión', 'En aprobación', 'Aprobado', 'Publicado'];
 
+        // En BD el rol sigue llamándose 'aprobador'; en pantalla se muestra como Revisor/Aprobador
+        const ROLE_LABELS = { owner: 'Owner', aprobador: 'Revisor/Aprobador', viewer: 'Viewer' };
+
         // ─── INIT ─────────────────────────────────────────────────────────────
         async function init() {
             supabaseClient.auth.onAuthStateChange(async (event, session) => {
@@ -1390,8 +1402,8 @@
                             return;
                         }
                         applyRoleUI(true);
-                        await loadCatalog();
                         if (currentUserRole === 'owner') await loadStaffUsers();
+                        await loadCatalog();
                         await loadDocuments();
                         if (currentUserRole === 'owner') await loadAudit();
                     }
@@ -1490,7 +1502,7 @@
 
             document.getElementById('userEmailDisplay').textContent = currentUser.email;
             const badge = document.getElementById('userRoleDisplay');
-            badge.textContent = currentUserRole.toUpperCase();
+            badge.textContent = ROLE_LABELS[currentUserRole].toUpperCase();
             badge.className = `role-badge ${currentUserRole}`;
 
             // Solo cambiar de tab en el primer login, no en refrescos de token
@@ -1548,10 +1560,11 @@
             return `<span class="status-badge status-${cls}">${escapeHtml(estado || '-')}</span>`;
         }
 
-        // Días desde la publicación; null si aún no se publica
+        // Días desde la última revisión periódica (o desde la publicación); null si aún no se publica
         function diasDesdePublicacion(doc) {
-            if (!doc.publicado) return null;
-            return Math.ceil((new Date() - new Date(doc.publicado)) / (1000 * 60 * 60 * 24));
+            const base = doc.ultima_revision || doc.publicado;
+            if (!base) return null;
+            return Math.ceil((new Date() - new Date(base)) / (1000 * 60 * 60 * 24));
         }
 
         function renderDocuments(filtered = null) {
@@ -1575,8 +1588,12 @@
                     ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" rel="noopener noreferrer" style="color: #F32121; text-decoration: none;" onclick="event.stopPropagation()">Abrir</a>`
                     : '-';
 
-                const renovarBtn = (isOwner && diasDesde > 365)
-                    ? `<button class="btn-renovar btn-icon" title="Renovar mantención a hoy" onclick="event.stopPropagation(); renovarDoc('${doc.id}')">🔄 Renovar</button>`
+                const renovarBtn = (isOwner && diasDesde > 365 && doc.estado === 'Publicado')
+                    ? `<button class="btn-renovar btn-icon" title="Registrar revisión periódica" onclick="event.stopPropagation(); renovarDoc('${doc.id}')">🔁 Revisar</button>`
+                    : '';
+                // Solo borradores se eliminan; el resto se archiva (la BD además exige que no tenga historial)
+                const deleteBtn = doc.estado === 'Borrador'
+                    ? `<button class="btn-danger btn-icon" title="Eliminar borrador" onclick="event.stopPropagation(); deleteDocument('${doc.id}')">🗑️</button>`
                     : '';
 
                 const accionesHtml = isOwner ? `
@@ -1584,7 +1601,7 @@
                         <div class="actions">
                             ${renovarBtn}
                             <button class="btn-secondary btn-icon" onclick="event.stopPropagation(); editDocument('${doc.id}')">✏️</button>
-                            <button class="btn-danger btn-icon" onclick="event.stopPropagation(); deleteDocument('${doc.id}')">🗑️</button>
+                            ${deleteBtn}
                         </div>
                     </td>` : '';
 
@@ -1676,6 +1693,7 @@
             const estado = document.getElementById('filterEstado').value;
             const tipo   = document.getElementById('filterTipo').value;
             const repo   = document.getElementById('filterRepositorio').value;
+            const area   = document.getElementById('filterArea').value;
 
             const filtered = documents.filter(doc => {
                 const matchSearch = !search ||
@@ -1684,11 +1702,12 @@
                 const matchEstado = !estado || doc.estado === estado;
                 const matchTipo   = !tipo   || doc.tipo === tipo;
                 const matchRepo   = !repo   || doc.repositorio === repo;
-                return matchSearch && matchEstado && matchTipo && matchRepo;
+                const matchArea   = !area   || doc.area === area;
+                return matchSearch && matchEstado && matchTipo && matchRepo && matchArea;
             });
 
             const countEl = document.getElementById('filterCount');
-            if (search || estado || tipo || repo) {
+            if (search || estado || tipo || repo || area) {
                 countEl.textContent = `${filtered.length} de ${documents.length} documentos`;
             } else {
                 countEl.textContent = '';
@@ -1702,6 +1721,7 @@
             document.getElementById('filterEstado').value = '';
             document.getElementById('filterTipo').value = '';
             document.getElementById('filterRepositorio').value = '';
+            document.getElementById('filterArea').value = '';
             document.getElementById('filterCount').textContent = '';
             renderDocuments();
         }
@@ -1754,12 +1774,16 @@
                 </div>
                 <hr class="modal-divider">
                 <div class="modal-field">
+                    <span class="modal-label">Área solicitante</span>
+                    <span class="modal-value">${escapeHtml(doc.area || '-')}</span>
+                </div>
+                <div class="modal-field">
                     <span class="modal-label">Elaborador</span>
                     <span class="modal-value">${escapeHtml(doc.elaborador || '-')}</span>
                 </div>
                 <div class="modal-field">
                     <span class="modal-label">Revisor</span>
-                    <span class="modal-value">${escapeHtml(doc.revisor || '-')}</span>
+                    <span class="modal-value">${escapeHtml(doc.revisor || 'Sin revisor')}</span>
                 </div>
                 <div class="modal-field">
                     <span class="modal-label">Aprobador</span>
@@ -1780,33 +1804,54 @@
         }
 
         // ─── FLUJO DE APROBACIÓN ──────────────────────────────────────────────
+        // Acciones que exigen comentario, con el mensaje que se muestra si falta
+        const WF_COMMENT_REQUIRED = {
+            observar:           'Escribe las observaciones antes de devolver el documento',
+            carga_historica:    'Indica en el comentario quién y cuándo aprobó el documento',
+            aprobar_owner:      'Escribe la justificación de la aprobación por excepción',
+            nueva_version:      'Escribe el motivo del cambio en el comentario',
+            revision_periodica: 'Escribe la conclusión de la revisión (ej: vigente sin cambios)',
+            archivar:           'Indica el motivo y confirma que se retiró del repositorio',
+            obsoleto:           'Indica el motivo y confirma que se retiró del repositorio'
+        };
+
         // Acciones disponibles para el usuario actual. Espejo de doc_transition() en Supabase,
         // que es quien realmente valida (esto solo decide qué botones mostrar).
         function getWorkflowActions(doc) {
             const me      = currentUser?.id;
             const isOwner = currentUserRole === 'owner';
             const acts    = [];
+            const enFlujo = ['En revisión', 'En aprobación'].includes(doc.estado);
 
             if (doc.estado === 'En revisión' && doc.revisor_id === me) {
                 acts.push({ action: 'aprobar_revision', label: '✓ Aprobar revisión', cls: 'btn-primary' });
-                acts.push({ action: 'observar', label: '↩ Observar', cls: 'btn-danger', needsComment: true });
             }
-            if (doc.estado === 'En aprobación' && doc.aprobador_id === me) {
+            if (doc.estado === 'En aprobación' && doc.aprobador_id === me && doc.elaborador_id !== me) {
                 acts.push({ action: 'aprobar', label: '✓ Aprobar documento', cls: 'btn-primary' });
-                acts.push({ action: 'observar', label: '↩ Observar', cls: 'btn-danger', needsComment: true });
+            }
+            const asignado = (doc.estado === 'En revisión' && doc.revisor_id === me) ||
+                             (doc.estado === 'En aprobación' && doc.aprobador_id === me);
+            if (enFlujo && (asignado || isOwner)) {
+                acts.push({ action: 'observar', label: '↩ Observar', cls: 'btn-danger' });
             }
             if (isOwner) {
                 if (['Borrador', 'Observado'].includes(doc.estado)) {
-                    acts.push({ action: 'enviar_revision', label: '📤 Enviar a revisión', cls: 'btn-primary' });
+                    acts.push({ action: 'enviar_revision', label: doc.revisor_id ? '📤 Enviar a revisión' : '📤 Enviar a aprobación', cls: 'btn-primary' });
                 }
                 if (doc.estado === 'Aprobado') {
                     acts.push({ action: 'publicar', label: '🚀 Publicar', cls: 'btn-primary' });
+                }
+                if (['Borrador', 'Observado', 'En revisión', 'En aprobación'].includes(doc.estado)) {
+                    acts.push({ action: 'aprobar_owner', label: '⚡ Aprobar por excepción', cls: 'btn-secondary' });
+                }
+                if (doc.estado === 'Publicado') {
+                    acts.push({ action: 'revision_periodica', label: '🔁 Revisión periódica', cls: 'btn-secondary' });
                 }
                 if (['Aprobado', 'Publicado'].includes(doc.estado)) {
                     acts.push({ action: 'nueva_version', label: '🆕 Nueva versión', cls: 'btn-secondary' });
                 }
                 if (doc.estado === 'Borrador') {
-                    acts.push({ action: 'carga_historica', label: '📥 Carga histórica', cls: 'btn-secondary', needsComment: true });
+                    acts.push({ action: 'carga_historica', label: '📥 Carga histórica', cls: 'btn-secondary' });
                 }
                 if (!['Archivado', 'Obsoleto'].includes(doc.estado)) {
                     acts.push({ action: 'archivar', label: 'Archivar', cls: 'btn-secondary' });
@@ -1818,14 +1863,22 @@
 
         function workflowHint(doc) {
             const me = currentUser?.id;
-            if (doc.estado === 'En revisión' && doc.revisor_id === me)     return 'Eres el revisor. Abre el documento, revísalo y decide.';
-            if (doc.estado === 'En aprobación' && doc.aprobador_id === me) return 'Eres el aprobador. La revisión ya fue aprobada.';
+            if (doc.estado === 'En revisión' && doc.revisor_id === me) return 'Eres el revisor. Abre el PDF, revísalo y decide.';
+            if (doc.estado === 'En aprobación' && doc.aprobador_id === me) {
+                return doc.elaborador_id === me
+                    ? 'Elaboraste este documento: no puedes aprobarlo. Un owner puede aprobarlo por excepción.'
+                    : 'Eres el aprobador. Valida que el contenido sea correcto y aplicable.';
+            }
             if (currentUserRole !== 'owner') return '';
             const hints = {
-                'Borrador':  'Completa revisor y aprobador (✏️ Editar) y envía a revisión. "Carga histórica" es solo para documentos ya aprobados fuera de la app.',
-                'Observado': 'Corrige según las observaciones y vuelve a enviar a revisión.',
-                'Aprobado':  'Registra metadatos y repositorio (✏️ Editar) y publica.',
-                'Publicado': 'Para modificar el contenido, crea una nueva versión: vuelve a pasar por revisión y aprobación.'
+                'Borrador':      'Asigna aprobador y, si aplica, revisor (✏️ Editar) y envía. Sin revisor va directo a aprobación. "Carga histórica" es solo para documentos ya aprobados fuera de la app.',
+                'Observado':     'Corrige según las observaciones y vuelve a enviar.',
+                'En revisión':   'Esperando al revisor. Si es necesario, puedes aprobar por excepción (queda registrado con tu justificación).',
+                'En aprobación': 'Esperando al aprobador. Si es necesario, puedes aprobar por excepción (queda registrado con tu justificación).',
+                'Aprobado':      'Registra el link al PDF aprobado y el repositorio (✏️ Editar) y publica.',
+                'Publicado':     'Revisión periódica: confirma que sigue vigente. Para cambiar el contenido, crea una nueva versión (vuelve a aprobación).',
+                'Archivado':     'Documento fuera de uso. Su historial y versiones se conservan como registro.',
+                'Obsoleto':      'Documento fuera de uso. Su historial y versiones se conservan como registro.'
             };
             return hints[doc.estado] || '';
         }
@@ -1839,23 +1892,39 @@
             }).join('<span style="color:#ccc;">›</span>');
 
             const acts = getWorkflowActions(doc);
-            const needsComment = acts.some(a => a.needsComment);
+            const obligatorias = acts.filter(a => WF_COMMENT_REQUIRED[a.action]).map(a => WF_ACTION_LABELS[a.action]);
             const hint = workflowHint(doc);
+            const placeholder = obligatorias.length
+                ? 'Comentario (obligatorio para: ' + obligatorias.join(', ') + ')'
+                : 'Comentario (opcional)';
             const actionsHtml = acts.length ? `
                 <div class="wf-actions">
                     ${hint ? `<p class="wf-hint">${escapeHtml(hint)}</p>` : ''}
-                    <textarea id="wfComment" rows="2" placeholder="${needsComment ? 'Comentario (obligatorio para observar o carga histórica)' : 'Comentario (opcional)'}"></textarea>
+                    <textarea id="wfComment" rows="2" placeholder="${escapeHtml(placeholder)}"></textarea>
                     <div class="actions">
                         ${acts.map(a => `<button class="${a.cls}" onclick="docTransition('${doc.id}', '${a.action}')">${a.label}</button>`).join('')}
                     </div>
                 </div>` : (hint ? `<p class="wf-hint">${escapeHtml(hint)}</p>` : '');
 
+            const verVersiones = ['owner', 'aprobador'].includes(currentUserRole);
+            const motivoHtml = (doc.motivo_cambio && !['Publicado', 'Archivado', 'Obsoleto'].includes(doc.estado))
+                ? `<p class="wf-hint" style="margin-top:12px;"><strong>Motivo de esta versión:</strong> ${escapeHtml(doc.motivo_cambio)}</p>`
+                : '';
+            const versionesHtml = verVersiones
+                ? `<h4 style="margin-top:18px;">Versiones publicadas</h4>
+                   <div id="wfVersions"><small style="color:#999;">Cargando...</small></div>`
+                : '';
+
             panel.innerHTML = `
                 <h4>Flujo de aprobación</h4>
                 <div class="wf-steps">${steps}${['Observado', 'Archivado', 'Obsoleto'].includes(doc.estado) ? ' ' + estadoBadge(doc.estado) : ''}</div>
                 ${actionsHtml}
+                ${motivoHtml}
+                ${versionesHtml}
                 <h4 style="margin-top:18px;">Historial</h4>
                 <div id="wfHistory"><small style="color:#999;">Cargando...</small></div>`;
+
+            if (verVersiones) renderVersions(doc);
 
             const { data, error } = await supabaseClient
                 .from('document_approvals')
@@ -1869,30 +1938,62 @@
                 histEl.innerHTML = '<small style="color:#999;">Sin movimientos registrados</small>';
                 return;
             }
-            histEl.innerHTML = data.map(h => {
-                const d = new Date(h.created_at);
-                const when = d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' })
-                           + ' ' + d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
-                return `
+            histEl.innerHTML = data.map(h => `
                     <div class="wf-history-item">
                         <strong>${escapeHtml(WF_ACTION_LABELS[h.action] || h.action)}</strong>
                         → ${estadoBadge(h.to_estado)} <small>v${escapeHtml(h.version || '-')}</small><br>
-                        <span class="when">${when} · ${escapeHtml(h.user_email || '')}</span>
+                        <span class="when">${formatFechaHora(h.created_at)} · ${escapeHtml(h.user_email || '')}</span>
                         ${h.comment ? `<div class="comment">${escapeHtml(h.comment)}</div>` : ''}
+                    </div>`).join('');
+        }
+
+        // Versiones publicadas: evidencia de control de cambios (ISO 9001 · 7.5.3)
+        async function renderVersions(doc) {
+            const { data, error } = await supabaseClient
+                .from('document_versions')
+                .select('version, link, publicado, aprobado_por, motivo_cambio, published_email')
+                .eq('document_id', doc.id)
+                .order('created_at', { ascending: false });
+
+            const el = document.getElementById('wfVersions');
+            if (!el) return;
+            if (error || !data?.length) {
+                el.innerHTML = '<small style="color:#999;">Aún no tiene versiones publicadas</small>';
+                return;
+            }
+            el.innerHTML = data.map((v, i) => {
+                const vigente = i === 0 && doc.estado === 'Publicado';
+                const link = (v.link && v.link.startsWith('http'))
+                    ? `<a href="${escapeHtml(v.link)}" target="_blank" rel="noopener noreferrer" style="color:#F32121;">PDF</a>`
+                    : '';
+                return `
+                    <div class="wf-history-item">
+                        <strong>v${escapeHtml(v.version)}</strong> ${vigente ? estadoBadge('Publicado') : '<small style="color:#999;">(histórica)</small>'}
+                        · ${escapeHtml(v.publicado)} ${link}<br>
+                        <span class="when">Aprobó: ${escapeHtml(v.aprobado_por || '-')} · Publicó: ${escapeHtml(v.published_email || '-')}</span>
+                        ${v.motivo_cambio ? `<div class="comment">${escapeHtml(v.motivo_cambio)}</div>` : ''}
                     </div>`;
             }).join('');
         }
 
+        function formatFechaHora(iso) {
+            const d = new Date(iso);
+            return d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' })
+                 + ' ' + d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+        }
+
         const WF_ACTION_LABELS = {
-            enviar_revision:  'Envió a revisión',
-            aprobar_revision: 'Aprobó la revisión',
-            observar:         'Observó',
-            aprobar:          'Aprobó',
-            publicar:         'Publicó',
-            carga_historica:  'Carga histórica',
-            nueva_version:    'Nueva versión',
-            archivar:         'Archivó',
-            obsoleto:         'Marcó obsoleto'
+            enviar_revision:    'Envió al flujo',
+            aprobar_revision:   'Aprobó la revisión',
+            observar:           'Observó',
+            aprobar:            'Aprobó',
+            aprobar_owner:      'Aprobó por excepción (owner)',
+            publicar:           'Publicó',
+            carga_historica:    'Carga histórica',
+            nueva_version:      'Nueva versión',
+            revision_periodica: 'Revisión periódica',
+            archivar:           'Archivó',
+            obsoleto:           'Marcó obsoleto'
         };
 
         async function docTransition(docId, action) {
@@ -1900,16 +2001,13 @@
             const comment = document.getElementById('wfComment')?.value.trim() || '';
             let version   = null;
 
-            if (action === 'observar' && !comment) {
-                showMessage('Escribe las observaciones antes de devolver el documento', 'error');
-                return;
-            }
-            if (action === 'carga_historica' && !comment) {
-                showMessage('Indica en el comentario quién y cuándo aprobó el documento', 'error');
+            if (WF_COMMENT_REQUIRED[action] && !comment) {
+                showMessage(WF_COMMENT_REQUIRED[action], 'error');
+                document.getElementById('wfComment')?.focus();
                 return;
             }
             if (action === 'nueva_version') {
-                version = prompt(`Versión actual: ${doc?.version || '-'}\nNueva versión:`);
+                version = prompt(`Versión actual: ${doc?.version || '-'}\nNueva versión:`)?.trim();
                 if (!version) return;
             } else if (!confirm(`¿Confirmas "${WF_ACTION_LABELS[action]}" para "${doc?.name}"?`)) {
                 return;
@@ -1940,7 +2038,7 @@
                 if (doc.estado === 'En revisión' && doc.revisor_id === me)     return { doc, tarea: 'Revisar' };
                 if (doc.estado === 'En aprobación' && doc.aprobador_id === me) return { doc, tarea: 'Aprobar' };
                 if (isOwner && doc.estado === 'Observado') return { doc, tarea: 'Corregir observaciones y reenviar' };
-                if (isOwner && doc.estado === 'Aprobado')  return { doc, tarea: 'Registrar metadatos y publicar' };
+                if (isOwner && doc.estado === 'Aprobado')  return { doc, tarea: 'Registrar link PDF y publicar' };
                 return null;
             }).filter(Boolean);
         }
@@ -1965,9 +2063,10 @@
         }
 
         // ─── CATÁLOGOS (Tipo, Alcance, Repositorio) ───────────────────────────
-        const CATALOG_LABELS = { tipo: 'Tipo', alcance: 'Alcance', repositorio: 'Repositorio' };
+        const CATALOG_LABELS = { area: 'Área solicitante', tipo: 'Tipo', alcance: 'Alcance', repositorio: 'Repositorio' };
         // Respaldo si la tabla catalog_options aún no existe
         const CATALOG_DEFAULTS = {
+            area:        ['Data Ops', 'Soporte', 'Extract', 'Proyectos', 'Comunicaciones y Administración'],
             tipo:        ['Manual', 'Procedimiento', 'Capacitación', 'QRG', 'Video'],
             alcance:     ['Contratista', 'Empleados', 'Transversal', 'Thinking'],
             repositorio: ['Contract Support', 'PMG Center', 'Reportabilidad HSS', 'Rutinas HSS', 'Contract Data Center']
@@ -1977,7 +2076,7 @@
         async function loadCatalog() {
             const { data, error } = await supabaseClient
                 .from('catalog_options')
-                .select('id, category, value, sort_order, active')
+                .select('id, category, value, sort_order, active, default_aprobador_id')
                 .order('sort_order')
                 .order('value');
             if (error) {
@@ -2021,6 +2120,38 @@
             sel.value = value;
         }
 
+        // Selector del aprobador por defecto de un área (solo perfiles owner / revisor-aprobador)
+        function areaAprobadorSelect(o) {
+            const opts = staffUsers.map(u =>
+                `<option value="${u.user_id}" ${u.user_id === o.default_aprobador_id ? 'selected' : ''}>${escapeHtml(u.email)}</option>`).join('');
+            return `
+                <div class="catalog-item" style="padding-top:0;">
+                    <small style="color:var(--muted); white-space:nowrap;">Aprobador:</small>
+                    <select style="padding:5px 8px; font-size:12px;" onchange="setAreaAprobador('${o.id}', this.value)">
+                        <option value="">-- Sin definir --</option>${opts}
+                    </select>
+                </div>`;
+        }
+
+        async function setAreaAprobador(id, userId) {
+            const item = catalogItem(id);
+            if (!item) return;
+            const { error } = await supabaseClient
+                .from('catalog_options')
+                .update({ default_aprobador_id: userId || null })
+                .eq('id', id);
+            if (error) { showMessage('❌ ' + error.message, 'error'); return; }
+            await afterCatalogChange(`✓ Aprobador de ${item.value} actualizado`);
+        }
+
+        // Al elegir área, sugiere su aprobador por defecto (si no es el elaborador)
+        function applyAreaDefaultAprobador() {
+            const area = document.getElementById('docArea').value;
+            const def  = catalog.find(o => o.category === 'area' && o.value === area)?.default_aprobador_id;
+            const elab = document.getElementById('docElaborador').value;
+            if (def && def !== elab) document.getElementById('docAprobador').value = def;
+        }
+
         function renderCatalogAdmin() {
             if (currentUserRole !== 'owner') return;
             document.querySelectorAll('[data-catalog-admin]').forEach(panel => {
@@ -2037,7 +2168,8 @@
                             <button class="btn-secondary" title="Renombrar" onclick="renameCatalogOption('${o.id}')">✏️</button>
                             <button class="btn-secondary" title="${o.active ? 'Desactivar' : 'Activar'}" onclick="toggleCatalogOption('${o.id}')">${o.active ? '⏸' : '▶'}</button>
                             <button class="btn-danger" title="Eliminar" onclick="deleteCatalogOption('${o.id}')">🗑️</button>
-                        </div>`).join('') || '<div class="catalog-item"><small style="color:#999;">Sin valores</small></div>'}
+                        </div>
+                        ${cat === 'area' ? areaAprobadorSelect(o) : ''}`).join('') || '<div class="catalog-item"><small style="color:#999;">Sin valores</small></div>'}
                     <form class="catalog-add" onsubmit="addCatalogOption(event, '${cat}')">
                         <input type="text" required placeholder="Nuevo valor...">
                         <button type="submit" class="btn-secondary">+ Agregar</button>
@@ -2155,14 +2287,19 @@
                 .order('email');
             staffUsers = error ? [] : (data || []);
 
-            const options = '<option value="">-- Seleccionar --</option>' +
-                staffUsers.map(u => `<option value="${u.user_id}">${escapeHtml(u.email)}${u.role === 'owner' ? ' (owner)' : ''}</option>`).join('');
-            ['docRevisor', 'docAprobador'].forEach(id => {
+            const options = staffUsers
+                .map(u => `<option value="${u.user_id}">${escapeHtml(u.email)}${u.role === 'owner' ? ' (owner)' : ''}</option>`).join('');
+            ['docElaborador', 'docRevisor', 'docAprobador'].forEach(id => {
                 const sel = document.getElementById(id);
                 const prev = sel.value;
-                sel.innerHTML = options;
+                sel.innerHTML = `<option value="">${escapeHtml(sel.dataset.firstLabel)}</option>` + options;
                 sel.value = prev;
             });
+            // Documento nuevo: el elaborador por defecto es quien lo registra
+            if (!editingDocId && !document.getElementById('docElaborador').value) {
+                document.getElementById('docElaborador').value = currentUser?.id || '';
+            }
+            renderCatalogAdmin(); // refresca los selectores de aprobador por área
         }
 
         function staffEmail(userId) {
@@ -2188,7 +2325,7 @@
                 <tr>
                     <td><strong>${escapeHtml(doc.name)}</strong></td>
                     <td><small>${escapeHtml(doc.codigo || '')}</small></td>
-                    <td><small>${escapeHtml(doc.elaborador || '-')}</small></td>
+                    <td><small>${escapeHtml(staffEmail(doc.elaborador_id) || doc.elaborador || '-')}</small></td>
                     <td><small>${escapeHtml(staffEmail(doc.revisor_id) || doc.revisor || '-')}</small></td>
                     <td><small>${escapeHtml(staffEmail(doc.aprobador_id) || doc.aprobador || '-')}</small></td>
                     <td>${estadoBadge(doc.estado)}</td>
@@ -2206,6 +2343,18 @@
             const aprobadorId = document.getElementById('docAprobador').value || null;
             // Documentos antiguos tienen revisor/aprobador como texto libre: se conserva si no se asigna usuario
             const prevDoc     = editingDocId ? documents.find(d => d.id === editingDocId) : null;
+            const elaboradorId = document.getElementById('docElaborador').value || null;
+
+            // Segregación de funciones (la BD también lo valida)
+            if (!elaboradorId && !prevDoc?.elaborador) {
+                showMessage('Selecciona el elaborador', 'error');
+                return;
+            }
+            if (elaboradorId && (revisorId === elaboradorId || aprobadorId === elaboradorId)) {
+                showMessage('Revisor y aprobador deben ser distintos del elaborador', 'error');
+                return;
+            }
+
             const data = {
                 name:         document.getElementById('docName').value,
                 codigo:       document.getElementById('docCodigo').value,
@@ -2214,7 +2363,9 @@
                 repositorio:  document.getElementById('docRepositorio').value,
                 publicado:    document.getElementById('docPublicado').value || null,
                 version:      document.getElementById('docVersion').value,
-                elaborador:   document.getElementById('docElaborador').value,
+                area:          document.getElementById('docArea').value,
+                elaborador_id: elaboradorId,
+                elaborador:    elaboradorId ? staffEmail(elaboradorId) : (prevDoc?.elaborador || ''),
                 revisor_id:   revisorId,
                 aprobador_id: aprobadorId,
                 revisor:      revisorId   ? staffEmail(revisorId)   : (prevDoc?.revisor || ''),
@@ -2269,14 +2420,19 @@
             ensureOption(document.getElementById('docTipo'), doc.tipo);
             ensureOption(document.getElementById('docAlcance'), doc.alcance);
             ensureOption(document.getElementById('docRepositorio'), doc.repositorio);
+            ensureOption(document.getElementById('docArea'), doc.area);
             document.getElementById('docEstadoInfo').value  = doc.estado || '';
             document.getElementById('docPublicado').value   = doc.publicado || '';
             document.getElementById('docVersion').value     = doc.version || '';
-            document.getElementById('docElaborador').value  = doc.elaborador || '';
+            document.getElementById('docElaborador').value  = doc.elaborador_id || '';
             document.getElementById('docRevisor').value     = doc.revisor_id || '';
             document.getElementById('docAprobador').value   = doc.aprobador_id || '';
             document.getElementById('docLink').value        = doc.data?.link || '';
             document.getElementById('docNotes').value       = doc.data?.notes || '';
+            // Publicado: PDF y versión solo cambian con "Nueva versión" (la BD también lo bloquea)
+            const publicado = doc.estado === 'Publicado';
+            document.getElementById('docLink').disabled    = publicado;
+            document.getElementById('docVersion').disabled = publicado;
             document.getElementById('btnCancel').style.display = 'inline-block';
 
             switchTab('crear', document.getElementById('tab-crear'));
@@ -2285,11 +2441,16 @@
 
         async function deleteDocument(id) {
             if (currentUserRole !== 'owner') return;
-            if (!confirm('¿Eliminar documento? Esta acción no se puede deshacer.')) return;
+            if (!confirm('¿Eliminar borrador? Esta acción no se puede deshacer.')) return;
 
             try {
-                const { error } = await supabaseClient.from('documents').delete().eq('id', id);
+                const { data: borrados, error } = await supabaseClient
+                    .from('documents').delete().eq('id', id).select('id');
                 if (error) throw error;
+                if (!borrados?.length) {
+                    showMessage('Solo se eliminan borradores que nunca entraron al flujo. Archívalo para conservar su historial.', 'error');
+                    return;
+                }
                 await logAudit(id, 'deleted', {});
                 showMessage('✓ Documento eliminado', 'success');
             } catch (err) {
@@ -2308,6 +2469,12 @@
             editingDocId = null;
             const ei = document.getElementById('docEstadoInfo');
             if (ei) ei.value = 'Borrador';
+            const el = document.getElementById('docElaborador');
+            if (el && currentUser) el.value = currentUser.id;
+            ['docLink', 'docVersion'].forEach(id => {
+                const inp = document.getElementById(id);
+                if (inp) inp.disabled = false;
+            });
             const ft = document.getElementById('formTitle');
             if (ft) ft.textContent = 'Nuevo documento';
             const bc = document.getElementById('btnCancel');
@@ -2318,22 +2485,24 @@
             if (currentUserRole !== 'owner') return;
             const doc = documents.find(d => d.id === id);
             if (!doc) return;
-            if (!confirm(`¿Renovar mantención de "${doc.name}"?\nSe actualizará la fecha Publicado a hoy.`)) return;
+            const conclusion = prompt(
+                `Revisión periódica de "${doc.name}" (v${doc.version || '-'})\n\n` +
+                'Conclusión de la revisión (ej: "Vigente sin cambios").\n' +
+                'Si requiere cambios, cancela y usa "Nueva versión".')?.trim();
+            if (!conclusion) return;
 
-            const hoy = new Date().toISOString().split('T')[0];
-            try {
-                const { error } = await supabaseClient
-                    .from('documents')
-                    .update({ publicado: hoy, updated_at: new Date().toISOString() })
-                    .eq('id', id);
-                if (error) throw error;
-                await logAudit(id, 'renovated', { name: doc.name, publicado: hoy });
-                showMessage(`✓ Mantención renovada para "${doc.name}"`, 'success');
-                await loadDocuments();
-                await loadAudit();
-            } catch (err) {
-                showMessage('❌ Error al renovar: ' + err.message, 'error');
+            showLoading('Registrando revisión...');
+            const { error } = await supabaseClient.rpc('doc_transition', {
+                p_doc_id: id, p_action: 'revision_periodica', p_comment: conclusion, p_version: null
+            });
+            hideLoading();
+            if (error) {
+                showMessage('❌ ' + error.message, 'error');
+                return;
             }
+            showMessage(`✓ Revisión periódica registrada para "${doc.name}"`, 'success');
+            await loadDocuments();
+            await loadAudit();
         }
 
         // ─── AUDITORÍA ────────────────────────────────────────────────────────
@@ -2479,10 +2648,10 @@
             tbody.innerHTML = users.map(u => {
                 const isMe = u.user_id === currentUser?.id;
                 const fecha = u.created_at ? new Date(u.created_at).toLocaleDateString('es-CL') : '-';
-                const roleBadge = `<span class="role-badge ${escapeHtml(u.role)}">${escapeHtml((u.role || '').toUpperCase())}</span>`;
+                const roleBadge = `<span class="role-badge ${escapeHtml(u.role)}">${escapeHtml((ROLE_LABELS[u.role] || u.role || '').toUpperCase())}</span>`;
                 const roleSelect = `
                     <select onchange="changeUserRole('${u.user_id}', this.value, this)" style="padding:5px 8px; font-size:12px;">
-                        ${['viewer', 'aprobador', 'owner'].map(r => `<option value="${r}" ${r === u.role ? 'selected' : ''}>${r}</option>`).join('')}
+                        ${['viewer', 'aprobador', 'owner'].map(r => `<option value="${r}" ${r === u.role ? 'selected' : ''}>${ROLE_LABELS[r]}</option>`).join('')}
                     </select>`;
 
                 return `
