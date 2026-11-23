@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control Documental - Thinking SpA</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Librería servida desde la propia app: Edge bloquea el almacenamiento a scripts de cdn.jsdelivr.net y no guardaba la sesión -->
+    <!-- Librería servida desde la propia app: Edge bloquea el almacenamiento a scripts de cdn.jsdelivr.net -->
     <script src="vendor/supabase-js-2.45.4.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -58,12 +58,30 @@
         .app { display: none; min-height: 100vh; }
         .app.active { display: block; }
         header { background: var(--navy); color: var(--white); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-        header .brand { display: flex; flex-direction: column; }
+        header .brand { display: flex; flex-direction: column; cursor: pointer; }
         header .brand strong { font-size: 16px; }
         header .brand span { font-size: 12px; opacity: .7; }
         header .user { display: flex; align-items: center; gap: 10px; font-size: 13px; }
 
         main { max-width: 1280px; margin: 0 auto; padding: 24px; }
+
+        /* ─── INICIO: ELEGIR MANUALES O QRG ─── */
+        .inicio h2 { font-size: 20px; color: var(--blue); margin: 12px 0 4px; }
+        .inicio p.sub { color: var(--muted); margin-bottom: 20px; }
+        .opciones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .opcion { background: var(--white); border-radius: 16px; box-shadow: var(--shadow); padding: 28px; border: 2px solid transparent; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+        .opcion:hover { border-color: var(--red); }
+        .opcion .tipo { font-size: 12px; font-weight: 700; color: var(--red); text-transform: uppercase; letter-spacing: .08em; }
+        .opcion .cantidad { font-size: 40px; font-weight: 800; color: var(--blue); margin: 6px 0; }
+        .opcion .detalle { color: var(--muted); line-height: 1.5; }
+        .opcion .alerta { margin-top: 12px; }
+
+        /* ─── SELECTOR SUPERIOR ─── */
+        .barra { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+        .segmento { display: inline-flex; background: var(--white); border-radius: 10px; box-shadow: var(--shadow); padding: 4px; }
+        .segmento button { border: none; background: none; padding: 8px 18px; border-radius: 8px; font-weight: 600; color: var(--muted); }
+        .segmento button.active { background: var(--blue); color: var(--white); }
+        .volver { background: none; border: none; color: var(--blue); font-weight: 600; }
 
         /* ─── KPIs ─── */
         .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
@@ -83,6 +101,9 @@
         .card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 12px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        th.orden { cursor: pointer; user-select: none; }
+        th.orden:hover { color: var(--blue); }
+        th.orden .flecha { display: inline-block; width: 12px; color: var(--red); }
         td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
         tbody tr.fila { cursor: pointer; }
         tbody tr.fila:hover { background: #FAFBFD; }
@@ -90,6 +111,7 @@
         td.nombre { font-weight: 500; }
         td.version { font-weight: 700; white-space: nowrap; }
         td.fecha { white-space: nowrap; color: var(--muted); }
+        td.fecha.reciente { color: var(--text); font-weight: 600; }
         .vacio { text-align: center; padding: 40px; color: var(--muted); }
 
         .pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
@@ -124,6 +146,7 @@
         @media (max-width: 760px) {
             main { padding: 16px; }
             header { padding-left: 16px; padding-right: 16px; }
+            .opciones { grid-template-columns: 1fr; }
             .col-opcional { display: none; }
             .panel { padding: 20px 16px; }
             .panel .datos { grid-template-columns: 1fr; }
@@ -155,7 +178,7 @@
 <!-- ─── APP ─── -->
 <div class="app" id="app">
     <header>
-        <div class="brand">
+        <div class="brand" onclick="irInicio()" title="Volver al inicio">
             <strong>Control Documental</strong>
             <span>Manuales y QRG del Training Center</span>
         </div>
@@ -166,43 +189,58 @@
     </header>
 
     <main>
-        <div class="kpis" id="kpis"></div>
+        <!-- INICIO: elegir qué ver -->
+        <section class="inicio" id="inicio">
+            <h2>¿Qué quieres revisar?</h2>
+            <p class="sub" id="metaInicio">Cargando…</p>
+            <div class="opciones">
+                <button class="opcion" onclick="elegir('Manual')">
+                    <div class="tipo">Manuales</div>
+                    <div class="cantidad" id="cantManual">—</div>
+                    <div class="detalle">Manuales de usuario en Word, con su versión vigente y el historial de cambios.</div>
+                    <div class="alerta" id="alertaManual"></div>
+                </button>
+                <button class="opcion" onclick="elegir('QRG')">
+                    <div class="tipo">QRG</div>
+                    <div class="cantidad" id="cantQRG">—</div>
+                    <div class="detalle">Guías rápidas en PowerPoint, con su versión vigente y el historial de cambios.</div>
+                    <div class="alerta" id="alertaQRG"></div>
+                </button>
+            </div>
+        </section>
 
-        <div class="filtros">
-            <input type="search" id="fBuscar" placeholder="Buscar por código, nombre o cambio…" oninput="render()">
-            <select id="fTipo" onchange="render()">
-                <option value="">Tipo: todos</option>
-                <option>Manual</option>
-                <option>QRG</option>
-            </select>
-            <select id="fMarca" onchange="render()"><option value="">Marca: todas</option></select>
-            <select id="fEstado" onchange="render()">
-                <option value="">Estado: todos</option>
-                <option>Al día</option>
-                <option>Cambios pendientes</option>
-                <option>Por revisar</option>
-                <option value="__revision">Versión nueva en revisión</option>
-            </select>
-            <span class="meta-sync" id="metaSync"></span>
-        </div>
+        <!-- LISTADO de un tipo -->
+        <section id="listado" style="display:none;">
+            <div class="barra">
+                <button class="volver" onclick="irInicio()">← Inicio</button>
+                <div class="segmento">
+                    <button id="segManual" onclick="elegir('Manual')">Manuales</button>
+                    <button id="segQRG" onclick="elegir('QRG')">QRG</button>
+                </div>
+            </div>
 
-        <div class="card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Nombre</th>
-                        <th>Tipo</th>
-                        <th class="col-opcional">Marca</th>
-                        <th>Versión</th>
-                        <th class="col-opcional">Fecha</th>
-                        <th>Publicación</th>
-                        <th>Bóveda</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla"><tr><td colspan="8" class="vacio">Cargando…</td></tr></tbody>
-            </table>
-        </div>
+            <div class="kpis" id="kpis"></div>
+
+            <div class="filtros">
+                <input type="search" id="fBuscar" placeholder="Buscar por código, nombre o cambio…" oninput="render()">
+                <select id="fMarca" onchange="render()"><option value="">Marca: todas</option></select>
+                <select id="fEstado" onchange="render()">
+                    <option value="">Estado: todos</option>
+                    <option>Al día</option>
+                    <option>Cambios pendientes</option>
+                    <option>Por revisar</option>
+                    <option value="__revision">Versión nueva en revisión</option>
+                </select>
+                <span class="meta-sync" id="metaSync"></span>
+            </div>
+
+            <div class="card">
+                <table>
+                    <thead><tr id="cabecera"></tr></thead>
+                    <tbody id="tabla"><tr><td class="vacio">Cargando…</td></tr></tbody>
+                </table>
+            </div>
+        </section>
     </main>
 </div>
 
@@ -213,11 +251,12 @@
 
 <script>
     // ─── CONFIG ──────────────────────────────────────────────────────────
-    // Clave pública (anon). Los datos los protege Supabase: solo se entregan
+    // Clave pública (publishable). Los datos los protege Supabase: solo se entregan
     // a sesiones con correo @thinking.cl verificado (política es_thinking()).
     const SUPABASE_URL = 'https://kmrvvbbyekzuzimzahvd.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_ZphXuMK9lAQhw9q68k409w_DVrhuTJg';
     const DOMINIO = '@thinking.cl';
+    const ANTES = 'Antes de la bóveda';
 
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
         auth: { storage: window.localStorage, persistSession: true, autoRefreshToken: true }
@@ -225,14 +264,26 @@
 
     let materiales = [];
     let cargado = false;
+    let tipoActual = null;                       // 'Manual' | 'QRG'
+    let orden = { col: 'codigo', asc: true };
+
+    // Columnas de la tabla: clave de orden, título y cómo se muestra
+    const COLUMNAS = [
+        { k: 'codigo',      t: 'Código',        td: m => `<td class="codigo">${esc(m.codigo || '—')}</td>`, solo: 'Manual' },
+        { k: 'nombre',      t: 'Nombre',        td: m => `<td class="nombre">${esc(m.nombre)}</td>` },
+        { k: 'marca',       t: 'Marca',         td: m => `<td class="col-opcional">${esc(m.marca)}</td>`, cls: 'col-opcional' },
+        { k: 'version',     t: 'Versión',       td: m => `<td class="version">${esc(m.version)}${m.en_revision ? ' <span class="pill info">Nueva en revisión</span>' : ''}</td>` },
+        { k: 'publicado',   t: 'Publicado',     td: m => `<td class="fecha col-opcional">${m.publicado ? fecha(m.publicado) : ANTES}</td>`, cls: 'col-opcional' },
+        { k: 'ultimo',      t: 'Último cambio', td: m => `<td class="fecha${reciente(m.ultimo) ? ' reciente' : ''}">${fecha(m.ultimo)}</td>` },
+        { k: 'al_dia',      t: 'Bóveda',        td: m => `<td>${pillAlDia(m.al_dia)}</td>` },
+    ];
 
     // ─── SESIÓN ──────────────────────────────────────────────────────────
     function esThinking(email) { return (email || '').toLowerCase().endsWith(DOMINIO); }
 
     async function init() {
         // El callback no debe esperar otras llamadas a Supabase: mientras corre, la librería
-        // tiene tomada la sesión y una consulta adentro queda bloqueada (al recargar la página
-        // quedaba en «Cargando…»). Por eso las llamadas se difieren con setTimeout.
+        // tiene tomada la sesión y una consulta adentro queda bloqueada. Se difieren con setTimeout.
         sb.auth.onAuthStateChange((_event, session) => {
             const email = session?.user?.email;
             if (!email) { cargado = false; mostrarLogin(); return; }
@@ -283,37 +334,77 @@
         document.getElementById('app').classList.add('active');
     }
 
-    // ─── MATERIALES ──────────────────────────────────────────────────────
+    // ─── DATOS ───────────────────────────────────────────────────────────
     async function cargarMateriales() {
         // Si Supabase no responde, se avisa en vez de quedar en «Cargando…»
         const espera = new Promise(r => setTimeout(() => r({ error: { message: 'Supabase no respondió a tiempo. Recarga la página.' } }), 20000));
         const { data, error } = await Promise.race([sb.from('materiales').select('*'), espera]);
         if (error) {
             cargado = false;
-            document.getElementById('tabla').innerHTML =
-                `<tr><td colspan="8" class="vacio">No se pudieron cargar los materiales: ${esc(error.message)}</td></tr>`;
+            document.getElementById('metaInicio').textContent = 'No se pudieron cargar los materiales: ' + error.message;
             return;
         }
-        materiales = (data || []).sort((a, b) =>
-            (a.tipo === b.tipo ? 0 : a.tipo === 'Manual' ? -1 : 1) ||
-            (a.codigo || a.nombre).localeCompare(b.codigo || b.nombre, 'es'));
-
-        const marcas = [...new Set(materiales.map(m => m.marca).filter(Boolean))].sort();
-        document.getElementById('fMarca').innerHTML = '<option value="">Marca: todas</option>' +
-            marcas.map(m => `<option>${esc(m)}</option>`).join('');
+        // Publicado = fecha de la versión 1.0. Si la primera versión registrada no es la 1.0
+        // (p. ej. empieza en 1.1) o no tiene fecha, la publicación original es anterior a la bóveda.
+        // Último cambio = fecha de la versión vigente.
+        materiales = (data || []).map(m => {
+            const vs = m.versiones || [];
+            const primera = vs[vs.length - 1];
+            const esOriginal = primera && /^1\.0+$/.test(String(primera.version)) && primera.fecha;
+            return { ...m, publicado: esOriginal ? primera.fecha : null, ultimo: m.fecha_version };
+        });
 
         const sync = materiales.map(m => m.sincronizado).filter(Boolean).sort().pop();
         document.getElementById('metaSync').textContent = sync ? `Datos al ${fecha(sync)}` : '';
+        document.getElementById('metaInicio').textContent = sync ? `Datos actualizados al ${fecha(sync)}.` : '';
+        ['Manual', 'QRG'].forEach(t => {
+            const lista = materiales.filter(m => m.tipo === t);
+            document.getElementById('cant' + t).textContent = lista.length;
+            const pend = lista.filter(m => m.al_dia !== 'Al día').length;
+            document.getElementById('alerta' + t).innerHTML = pend
+                ? `<span class="pill bad">${pend} con cambios pendientes</span>` : '<span class="pill ok">Todos al día</span>';
+        });
+
+        // Si el usuario ya había elegido un tipo (p. ej. al recargar), vuelve a él
+        const guardado = leerPreferencia();
+        if (guardado) elegir(guardado);
+    }
+
+    // ─── NAVEGACIÓN ──────────────────────────────────────────────────────
+    function elegir(tipo) {
+        tipoActual = tipo;
+        guardarPreferencia(tipo);
+        orden = { col: tipo === 'Manual' ? 'codigo' : 'nombre', asc: true };
+        ['fBuscar', 'fMarca', 'fEstado'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('segManual').classList.toggle('active', tipo === 'Manual');
+        document.getElementById('segQRG').classList.toggle('active', tipo === 'QRG');
+        const marcas = [...new Set(delTipo().map(m => m.marca).filter(Boolean))].sort();
+        document.getElementById('fMarca').innerHTML = '<option value="">Marca: todas</option>' +
+            marcas.map(m => `<option>${esc(m)}</option>`).join('');
+        document.getElementById('inicio').style.display = 'none';
+        document.getElementById('listado').style.display = 'block';
         render();
     }
 
+    function irInicio() {
+        tipoActual = null;
+        guardarPreferencia(null);
+        document.getElementById('listado').style.display = 'none';
+        document.getElementById('inicio').style.display = 'block';
+    }
+
+    function guardarPreferencia(t) { try { t ? localStorage.setItem('cd_tipo', t) : localStorage.removeItem('cd_tipo'); } catch { /* sin almacenamiento */ } }
+    function leerPreferencia() { try { return localStorage.getItem('cd_tipo'); } catch { return null; } }
+
+    // ─── LISTADO ─────────────────────────────────────────────────────────
+    function delTipo() { return materiales.filter(m => m.tipo === tipoActual); }
+    function columnas() { return COLUMNAS.filter(c => !c.solo || c.solo === tipoActual); }
+
     function filtrados() {
         const q = document.getElementById('fBuscar').value.trim().toLowerCase();
-        const tipo = document.getElementById('fTipo').value;
         const marca = document.getElementById('fMarca').value;
         const estado = document.getElementById('fEstado').value;
-        return materiales.filter(m => {
-            if (tipo && m.tipo !== tipo) return false;
+        return delTipo().filter(m => {
             if (marca && m.marca !== marca) return false;
             if (estado === '__revision' && !m.en_revision) return false;
             if (estado && estado !== '__revision' && m.al_dia !== estado) return false;
@@ -323,33 +414,46 @@
         });
     }
 
+    // Valor para ordenar: versiones como números (1.10 > 1.9) y fechas vacías al final
+    function valorOrden(m, col) {
+        if (col === 'version') return String(m.version).split('.').map(n => n.padStart(4, '0')).join('.');
+        if (col === 'publicado' || col === 'ultimo') return m[col] || (orden.asc ? '9999' : '0000');
+        return String(m[col] || '').toLowerCase();
+    }
+
+    function ordenar(col) {
+        orden = { col, asc: orden.col === col ? !orden.asc : true };
+        render();
+    }
+
     function render() {
         renderKpis();
-        const lista = filtrados();
+        const cols = columnas();
+        document.getElementById('cabecera').innerHTML = cols.map(c => {
+            const flecha = orden.col === c.k ? (orden.asc ? '▲' : '▼') : '';
+            return `<th class="orden ${c.cls || ''}" onclick="ordenar('${c.k}')" title="Ordenar por ${c.t.toLowerCase()}">${c.t} <span class="flecha">${flecha}</span></th>`;
+        }).join('');
+
+        const lista = filtrados().sort((a, b) => {
+            const x = valorOrden(a, orden.col), y = valorOrden(b, orden.col);
+            return (x < y ? -1 : x > y ? 1 : 0) * (orden.asc ? 1 : -1);
+        });
         const tbody = document.getElementById('tabla');
         if (!lista.length) {
-            tbody.innerHTML = '<tr><td colspan="8" class="vacio">Ningún material coincide con los filtros.</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="${cols.length}" class="vacio">Ningún material coincide con los filtros.</td></tr>`;
             return;
         }
-        tbody.innerHTML = lista.map(m => `
-            <tr class="fila" onclick="abrirDetalle('${esc(m.id)}')">
-                <td class="codigo">${esc(m.codigo || 'QRG')}</td>
-                <td class="nombre">${esc(m.nombre)}</td>
-                <td>${esc(m.tipo)}</td>
-                <td class="col-opcional">${esc(m.marca)}</td>
-                <td class="version">${esc(m.version)}</td>
-                <td class="fecha col-opcional">${fecha(m.fecha_version)}</td>
-                <td>${pillPublicacion(m)}</td>
-                <td>${pillAlDia(m.al_dia)}</td>
-            </tr>`).join('');
+        tbody.innerHTML = lista.map(m => `<tr class="fila" onclick="abrirDetalle('${esc(m.id)}')">${cols.map(c => c.td(m)).join('')}</tr>`).join('');
     }
 
     function renderKpis() {
-        const n = f => materiales.filter(f).length;
+        const base = delTipo();
+        const n = f => base.filter(f).length;
+        const hace30 = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+        const nombre = tipoActual === 'Manual' ? 'Manuales' : 'QRG';
         const kpis = [
-            { valor: materiales.length, etiqueta: 'Materiales', accion: () => limpiarFiltros() },
-            { valor: n(m => m.tipo === 'Manual'), etiqueta: 'Manuales', accion: () => filtrar('fTipo', 'Manual') },
-            { valor: n(m => m.tipo === 'QRG'), etiqueta: 'QRG', accion: () => filtrar('fTipo', 'QRG') },
+            { valor: base.length, etiqueta: nombre, accion: () => limpiarFiltros() },
+            { valor: n(m => m.ultimo && m.ultimo >= hace30), etiqueta: 'Con cambios en los últimos 30 días', accion: () => { limpiarFiltros(false); orden = { col: 'ultimo', asc: false }; render(); } },
             { valor: n(m => m.al_dia === 'Cambios pendientes'), etiqueta: 'Con cambios pendientes', alerta: true, accion: () => filtrar('fEstado', 'Cambios pendientes') },
             { valor: n(m => m.en_revision), etiqueta: 'Versión nueva en revisión', accion: () => filtrar('fEstado', '__revision') },
         ];
@@ -366,13 +470,12 @@
 
     function filtrar(id, valor) { limpiarFiltros(false); document.getElementById(id).value = valor; render(); }
     function limpiarFiltros(volverARender = true) {
-        ['fBuscar', 'fTipo', 'fMarca', 'fEstado'].forEach(id => document.getElementById(id).value = '');
+        ['fBuscar', 'fMarca', 'fEstado'].forEach(id => document.getElementById(id).value = '');
         if (volverARender) render();
     }
 
-    function pillPublicacion(m) {
-        const base = m.publicacion === 'Publicado' ? '<span class="pill ok">Publicado</span>' : `<span class="pill warn">${esc(m.publicacion || 'Sin publicar')}</span>`;
-        return m.en_revision ? base + ' <span class="pill info">Nueva en revisión</span>' : base;
+    function reciente(iso) {
+        return iso && iso >= new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
     }
 
     function pillAlDia(valor) {
@@ -380,6 +483,7 @@
         return `<span class="pill ${clase}">${esc(valor || '—')}</span>`;
     }
 
+    // ─── DETALLE ─────────────────────────────────────────────────────────
     function abrirDetalle(id) {
         const m = materiales.find(x => x.id === id);
         if (!m) return;
@@ -391,17 +495,18 @@
             ${m.descripcion ? `<p class="desc">${esc(m.descripcion)}</p>` : ''}
             <div class="datos">
                 <div class="dato"><span>Versión vigente</span><strong>${esc(m.version)}</strong></div>
-                <div class="dato"><span>Fecha</span><strong>${fecha(m.fecha_version)}</strong></div>
-                <div class="dato"><span>Publicación</span><strong>${pillPublicacion(m)}</strong></div>
                 <div class="dato"><span>Bóveda</span><strong>${pillAlDia(m.al_dia)}</strong></div>
+                <div class="dato"><span>Publicado</span><strong>${m.publicado ? fecha(m.publicado) : ANTES}</strong></div>
+                <div class="dato"><span>Último cambio</span><strong>${fecha(m.ultimo)}</strong></div>
                 <div class="dato"><span>Marca</span><strong>${esc(m.marca || '—')}</strong></div>
                 <div class="dato"><span>Versiones registradas</span><strong>${versiones.length}</strong></div>
             </div>
+            ${m.en_revision ? '<p class="desc"><span class="pill info">Nueva en revisión</span> Hay una versión nueva esperando en «03. En Revisión».</p>' : ''}
             ${m.archivo ? `<div class="archivo">SharePoint · Version Editables / ${esc(m.archivo)}</div>` : ''}
             <h3>Historial de versiones</h3>
             ${versiones.length ? `<ul class="timeline">${versiones.map(v => `
                 <li>
-                    <span class="v">v${esc(v.version)}</span><span class="f">${fecha(v.fecha)}</span>
+                    <span class="v">v${esc(v.version)}</span><span class="f">${v.fecha ? fecha(v.fecha) : ANTES}</span>
                     <p>${esc(v.cambios)}</p>
                 </li>`).join('')}</ul>` : '<p class="desc">Sin historial registrado.</p>'}
         `;
