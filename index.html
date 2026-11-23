@@ -148,7 +148,33 @@
         .timeline .f { font-size: 12px; color: var(--muted); margin-left: 8px; }
         .timeline p { margin-top: 4px; line-height: 1.5; }
 
+        /* ─── CÓMO FUNCIONA ─── */
+        .btn-ayuda { background: none; color: var(--white); border: 1px solid rgba(255,255,255,.35); padding: 6px 12px; font-size: 12px; }
+        .btn-ayuda:hover { border-color: var(--white); }
+        .aviso-ayuda { margin-top: 16px; width: 100%; text-align: left; background: var(--info-bg); color: var(--blue); border: none; border-radius: 12px; padding: 14px 18px; font: inherit; }
+        .aviso-ayuda:hover { background: #DDE2F0; }
+        .como { max-width: 980px; }
+        .como h2 { font-size: 20px; color: var(--blue); margin: 4px 0 6px; }
+        .como h3 { font-size: 15px; color: var(--blue); margin: 26px 0 12px; }
+        .como p.sub { color: var(--muted); line-height: 1.6; }
+        .piezas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+        .pieza { background: var(--white); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; }
+        .pieza strong { color: var(--blue); }
+        .pieza p { color: var(--muted); margin-top: 6px; line-height: 1.5; font-size: 13px; }
+        .pieza .num { width: 26px; height: 26px; border-radius: 50%; background: var(--red); color: var(--white); font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 13px; }
+        .flujo { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+        .flujo li { display: flex; gap: 12px; background: var(--white); border-radius: 12px; box-shadow: var(--shadow); padding: 14px; }
+        .flujo li > span { flex: 0 0 28px; height: 28px; border-radius: 50%; background: var(--blue); color: var(--white); font-weight: 700; display: flex; align-items: center; justify-content: center; }
+        .flujo strong { color: var(--blue); }
+        .flujo p { color: var(--muted); font-size: 13px; line-height: 1.5; margin-top: 4px; }
+        .dos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 10px; }
+        table.ayuda { background: var(--white); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+        table.ayuda td { font-size: 13px; vertical-align: top; }
+        .nota-ayuda { margin-top: 26px; background: var(--white); border-left: 4px solid var(--red); border-radius: 8px; padding: 16px 18px; line-height: 1.6; box-shadow: var(--shadow); }
+
         @media (max-width: 760px) {
+            .piezas, .flujo, .dos { grid-template-columns: 1fr; }
+            header .user #userEmail { display: none; }
             main { padding: 16px; }
             header { padding-left: 16px; padding-right: 16px; }
             .opciones { grid-template-columns: 1fr; }
@@ -188,6 +214,7 @@
             <span>Manuales y QRG del Training Center</span>
         </div>
         <div class="user">
+            <button class="btn btn-ayuda" onclick="irComoFunciona()">¿Cómo funciona?</button>
             <span id="userEmail"></span>
             <button class="btn btn-ghost" onclick="salir()">Salir</button>
         </div>
@@ -211,6 +238,64 @@
                     <div class="detalle">Guías rápidas en PowerPoint, con su versión vigente y el historial de cambios.</div>
                     <div class="alerta" id="alertaQRG"></div>
                 </button>
+            </div>
+            <button class="aviso-ayuda" onclick="irComoFunciona()">
+                <strong>¿Primera vez aquí?</strong> Mira cómo se actualiza esta información y cómo leer la tabla →
+            </button>
+        </section>
+
+        <!-- CÓMO FUNCIONA -->
+        <section class="como" id="como" style="display:none;">
+            <div class="barra"><button class="volver" onclick="irInicio()">← Inicio</button></div>
+            <h2>¿Cómo funciona el control documental?</h2>
+            <p class="sub">Esta app muestra, para cada manual y QRG del Training Center, qué versión está vigente, cuándo se publicó, cuándo cambió por última vez y qué cambió en cada versión. Es solo de consulta: aquí no se edita nada.</p>
+
+            <h3>De dónde sale la información</h3>
+            <div class="piezas">
+                <div class="pieza"><div class="num">1</div><strong>SharePoint</strong><p>Donde están los documentos: la versión nueva queda en <em>03. En Revisión</em> y la oficial en <em>01. Publicados</em> (Word o PowerPoint en Version Editables y PDF en Version Cliente).</p></div>
+                <div class="pieza"><div class="num">2</div><strong>Bóveda (GitHub)</strong><p>La base de conocimiento que respalda cada documento: la fuente de cada dato, la ficha de cada manual y QRG con su historial, los cambios pendientes y los hallazgos.</p></div>
+                <div class="pieza"><div class="num">3</div><strong>Esta app</strong><p>Toma los datos de la bóveda y los muestra ordenados para todo el equipo. Se actualiza cada vez que se publica un documento.</p></div>
+            </div>
+
+            <h3>Cómo se actualiza un documento</h3>
+            <ol class="flujo">
+                <li><span>1</span><div><strong>Llega un cambio</strong><p>Un comunicado, una reunión o una decisión cambia un dato. Siempre con su fuente.</p></div></li>
+                <li><span>2</span><div><strong>Se registra en la bóveda</strong><p>Se corrige el dato y los documentos que lo usan quedan con <em>Cambios pendientes</em>.</p></div></li>
+                <li><span>3</span><div><strong>Se corrige y queda en revisión</strong><p>Se genera la versión nueva y queda en <em>03. En Revisión</em> para revisarla.</p></div></li>
+                <li><span>4</span><div><strong>Se publica</strong><p>Con la aprobación de Bastián, pasa a <em>01. Publicados</em> con su número de versión nuevo.</p></div></li>
+                <li><span>5</span><div><strong>Se cierra y se guarda</strong><p>Se anota la versión, la fecha y qué cambió; el documento vuelve a <em>Al día</em> y todo queda guardado en GitHub.</p></div></li>
+                <li><span>6</span><div><strong>Se ve aquí</strong><p>La app muestra la versión nueva. La fecha <em>Datos al</em> indica la última actualización.</p></div></li>
+            </ol>
+
+            <h3>Cómo leer la tabla</h3>
+            <div class="dos">
+                <table class="ayuda">
+                    <tr><th>Columna</th><th>Qué muestra</th></tr>
+                    <tr><td><strong>Versión</strong></td><td>La versión vigente publicada.</td></tr>
+                    <tr><td><strong>Publicado</strong></td><td>Fecha de la versión 1.0, cuando el documento se publicó por primera vez.</td></tr>
+                    <tr><td><strong>Último cambio</strong></td><td>Fecha de la versión vigente; en negrita si cambió en los últimos 30 días.</td></tr>
+                    <tr><td><strong>Bóveda</strong></td><td>Si el documento publicado está al día con la bóveda.</td></tr>
+                </table>
+                <table class="ayuda">
+                    <tr><th>Estado</th><th>Qué significa</th></tr>
+                    <tr><td><span class="pill ok">Al día</span></td><td>El documento coincide con la bóveda: se puede usar con confianza.</td></tr>
+                    <tr><td><span class="pill bad">Cambios pendientes</span></td><td>Algo cambió y el documento aún no lo refleja: espera la versión corregida.</td></tr>
+                    <tr><td><span class="pill warn">Por revisar</span></td><td>Aún no se comparó con la bóveda.</td></tr>
+                    <tr><td><span class="pill info">Nueva en revisión</span></td><td>Hay una versión nueva esperando en <em>03. En Revisión</em>.</td></tr>
+                </table>
+            </div>
+            <p class="sub">Haz clic en el encabezado de una columna para ordenar, y en un documento para ver su historial completo.</p>
+
+            <h3>Cómo se numeran las versiones</h3>
+            <div class="piezas">
+                <div class="pieza"><strong>1.0</strong><p>Documento nuevo.</p></div>
+                <div class="pieza"><strong>1.0 → 1.1</strong><p>Corrección o cambio puntual.</p></div>
+                <div class="pieza"><strong>1.3 → 2.0</strong><p>Actualización amplia del contenido.</p></div>
+            </div>
+
+            <div class="nota-ayuda">
+                <strong>¿Encontraste un error en un documento?</strong> Avísale a Bastián con el documento, la sección y qué debería decir. Se registra como hallazgo y se corrige en la siguiente versión.
+                <br><br>El detalle completo está en el manual <strong>MN-ESC-037 Control Documental</strong>.
             </div>
         </section>
 
@@ -386,16 +471,24 @@
         const marcas = [...new Set(delTipo().map(m => m.marca).filter(Boolean))].sort();
         document.getElementById('fMarca').innerHTML = '<option value="">Marca: todas</option>' +
             marcas.map(m => `<option>${esc(m)}</option>`).join('');
-        document.getElementById('inicio').style.display = 'none';
-        document.getElementById('listado').style.display = 'block';
+        mostrarVista('listado');
         render();
     }
 
     function irInicio() {
         tipoActual = null;
         guardarPreferencia(null);
-        document.getElementById('listado').style.display = 'none';
-        document.getElementById('inicio').style.display = 'block';
+        mostrarVista('inicio');
+    }
+
+    function irComoFunciona() {
+        cerrarDetalle();
+        mostrarVista('como');
+        window.scrollTo(0, 0);
+    }
+
+    function mostrarVista(id) {
+        ['inicio', 'listado', 'como'].forEach(v => document.getElementById(v).style.display = v === id ? 'block' : 'none');
     }
 
     function guardarPreferencia(t) { try { t ? localStorage.setItem('cd_tipo', t) : localStorage.removeItem('cd_tipo'); } catch { /* sin almacenamiento */ } }
