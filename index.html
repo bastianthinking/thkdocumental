@@ -229,19 +229,22 @@
     function esThinking(email) { return (email || '').toLowerCase().endsWith(DOMINIO); }
 
     async function init() {
-        sb.auth.onAuthStateChange(async (_event, session) => {
+        // El callback no debe esperar otras llamadas a Supabase: mientras corre, la librería
+        // tiene tomada la sesión y una consulta adentro queda bloqueada (al recargar la página
+        // quedaba en «Cargando…»). Por eso las llamadas se difieren con setTimeout.
+        sb.auth.onAuthStateChange((_event, session) => {
             const email = session?.user?.email;
             if (!email) { cargado = false; mostrarLogin(); return; }
             if (!esThinking(email)) {
-                await sb.auth.signOut();
-                mostrarLogin(`Solo pueden ingresar correos ${DOMINIO}.`, 'error');
+                setTimeout(async () => {
+                    await sb.auth.signOut();
+                    mostrarLogin(`Solo pueden ingresar correos ${DOMINIO}.`, 'error');
+                }, 0);
                 return;
             }
             mostrarApp(email);
-            if (!cargado) { cargado = true; await cargarMateriales(); }
+            if (!cargado) { cargado = true; setTimeout(cargarMateriales, 0); }
         });
-        const { data: { session } } = await sb.auth.getSession();
-        if (!session) mostrarLogin();
     }
 
     async function enviarLink(e) {
@@ -281,8 +284,11 @@
 
     // ─── MATERIALES ──────────────────────────────────────────────────────
     async function cargarMateriales() {
-        const { data, error } = await sb.from('materiales').select('*');
+        // Si Supabase no responde, se avisa en vez de quedar en «Cargando…»
+        const espera = new Promise(r => setTimeout(() => r({ error: { message: 'Supabase no respondió a tiempo. Recarga la página.' } }), 20000));
+        const { data, error } = await Promise.race([sb.from('materiales').select('*'), espera]);
         if (error) {
+            cargado = false;
             document.getElementById('tabla').innerHTML =
                 `<tr><td colspan="8" class="vacio">No se pudieron cargar los materiales: ${esc(error.message)}</td></tr>`;
             return;
