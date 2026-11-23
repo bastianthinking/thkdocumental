@@ -273,7 +273,7 @@
         { k: 'nombre',      t: 'Nombre',        td: m => `<td class="nombre">${esc(m.nombre)}</td>` },
         { k: 'marca',       t: 'Marca',         td: m => `<td class="col-opcional">${esc(m.marca)}</td>`, cls: 'col-opcional' },
         { k: 'version',     t: 'Versión',       td: m => `<td class="version">${esc(m.version)}${m.en_revision ? ' <span class="pill info">Nueva en revisión</span>' : ''}</td>` },
-        { k: 'publicado',   t: 'Publicado',     td: m => `<td class="fecha col-opcional">${m.publicado ? fecha(m.publicado) : ANTES}</td>`, cls: 'col-opcional' },
+        { k: 'publicado',   t: 'Publicado',     td: m => `<td class="fecha col-opcional">${textoPublicado(m)}</td>`, cls: 'col-opcional' },
         { k: 'ultimo',      t: 'Último cambio', td: m => `<td class="fecha${reciente(m.ultimo) ? ' reciente' : ''}">${fecha(m.ultimo)}</td>` },
         { k: 'al_dia',      t: 'Bóveda',        td: m => `<td>${pillAlDia(m.al_dia)}</td>` },
     ];
@@ -474,6 +474,12 @@
         if (volverARender) render();
     }
 
+    // Sin publicar (documento nuevo que solo está en En Revisión) / fecha de la 1.0 / anterior a la bóveda
+    function textoPublicado(m) {
+        if (m.publicacion && m.publicacion !== 'Publicado') return 'Sin publicar';
+        return m.publicado ? fecha(m.publicado) : ANTES;
+    }
+
     function reciente(iso) {
         return iso && iso >= new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
     }
@@ -496,7 +502,7 @@
             <div class="datos">
                 <div class="dato"><span>Versión vigente</span><strong>${esc(m.version)}</strong></div>
                 <div class="dato"><span>Bóveda</span><strong>${pillAlDia(m.al_dia)}</strong></div>
-                <div class="dato"><span>Publicado</span><strong>${m.publicado ? fecha(m.publicado) : ANTES}</strong></div>
+                <div class="dato"><span>Publicado</span><strong>${textoPublicado(m)}</strong></div>
                 <div class="dato"><span>Último cambio</span><strong>${fecha(m.ultimo)}</strong></div>
                 <div class="dato"><span>Marca</span><strong>${esc(m.marca || '—')}</strong></div>
                 <div class="dato"><span>Versiones registradas</span><strong>${versiones.length}</strong></div>
