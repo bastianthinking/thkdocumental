@@ -355,7 +355,7 @@
         materiales = (data || []).map(m => {
             const vs = m.versiones || [];
             const primera = vs[vs.length - 1];
-            const esOriginal = primera && /^1\.0+$/.test(String(primera.version)) && primera.fecha;
+            const esOriginal = primera && /^1\.0\d*$/.test(String(primera.version)) && primera.fecha;  // 1.0, 1.00 o 1.01
             return { ...m, publicado: esOriginal ? primera.fecha : null, ultimo: m.fecha_version };
         });
 
