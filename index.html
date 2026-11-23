@@ -4,2796 +4,421 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control Documental - Thinking SpA</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --primary-red: #F32121;
-            --primary-red-dark: #D91E1E;
-            --primary-blue: #293654;
-            --navy-dark: #161F36;
+            --red: #F32121;
+            --blue: #293654;
+            --navy: #161F36;
             --white: #FFFFFF;
-            --light-gray: #F5F6FA;
-            --dark-gray: #1D2433;
-            --muted: #8A90A3;
+            --bg: #F5F6FA;
+            --text: #1D2433;
+            --muted: #6B7287;
             --border: #E6E8F0;
-            --radius-lg: 16px;
-            --radius-md: 10px;
-            --radius-sm: 8px;
-            --shadow-sm: 0 1px 2px rgba(20,26,50,.06), 0 1px 1px rgba(20,26,50,.04);
-            --shadow-md: 0 8px 24px rgba(20,26,50,.08);
+            --ok: #1E7F4F;     --ok-bg: #E6F4EC;
+            --warn: #9A5B00;   --warn-bg: #FFF3DC;
+            --bad: #B42318;    --bad-bg: #FDECEA;
+            --info: #293654;   --info-bg: #E9ECF5;
+            --radius: 12px;
+            --shadow: 0 1px 2px rgba(20,26,50,.06), 0 4px 16px rgba(20,26,50,.05);
         }
 
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--light-gray);
-            color: var(--dark-gray);
-        }
-
-        /* LOGIN */
-        .login-page {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: var(--navy-dark);
-        }
-
-        .login-box {
-            background: var(--white);
-            padding: 50px 40px;
-            border-radius: var(--radius-lg);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-            width: 100%;
-            max-width: 420px;
-        }
-
-        .login-logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .login-logo img {
-            height: 50px;
-            margin-bottom: 20px;
-        }
-
-        .login-box h1 {
-            margin-bottom: 5px;
-            color: var(--primary-blue);
-            font-size: 26px;
-            font-weight: 700;
-        }
-
-        .login-box p {
-            color: #666;
-            margin-bottom: 30px;
+            background: var(--bg);
+            color: var(--text);
             font-size: 14px;
         }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--muted);
-            font-weight: 700;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        input[type="email"],
-        input[type="password"],
-        input[type="text"],
-        input[type="date"],
-        input[type="url"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--white);
-            color: var(--dark-gray);
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary-red);
-            box-shadow: 0 0 0 3px rgba(243, 33, 33, 0.1);
-        }
-
-        button {
-            padding: 11px 22px;
-            border: none;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 13.5px;
-            transition: all 0.15s;
-        }
-
-        .btn-primary {
-            background: var(--primary-red);
-            color: var(--white);
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-red-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(243, 33, 33, 0.3);
-        }
-
-        .btn-primary:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--primary-blue);
-            border: 1.5px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--primary-blue);
-            background: var(--light-gray);
-        }
-
-        .btn-danger {
-            background: #fde8e8;
-            color: #c81e1e;
-            font-size: 12px;
-            padding: 6px 10px;
-        }
-
-        .btn-danger:hover {
-            background: #fac9c9;
-        }
-
-        .btn-icon {
-            padding: 6px 10px;
-            margin-right: 6px;
-            font-size: 12px;
-        }
-
-        /* SIDEBAR */
-        .sidebar {
-            background: var(--navy-dark);
-            width: 248px;
-            flex-shrink: 0;
-            padding: 22px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .sidebar-brand { padding: 0 10px; }
-
-        .sidebar-logo {
-            font-size: 16px;
-            font-weight: 800;
-            color: #fff;
-            letter-spacing: 0.1px;
-        }
-
-        .sidebar-logo span { color: var(--primary-red); }
-
-        .sidebar-sub {
-            font-size: 11px;
-            color: rgba(255,255,255,0.45);
-            margin-top: 2px;
-        }
-
-        .sidebar-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        /* TOPBAR */
-        .topbar {
-            background: var(--white);
-            padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .topbar-eyebrow {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--primary-red);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-
-        .header-right {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .user-info {
-            text-align: right;
-            font-size: 13px;
-        }
-
-        .user-info strong {
-            display: block;
-            color: var(--dark-gray);
-            font-weight: 700;
-            font-size: 13px;
-        }
-
-        /* Badge de rol */
-        .role-badge {
-            display: inline-block;
-            padding: 3px 11px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-        }
-        .role-badge.owner {
-            background: var(--primary-red);
-            color: #fff;
-        }
-        .role-badge.viewer {
-            background: var(--light-gray);
-            color: var(--muted);
-        }
-        .role-badge.aprobador {
-            background: #ede9fe;
-            color: #6d28d9;
-        }
-
-        .btn-ghost {
-            background: var(--light-gray);
-            color: var(--dark-gray);
-            border: 1px solid var(--border);
-            padding: 8px 15px;
-            font-size: 12px;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-        }
-        .btn-ghost:hover {
-            background: var(--border);
-        }
-        .btn-logout {
-            background: var(--primary-red);
-            color: #fff;
-            padding: 8px 17px;
-            font-size: 12px;
-            border-radius: var(--radius-sm);
-        }
-        .btn-logout:hover { background: var(--primary-red-dark); }
-
-        /* MAIN */
-        .main-content {
-            display: none;
-            min-height: 100vh;
-        }
-
-        .main-content.active {
-            display: flex;
-            flex-direction: row;
-        }
-
-        .app-main {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .content {
-            flex: 1;
-            padding: 28px 32px;
-            display: flex;
-            flex-direction: column;
-            background: var(--light-gray);
-        }
-
-        /* TABS (sidebar nav) */
-        .tab-button {
-            padding: 11px 14px;
-            background: transparent;
-            border: none;
-            border-radius: var(--radius-sm);
-            color: rgba(255,255,255,0.6);
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 13.5px;
-            transition: all 0.15s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            white-space: nowrap;
-            text-align: left;
-            width: 100%;
-        }
-
-        .tab-button span:first-child { font-size: 15px; }
-
-        .tab-button.active {
-            color: #fff;
-            font-weight: 700;
-            background: rgba(255,255,255,0.1);
-        }
-
-        .tab-button:hover:not(.active) {
-            color: #fff;
-            background: rgba(255,255,255,0.06);
-        }
-
-        /* Ocultar tabs según rol — se controla con clase en body */
-        .owner-only {
-            display: none;
-        }
-
-        body.is-owner .owner-only {
-            display: inline-block;
-        }
-
-        body.is-owner th.owner-only {
-            display: table-cell;
-        }
-
-        body.is-owner .sidebar-nav .owner-only {
-            display: flex;
-        }
-
-        /* Owner y aprobador (tab Pendientes) */
-        .staff-only { display: none; }
-        body.is-owner .sidebar-nav .staff-only,
-        body.is-aprobador .sidebar-nav .staff-only { display: flex; }
-
-        .tab-count {
-            margin-left: auto;
-            background: var(--primary-red);
-            color: #fff;
-            font-size: 10px;
-            font-weight: 700;
-            border-radius: 10px;
-            padding: 1px 7px;
-        }
-        .tab-count:empty { display: none; }
-
-        .tab-content {
-            display: none;
-            flex: 1;
-            flex-direction: column;
-        }
-
-        .tab-content.active {
-            display: flex;
-        }
-
-        /* FORM PANEL */
-        .form-panel {
-            background: var(--white);
-            padding: 30px;
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
-            max-width: 900px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .form-panel h2 {
-            color: var(--dark-gray);
-            font-size: 17px;
-            margin-bottom: 20px;
-            font-weight: 800;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 14px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .form-row.full {
-            grid-template-columns: 1fr;
-        }
-
-        .form-row > div {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-row > div label {
-            margin-bottom: 8px;
-        }
-
-        .form-row > div input,
-        .form-row > div select,
-        .form-row > div textarea {
-            width: 100%;
-        }
-
-        /* LIST PANEL */
-        .list-panel {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-        }
-
-        .list-header {
-            background: var(--white);
-            color: var(--dark-gray);
-            padding: 18px 25px;
-            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 15px;
-            font-weight: 800;
-        }
-
-        .table-container {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: auto;
-            max-height: calc(100vh - 250px);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: var(--light-gray);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        th {
-            padding: 12px 15px;
-            text-align: left;
-            font-weight: 700;
-            color: var(--muted);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        td {
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--border);
-            font-size: 13px;
-        }
-
-        tbody tr:hover { background: var(--light-gray) !important; cursor: pointer; }
-
-        .status-badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: capitalize;
-        }
-
-        .status-borrador,
-        .status-en-revisión {
-            background: #fff3e0;
-            color: #b9690a;
-        }
-
-        .status-aprobado,
-        .status-publicado {
-            background: #e3f8ef;
-            color: #0f9d63;
-        }
-
-        .status-archivado,
-        .status-obsoleto {
-            background: #e8eeff;
-            color: #3454d1;
-        }
-
-        .status-en-aprobación {
-            background: #ede9fe;
-            color: #6d28d9;
-        }
-
-        .status-observado {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
-        /* FLUJO DE APROBACIÓN (modal) */
-        .wf-panel {
-            margin-top: 22px;
-            padding-top: 18px;
-            border-top: 1px solid var(--border);
-        }
-        .wf-panel h4 {
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--muted);
-            margin-bottom: 10px;
-        }
-        .wf-steps {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 16px;
-            font-size: 11px;
-        }
-        .wf-step {
-            padding: 4px 10px;
-            border-radius: 20px;
-            background: var(--light-gray);
-            color: var(--muted);
-            font-weight: 600;
-        }
-        .wf-step.done    { background: #e3f8ef; color: #0f9d63; }
-        .wf-step.current { background: var(--navy-dark); color: #fff; }
-        .wf-actions textarea { width: 100%; margin-bottom: 10px; }
-        .wf-actions .actions { flex-wrap: wrap; }
-        .wf-actions .btn-primary { width: auto; margin-top: 0; }
-        .wf-hint { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
-        .wf-history-item {
-            font-size: 12px;
-            padding: 8px 0;
-            border-bottom: 1px dashed var(--border);
-        }
-        .wf-history-item:last-child { border-bottom: none; }
-        .wf-history-item .when { color: var(--muted); }
-        .wf-history-item .comment {
-            margin-top: 4px;
-            padding: 6px 10px;
-            background: var(--light-gray);
-            border-radius: var(--radius-sm);
-            white-space: pre-wrap;
-        }
-
-        /* CATÁLOGOS */
-        .catalog-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 16px;
-            align-items: start;
-        }
-        .catalog-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
-            border-bottom: 1px solid var(--border);
-            font-size: 13px;
-        }
-        .catalog-item .name { flex: 1; }
-        .catalog-item.inactive .name { color: var(--muted); text-decoration: line-through; }
-        .catalog-item button { padding: 4px 8px; font-size: 11px; }
-        .catalog-add {
-            display: flex;
-            gap: 8px;
-            padding: 12px 16px;
-        }
-        .catalog-add input { padding: 8px 10px; font-size: 13px; }
-        .catalog-add button { padding: 8px 12px; white-space: nowrap; }
-
-        .login-divider {
-            text-align: center;
-            color: var(--muted);
-            font-size: 12px;
-            margin: 16px 0 10px;
-        }
-        #btnMagicLink { width: 100%; }
-
-        .actions {
-            display: flex;
-            gap: 6px;
-        }
-
-        /* STATS CARDS */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 18px 20px;
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            transition: transform 0.15s, box-shadow 0.15s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .stat-label {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            color: var(--muted);
-        }
-
-        .stat-label::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 7px;
-            background: var(--primary-blue);
-        }
-
-        .stat-card.ok .stat-label::before     { background: #0f9d63; }
-        .stat-card.review .stat-label::before { background: #b9690a; }
-        .stat-card.alert .stat-label::before  { background: var(--primary-red); }
-
-        .stat-value {
-            font-size: 30px;
-            font-weight: 800;
-            color: var(--dark-gray);
-            line-height: 1;
-        }
-
-        .stat-card.alert .stat-value { color: var(--primary-red); }
-        .stat-card.ok .stat-value    { color: #0f9d63; }
-        .stat-card.review .stat-value { color: #b9690a; }
-
-        .stat-sub {
-            font-size: 11px;
-            color: var(--muted);
-        }
-
-        @media (max-width: 900px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        /* FILTER BAR */
-        .filter-bar {
-            padding: 15px 20px;
-            background: #f9f9f9;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .filter-bar input[type="text"] {
-            flex: 1;
-            min-width: 200px;
-            padding: 8px 12px;
-            font-size: 13px;
-        }
-
-        .filter-bar select {
-            padding: 8px 12px;
-            font-size: 13px;
-            min-width: 140px;
-        }
-
-        .btn-clear {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--muted);
-            padding: 8px 14px;
-            font-size: 12px;
-        }
-
-        .btn-clear:hover {
-            background: var(--light-gray);
-            color: var(--dark-gray);
-        }
-
-        /* MODAL */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(41,54,84,0.6);
-            z-index: 500;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-box {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 680px;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .modal-header {
-            background: var(--navy-dark);
-            color: var(--white);
-            padding: 20px 25px;
-            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h3 {
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        .modal-close {
-            background: transparent;
-            border: none;
-            color: var(--white);
-            font-size: 20px;
-            cursor: pointer;
-            padding: 0;
-            line-height: 1;
-            opacity: 0.8;
-        }
-
-        .modal-close:hover { opacity: 1; }
-
-        .modal-body {
-            padding: 25px;
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        .modal-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .modal-field {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .modal-field.full {
-            grid-column: 1 / -1;
-        }
-
-        .modal-label {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--muted);
-        }
-
-        .modal-value {
-            font-size: 14px;
-            color: var(--dark-gray);
-        }
-
-        .modal-divider {
-            grid-column: 1 / -1;
-            border: none;
-            border-top: 1px solid var(--border);
-            margin: 4px 0;
-        }
-
-        .btn-renovar {
-            background: #f59e0b;
-            color: #fff;
-            font-size: 11px;
-            padding: 5px 9px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-weight: 700;
-        }
-        .btn-renovar:hover { background: #d97706; }
-
-        /* AUDIT */
-        .audit-container {
-            padding: 25px;
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        .audit-item {
-            background: var(--light-gray);
-            padding: 15px;
-            border-radius: var(--radius-md);
-            margin-bottom: 12px;
-            border-left: 3px solid var(--primary-red);
-        }
-
-        .audit-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .audit-action {
-            font-weight: 600;
-            color: var(--primary-red);
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-
-        .audit-time {
-            color: var(--muted);
-            font-size: 12px;
-        }
-
-        .audit-details {
-            background: var(--white);
-            padding: 10px;
-            border-radius: var(--radius-sm);
-            font-size: 11px;
-            color: var(--muted);
-            font-family: 'Monaco', monospace;
-            overflow-x: auto;
-        }
-
-        /* MESSAGES */
-        .message {
-            padding: 12px 15px;
-            border-radius: var(--radius-sm);
-            margin-bottom: 15px;
-            font-size: 13px;
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            z-index: 1000;
-            max-width: 400px;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .message.success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-        }
-
-        .message.error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-
-        .message.info {
-            background: #dbeafe;
-            color: #1e40af;
-            border: 1px solid #bfdbfe;
-        }
-
-        #loginError {
-            color: var(--primary-red);
-            margin-top: 15px;
-            text-align: center;
-            font-size: 13px;
-        }
-
-        /* Loading overlay */
-        .loading-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(22, 31, 54, 0.9);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            gap: 16px;
-            color: #fff;
-            font-size: 15px;
-            font-weight: 600;
-        }
-        .loading-overlay.active { display: flex; }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid rgba(255,255,255,0.2);
-            border-top-color: #F32121;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        @media (max-width: 1200px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 860px) {
-            .main-content.active { flex-direction: column; }
-            .sidebar {
-                width: 100%;
-                flex-direction: row;
-                align-items: center;
-                overflow-x: auto;
-                gap: 20px;
-                padding: 12px 16px;
-            }
-            .sidebar-brand { padding: 0; flex-shrink: 0; }
-            .sidebar-sub { display: none; }
-            .sidebar-nav { flex-direction: row; }
-            .tab-button { width: auto; }
-            .topbar { padding: 14px 20px; flex-wrap: wrap; gap: 10px; }
+        button { font-family: inherit; cursor: pointer; }
+        input, select { font-family: inherit; font-size: 14px; }
+
+        /* ─── LOGIN ─── */
+        .login-page { display: none; justify-content: center; align-items: center; min-height: 100vh; background: var(--navy); padding: 16px; }
+        .login-box { background: var(--white); padding: 40px 32px; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+        .login-box h1 { font-size: 22px; color: var(--blue); margin-bottom: 4px; }
+        .login-box p.sub { color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+        .field { margin-bottom: 14px; }
+        .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+        .field input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; }
+        .btn { border: none; border-radius: 8px; padding: 10px 16px; font-weight: 600; font-size: 14px; }
+        .btn-primary { background: var(--red); color: var(--white); width: 100%; }
+        .btn-primary:hover { background: #D91E1E; }
+        .btn-primary:disabled { opacity: .6; cursor: default; }
+        .btn-ghost { background: var(--white); color: var(--blue); border: 1px solid var(--border); padding: 6px 12px; font-size: 12px; }
+        .mensaje { font-size: 13px; min-height: 18px; margin-top: 12px; line-height: 1.5; }
+        .mensaje.error { color: var(--bad); }
+        .mensaje.ok { color: var(--ok); }
+
+        /* ─── LAYOUT ─── */
+        .app { display: none; min-height: 100vh; }
+        .app.active { display: block; }
+        header { background: var(--navy); color: var(--white); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        header .brand { display: flex; flex-direction: column; }
+        header .brand strong { font-size: 16px; }
+        header .brand span { font-size: 12px; opacity: .7; }
+        header .user { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+
+        main { max-width: 1280px; margin: 0 auto; padding: 24px; }
+
+        /* ─── KPIs ─── */
+        .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .kpi { background: var(--white); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); cursor: pointer; border: 2px solid transparent; }
+        .kpi:hover { border-color: var(--border); }
+        .kpi .valor { font-size: 26px; font-weight: 800; color: var(--blue); }
+        .kpi .etiqueta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+        .kpi.alerta .valor { color: var(--bad); }
+
+        /* ─── FILTROS ─── */
+        .filtros { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+        .filtros input { flex: 1 1 240px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; }
+        .filtros select { padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); }
+        .meta-sync { font-size: 12px; color: var(--muted); margin-left: auto; }
+
+        /* ─── TABLA ─── */
+        .card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 12px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        tbody tr.fila { cursor: pointer; }
+        tbody tr.fila:hover { background: #FAFBFD; }
+        td.codigo { font-weight: 700; color: var(--blue); white-space: nowrap; }
+        td.nombre { font-weight: 500; }
+        td.version { font-weight: 700; white-space: nowrap; }
+        td.fecha { white-space: nowrap; color: var(--muted); }
+        .vacio { text-align: center; padding: 40px; color: var(--muted); }
+
+        .pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
+        .pill.ok { color: var(--ok); background: var(--ok-bg); }
+        .pill.warn { color: var(--warn); background: var(--warn-bg); }
+        .pill.bad { color: var(--bad); background: var(--bad-bg); }
+        .pill.info { color: var(--info); background: var(--info-bg); }
+
+        /* ─── DETALLE ─── */
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(22,31,54,.45); z-index: 50; justify-content: flex-end; }
+        .overlay.active { display: flex; }
+        .panel { background: var(--white); width: 100%; max-width: 620px; height: 100%; overflow-y: auto; padding: 28px; box-shadow: -10px 0 40px rgba(0,0,0,.15); }
+        .panel .cerrar { float: right; background: none; border: none; font-size: 22px; color: var(--muted); }
+        .panel .tipo { font-size: 12px; font-weight: 700; color: var(--red); text-transform: uppercase; letter-spacing: .06em; }
+        .panel h2 { font-size: 20px; color: var(--blue); margin: 4px 0 8px; }
+        .panel .desc { color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+        .panel .datos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 18px; }
+        .panel .dato { background: var(--bg); border-radius: 8px; padding: 10px 12px; }
+        .panel .dato > span { display: block; font-size: 11px; color: var(--muted); }
+        .panel .dato strong { font-size: 14px; }
+        .panel .archivo { font-size: 12px; color: var(--muted); word-break: break-all; margin-bottom: 22px; }
+        .panel h3 { font-size: 14px; color: var(--blue); margin-bottom: 12px; }
+
+        .timeline { list-style: none; border-left: 2px solid var(--border); margin-left: 8px; }
+        .timeline li { position: relative; padding: 0 0 18px 20px; }
+        .timeline li::before { content: ''; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--white); border: 2px solid var(--blue); }
+        .timeline li:first-child::before { background: var(--red); border-color: var(--red); }
+        .timeline .v { font-weight: 800; color: var(--blue); }
+        .timeline .f { font-size: 12px; color: var(--muted); margin-left: 8px; }
+        .timeline p { margin-top: 4px; line-height: 1.5; }
+
+        @media (max-width: 760px) {
+            main { padding: 16px; }
+            header { padding-left: 16px; padding-right: 16px; }
+            .col-opcional { display: none; }
+            .panel { padding: 20px 16px; }
+            .panel .datos { grid-template-columns: 1fr; }
+            .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .filtros input, .filtros select { flex: 1 1 100%; min-width: 0; }
+            .meta-sync { margin-left: 0; }
+            td, th { padding: 10px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- LOADING OVERLAY -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <span id="loadingText">Iniciando sesión...</span>
+<!-- ─── LOGIN ─── -->
+<div class="login-page" id="loginPage">
+    <div class="login-box">
+        <h1>Control Documental</h1>
+        <p class="sub">Manuales y QRG del Training Center. Ingresa con tu correo @thinking.cl y te enviaremos un link de acceso.</p>
+        <form onsubmit="enviarLink(event)">
+            <div class="field">
+                <label for="email">Correo</label>
+                <input type="email" id="email" required autocomplete="email" placeholder="nombre@thinking.cl">
+            </div>
+            <button class="btn btn-primary" id="btnLink" type="submit">Enviarme el link de acceso</button>
+        </form>
+        <div class="mensaje" id="mensajeLogin"></div>
     </div>
+</div>
 
-    <!-- LOGIN PAGE -->
-    <div class="login-page" id="loginPage">
-        <div class="login-box">
-            <div class="login-logo">
-                <img src="https://thinking.cl/logo.png" alt="Thinking SpA" onerror="this.style.display='none'">
-                <h1>Control Documental</h1>
-            </div>
-            <p style="text-align:center;">Thinking SpA</p>
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="loginEmail" required placeholder="tucorreo@thinking.cl">
-                </div>
-                <div class="form-group">
-                    <label>Contraseña</label>
-                    <input type="password" id="loginPassword" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="btn-primary" id="btnLogin">Iniciar sesión</button>
-                <div class="login-divider">o, sin contraseña</div>
-                <button type="button" class="btn-secondary" id="btnMagicLink" onclick="handleMagicLink()">📧 Enviarme un link de acceso</button>
-                <div id="loginError"></div>
-            </form>
+<!-- ─── APP ─── -->
+<div class="app" id="app">
+    <header>
+        <div class="brand">
+            <strong>Control Documental</strong>
+            <span>Manuales y QRG del Training Center</span>
         </div>
-    </div>
-
-    <!-- MAIN APP -->
-    <div class="main-content" id="mainContent">
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <div class="sidebar-brand">
-                <div class="sidebar-logo">Control<span>.</span>Documental</div>
-                <p class="sidebar-sub">Thinking SpA</p>
-            </div>
-
-            <!-- TABS (se muestran según rol en applyRoleUI) -->
-            <nav class="sidebar-nav" id="tabSwitch">
-                <button class="tab-button owner-only" id="tab-crear" onclick="switchTab('crear', this)"><span>➕</span><span>Crear Documento</span></button>
-                <button class="tab-button active" id="tab-documentos" onclick="switchTab('documentos', this)"><span>📄</span><span>Documentos</span></button>
-                <button class="tab-button staff-only" id="tab-pendientes" onclick="switchTab('pendientes', this)"><span>✅</span><span>Mis pendientes</span><span class="tab-count" id="pendientesCount"></span></button>
-                <button class="tab-button owner-only" id="tab-aprobadores" onclick="switchTab('aprobadores', this)"><span>👥</span><span>Aprobadores</span></button>
-                <button class="tab-button owner-only" id="tab-auditoria" onclick="switchTab('auditoria', this)"><span>📋</span><span>Auditoría</span></button>
-                <button class="tab-button owner-only" id="tab-usuarios" onclick="switchTab('usuarios', this); loadUsers()"><span>👤</span><span>Usuarios</span></button>
-                <button class="tab-button owner-only" id="tab-catalogos" onclick="switchTab('catalogos', this)"><span>🗂️</span><span>Catálogos</span></button>
-            </nav>
-        </aside>
-
-        <div class="app-main">
-            <!-- TOPBAR -->
-            <div class="topbar">
-                <span class="topbar-eyebrow">WORKSPACE</span>
-                <div class="header-right">
-                    <div class="user-info">
-                        <strong id="userEmailDisplay"></strong>
-                        <span class="role-badge" id="userRoleDisplay"></span>
-                    </div>
-                    <button class="btn-ghost" onclick="openPasswordModal()">🔑 Contraseña</button>
-                    <button class="btn-logout" onclick="handleLogout()">Cerrar sesión</button>
-                </div>
-            </div>
-
-            <!-- CONTENT -->
-            <div class="content">
-            <!-- TAB: CREAR (solo owner) -->
-            <div class="tab-content" id="crear-tab">
-                <div class="form-panel">
-                    <h2 id="formTitle">Nuevo documento</h2>
-                    <form id="documentForm" onsubmit="handleSaveDocument(event)">
-                        <div class="form-row full">
-                            <div>
-                                <label>Nombre</label>
-                                <input type="text" id="docName" required placeholder="Ej: Procedimiento de Seguridad">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div>
-                                <label>Código</label>
-                                <input type="text" id="docCodigo" required placeholder="Ej: P04-PMG-001">
-                            </div>
-                            <div>
-                                <label>Tipo</label>
-                                <select id="docTipo" required data-catalog="tipo"></select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div>
-                                <label>Área solicitante</label>
-                                <select id="docArea" required data-catalog="area" onchange="applyAreaDefaultAprobador()"></select>
-                            </div>
-                            <div>
-                                <label>Alcance</label>
-                                <select id="docAlcance" required data-catalog="alcance"></select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div>
-                                <label>Repositorio</label>
-                                <select id="docRepositorio" required data-catalog="repositorio"></select>
-                            </div>
-                            <div>
-                                <label>Versión</label>
-                                <input type="text" id="docVersion" placeholder="Ej: 1.0, 2.1">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div>
-                                <label>Elaborador</label>
-                                <select id="docElaborador" data-first-label="-- Seleccionar --"></select>
-                            </div>
-                            <div>
-                                <label>Revisor (opcional · forma)</label>
-                                <select id="docRevisor" data-first-label="Sin revisor — va directo a aprobación"></select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div>
-                                <label>Aprobador (fondo)</label>
-                                <select id="docAprobador" data-first-label="-- Seleccionar --"></select>
-                            </div>
-                            <div>
-                                <label>Estado</label>
-                                <input type="text" id="docEstadoInfo" value="Borrador" disabled>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div>
-                                <label>Publicado</label>
-                                <input type="date" id="docPublicado">
-                            </div>
-                            <div></div>
-                        </div>
-                        <p class="wf-hint">El aprobador se sugiere según el área. Revisor y aprobador deben ser distintos del elaborador. El estado avanza solo con el flujo de aprobación (abre el documento desde la lista); la fecha de publicación se completa al publicar.</p>
-                        <div class="form-row full">
-                            <div>
-                                <label>Link PDF (versión aprobada)</label>
-                                <input type="url" id="docLink" placeholder="https://...">
-                            </div>
-                        </div>
-                        <div class="form-row full">
-                            <div>
-                                <label>Notas</label>
-                                <textarea id="docNotes" rows="3" placeholder="Notas adicionales..."></textarea>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 10px; margin-top: 20px;">
-                            <button type="submit" class="btn-primary">Guardar</button>
-                            <button type="button" class="btn-secondary" onclick="resetForm()" id="btnCancel" style="display: none; flex: 1;">Cancelar</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- TAB: DOCUMENTOS -->
-            <div class="tab-content active" id="documentos-tab">
-
-                <!-- STATS -->
-                <div class="stats-grid" id="statsGrid">
-                    <div class="stat-card total">
-                        <span class="stat-label">Total documentos</span>
-                        <span class="stat-value" id="statTotal">—</span>
-                        <span class="stat-sub">en el sistema</span>
-                    </div>
-                    <div class="stat-card ok">
-                        <span class="stat-label">Publicados</span>
-                        <span class="stat-value" id="statPublicados">—</span>
-                        <span class="stat-sub">vigentes</span>
-                    </div>
-                    <div class="stat-card review">
-                        <span class="stat-label">En flujo</span>
-                        <span class="stat-value" id="statRevision">—</span>
-                        <span class="stat-sub">en revisión o aprobación</span>
-                    </div>
-                    <div class="stat-card alert">
-                        <span class="stat-label">Mantención vencida</span>
-                        <span class="stat-value" id="statVencidos">—</span>
-                        <span class="stat-sub">más de 365 días</span>
-                    </div>
-                </div>
-
-                <div class="list-panel">
-                    <div class="list-header">📚 Documentos Registrados</div>
-                    <div class="filter-bar">
-                        <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre o código..." oninput="applyFilters()">
-                        <select id="filterEstado" onchange="applyFilters()">
-                            <option value="">Todos los estados</option>
-                            <option value="Publicado">Publicado</option>
-                            <option value="Aprobado">Aprobado</option>
-                            <option value="En aprobación">En aprobación</option>
-                            <option value="En revisión">En revisión</option>
-                            <option value="Observado">Observado</option>
-                            <option value="Borrador">Borrador</option>
-                            <option value="Archivado">Archivado</option>
-                            <option value="Obsoleto">Obsoleto</option>
-                        </select>
-                        <select id="filterTipo" onchange="applyFilters()" data-catalog-filter="tipo" data-all-label="Todos los tipos"></select>
-                        <select id="filterRepositorio" onchange="applyFilters()" data-catalog-filter="repositorio" data-all-label="Todos los repositorios"></select>
-                        <select id="filterArea" onchange="applyFilters()" data-catalog-filter="area" data-all-label="Todas las áreas"></select>
-                        <button class="btn-clear" onclick="clearFilters()">✕ Limpiar</button>
-                        <span id="filterCount" style="font-size:12px; color:#999;"></span>
-                    </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Código</th>
-                                    <th>Tipo</th>
-                                    <th>Alcance</th>
-                                    <th>Estado</th>
-                                    <th>Repositorio</th>
-                                    <th>Publicado</th>
-                                    <th>Versión</th>
-                                    <th>Mantención</th>
-                                    <th>Link</th>
-                                    <th>Notas</th>
-                                    <th class="owner-only" id="th-acciones">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="documentTable">
-                                <tr><td colspan="12" style="text-align: center; padding: 40px;">Cargando documentos...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- MODAL CAMBIAR CONTRASEÑA -->
-            <div class="modal-overlay" id="passwordModalOverlay" onclick="closePasswordModal(event)">
-                <div class="modal-box" style="max-width: 400px;">
-                    <div class="modal-header">
-                        <h3>🔑 Cambiar contraseña</h3>
-                        <button class="modal-close" onclick="closePasswordModalDirect()">✕</button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="passwordForm" onsubmit="handleChangePassword(event)">
-                            <div class="form-group">
-                                <label>Nueva contraseña</label>
-                                <input type="password" id="newPassword" required minlength="6" placeholder="Mínimo 6 caracteres">
-                            </div>
-                            <div class="form-group">
-                                <label>Confirmar contraseña</label>
-                                <input type="password" id="confirmPassword" required minlength="6" placeholder="Repite la contraseña">
-                            </div>
-                            <div id="passwordError" style="color: var(--primary-red); font-size: 13px; margin-bottom: 12px;"></div>
-                            <button type="submit" class="btn-primary" id="btnChangePassword">Cambiar contraseña</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- MODAL DETALLE -->
-            <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-                <div class="modal-box">
-                    <div class="modal-header">
-                        <h3 id="modalTitle">Detalle del documento</h3>
-                        <button class="modal-close" onclick="closeModalDirect()">✕</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="modal-grid" id="modalContent"></div>
-                        <div class="wf-panel" id="modalWorkflow"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB: MIS PENDIENTES (owner y aprobador) -->
-            <div class="tab-content" id="pendientes-tab">
-                <div class="list-panel">
-                    <div class="list-header">✅ Mis pendientes</div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Documento</th>
-                                    <th>Código</th>
-                                    <th>Versión</th>
-                                    <th>Estado</th>
-                                    <th>Qué debes hacer</th>
-                                </tr>
-                            </thead>
-                            <tbody id="pendientesTable">
-                                <tr><td colspan="5" style="text-align: center; padding: 40px;">Cargando...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB: CATÁLOGOS (solo owner) -->
-            <div class="tab-content" id="catalogos-tab">
-                <p class="wf-hint">Valores disponibles al crear documentos. Desactivar oculta el valor en documentos nuevos sin afectar a los existentes; renombrar actualiza también los documentos que lo usan.</p>
-                <div class="catalog-grid">
-                    <div class="list-panel" data-catalog-admin="area"></div>
-                    <div class="list-panel" data-catalog-admin="tipo"></div>
-                    <div class="list-panel" data-catalog-admin="alcance"></div>
-                    <div class="list-panel" data-catalog-admin="repositorio"></div>
-                </div>
-            </div>
-
-            <!-- TAB: APROBADORES (solo owner) -->
-            <div class="tab-content" id="aprobadores-tab">
-                <div class="list-panel">
-                    <div class="list-header">👥 Elaborador, Revisor, Aprobador</div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Documento</th>
-                                    <th>Código</th>
-                                    <th>Elaborador</th>
-                                    <th>Revisor</th>
-                                    <th>Aprobador</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="aprobadoresTable">
-                                <tr><td colspan="7" style="text-align: center; padding: 40px;">Cargando aprobadores...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB: AUDITORÍA (solo owner) -->
-            <div class="tab-content" id="auditoria-tab">
-                <div class="list-panel">
-                    <div class="list-header">🔍 Historial de Cambios</div>
-                    <div class="audit-container" id="auditList">
-                        <div style="text-align: center; padding: 40px; color: #999;">Cargando auditoría...</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB: USUARIOS (solo owner) -->
-            <div class="tab-content" id="usuarios-tab">
-                <div style="display: flex; gap: 20px; flex: 1; min-height: 0;">
-
-                    <!-- Formulario crear usuario -->
-                    <div class="form-panel" style="max-width: 380px; align-self: flex-start;">
-                        <h2>Nuevo usuario</h2>
-                        <form id="userForm" onsubmit="handleCreateUser(event)">
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" id="newUserEmail" required placeholder="correo@empresa.cl">
-                            </div>
-                            <div class="form-group">
-                                <label>Contraseña</label>
-                                <input type="password" id="newUserPassword" placeholder="Opcional — vacío: entra con link por correo" minlength="6">
-                            </div>
-                            <div class="form-group">
-                                <label>Rol</label>
-                                <select id="newUserRole" required>
-                                    <option value="viewer">Viewer — solo lectura</option>
-                                    <option value="aprobador">Revisor/Aprobador — revisa y aprueba</option>
-                                    <option value="owner">Owner — acceso completo</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn-primary" id="btnCreateUser">Crear usuario</button>
-                        </form>
-                    </div>
-
-                    <!-- Lista de usuarios -->
-                    <div class="list-panel" style="flex: 1;">
-                        <div class="list-header">👥 Usuarios registrados</div>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Email</th>
-                                        <th>Rol</th>
-                                        <th>Creado</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="usersTable">
-                                    <tr><td colspan="4" style="text-align:center; padding:40px; color:#999;">Cargando usuarios...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="user">
+            <span id="userEmail"></span>
+            <button class="btn btn-ghost" onclick="salir()">Salir</button>
         </div>
+    </header>
+
+    <main>
+        <div class="kpis" id="kpis"></div>
+
+        <div class="filtros">
+            <input type="search" id="fBuscar" placeholder="Buscar por código, nombre o cambio…" oninput="render()">
+            <select id="fTipo" onchange="render()">
+                <option value="">Tipo: todos</option>
+                <option>Manual</option>
+                <option>QRG</option>
+            </select>
+            <select id="fMarca" onchange="render()"><option value="">Marca: todas</option></select>
+            <select id="fEstado" onchange="render()">
+                <option value="">Estado: todos</option>
+                <option>Al día</option>
+                <option>Cambios pendientes</option>
+                <option>Por revisar</option>
+                <option value="__revision">Versión nueva en revisión</option>
+            </select>
+            <span class="meta-sync" id="metaSync"></span>
         </div>
-    </div>
 
-    <script>
-        // ─── CONFIG ───────────────────────────────────────────────────────────
-        const SUPABASE_URL = 'https://kmrvvbbyekzuzimzahvd.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttcnZ2YmJ5ZWt6dXppbXphaHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTkzNDEsImV4cCI6MjA5NDE3NTM0MX0.FqmTWcjOHX1J3H-VnAXyaFpXZe1jkIf3GD9WJg0yhTA';
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th class="col-opcional">Marca</th>
+                        <th>Versión</th>
+                        <th class="col-opcional">Fecha</th>
+                        <th>Publicación</th>
+                        <th>Bóveda</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla"><tr><td colspan="8" class="vacio">Cargando…</td></tr></tbody>
+            </table>
+        </div>
+    </main>
+</div>
 
-        const { createClient } = window.supabase;
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
-            auth: {
-                storage: window.sessionStorage,
-                persistSession: true,
-                autoRefreshToken: true
+<!-- ─── DETALLE DE UN MATERIAL ─── -->
+<div class="overlay" id="detalle" onclick="if (event.target === this) cerrarDetalle()">
+    <div class="panel" id="panel"></div>
+</div>
+
+<script>
+    // ─── CONFIG ──────────────────────────────────────────────────────────
+    // Clave pública (anon). Los datos los protege Supabase: solo se entregan
+    // a sesiones con correo @thinking.cl verificado (política es_thinking()).
+    const SUPABASE_URL = 'https://kmrvvbbyekzuzimzahvd.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_ZphXuMK9lAQhw9q68k409w_DVrhuTJg';
+    const DOMINIO = '@thinking.cl';
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: { storage: window.localStorage, persistSession: true, autoRefreshToken: true }
+    });
+
+    let materiales = [];
+    let cargado = false;
+
+    // ─── SESIÓN ──────────────────────────────────────────────────────────
+    function esThinking(email) { return (email || '').toLowerCase().endsWith(DOMINIO); }
+
+    async function init() {
+        sb.auth.onAuthStateChange(async (_event, session) => {
+            const email = session?.user?.email;
+            if (!email) { cargado = false; mostrarLogin(); return; }
+            if (!esThinking(email)) {
+                await sb.auth.signOut();
+                mostrarLogin(`Solo pueden ingresar correos ${DOMINIO}.`, 'error');
+                return;
             }
+            mostrarApp(email);
+            if (!cargado) { cargado = true; await cargarMateriales(); }
         });
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) mostrarLogin();
+    }
 
-        // ─── ESTADO ───────────────────────────────────────────────────────────
-        let currentUser = null;
-        let currentUserRole = null; // 'owner' | 'aprobador' | 'viewer'
-        let editingDocId = null;
-        let documents = [];
-        let auditLogs = [];
-        let staffUsers = []; // owners y aprobadores, para asignar revisor/aprobador
-        let loginNotice = ''; // mensaje a mostrar al volver al login
+    async function enviarLink(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        if (!esThinking(email)) { mensaje(`Usa tu correo ${DOMINIO}.`, 'error'); return; }
+        const btn = document.getElementById('btnLink');
+        btn.disabled = true; btn.textContent = 'Enviando…';
+        const { error } = await sb.auth.signInWithOtp({
+            email,
+            options: { emailRedirectTo: location.origin + location.pathname }
+        });
+        btn.disabled = false; btn.textContent = 'Enviarme el link de acceso';
+        if (error) mensaje('No se pudo enviar el link: ' + error.message, 'error');
+        else mensaje(`Listo. Revisa tu correo (${email}) y abre el link desde este mismo navegador.`, 'ok');
+    }
 
-        // Etapas del flujo (diagrama BPMN "Proceso de elaboración de material")
-        const WF_STEPS = ['Borrador', 'En revisión', 'En aprobación', 'Aprobado', 'Publicado'];
+    async function salir() { await sb.auth.signOut(); }
 
-        // En BD el rol sigue llamándose 'aprobador'; en pantalla se muestra como Revisor/Aprobador
-        const ROLE_LABELS = { owner: 'Owner', aprobador: 'Revisor/Aprobador', viewer: 'Viewer' };
+    function mensaje(texto, tipo) {
+        const div = document.getElementById('mensajeLogin');
+        div.textContent = texto || '';
+        div.className = 'mensaje ' + (tipo || '');
+    }
 
-        // ─── INIT ─────────────────────────────────────────────────────────────
-        async function init() {
-            supabaseClient.auth.onAuthStateChange(async (event, session) => {
-                if (session?.user) {
-                    const firstLogin = !currentUser;
-                    currentUser = session.user;
-                    // Solo en primer login o SIGNED_IN real, no en TOKEN_REFRESHED
-                    if (firstLogin || event === 'SIGNED_IN') {
-                        await loadUserRole();
-                        if (!currentUserRole) {
-                            loginNotice = '❌ Tu cuenta no tiene acceso. Solicítalo a un owner de PMG.';
-                            await supabaseClient.auth.signOut();
-                            return;
-                        }
-                        applyRoleUI(true);
-                        if (currentUserRole === 'owner') await loadStaffUsers();
-                        await loadCatalog();
-                        await loadDocuments();
-                        if (currentUserRole === 'owner') await loadAudit();
-                    }
-                    // Llegó desde el link "Restablecer contraseña": pedir la nueva de inmediato
-                    if (event === 'PASSWORD_RECOVERY' && currentUserRole) {
-                        openPasswordModal();
-                        showMessage('Define tu nueva contraseña', 'info');
-                    }
-                } else {
-                    currentUser = null;
-                    currentUserRole = null;
-                    showLogin();
-                }
-            });
+    function mostrarLogin(texto, tipo) {
+        document.getElementById('app').classList.remove('active');
+        document.getElementById('loginPage').style.display = 'flex';
+        mensaje(texto, tipo);
+    }
 
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) showLogin();
+    function mostrarApp(email) {
+        document.getElementById('userEmail').textContent = email;
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('app').classList.add('active');
+    }
+
+    // ─── MATERIALES ──────────────────────────────────────────────────────
+    async function cargarMateriales() {
+        const { data, error } = await sb.from('materiales').select('*');
+        if (error) {
+            document.getElementById('tabla').innerHTML =
+                `<tr><td colspan="8" class="vacio">No se pudieron cargar los materiales: ${esc(error.message)}</td></tr>`;
+            return;
         }
+        materiales = (data || []).sort((a, b) =>
+            (a.tipo === b.tipo ? 0 : a.tipo === 'Manual' ? -1 : 1) ||
+            (a.codigo || a.nombre).localeCompare(b.codigo || b.nombre, 'es'));
 
-        // ─── AUTH ─────────────────────────────────────────────────────────────
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email    = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const btnLogin = document.getElementById('btnLogin');
-            const errDiv   = document.getElementById('loginError');
+        const marcas = [...new Set(materiales.map(m => m.marca).filter(Boolean))].sort();
+        document.getElementById('fMarca').innerHTML = '<option value="">Marca: todas</option>' +
+            marcas.map(m => `<option>${esc(m)}</option>`).join('');
 
-            errDiv.textContent = '';
-            btnLogin.disabled = true;
-            btnLogin.textContent = 'Iniciando sesión...';
-            showLoading('Verificando credenciales...');
+        const sync = materiales.map(m => m.sincronizado).filter(Boolean).sort().pop();
+        document.getElementById('metaSync').textContent = sync ? `Datos al ${fecha(sync)}` : '';
+        render();
+    }
 
-            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    function filtrados() {
+        const q = document.getElementById('fBuscar').value.trim().toLowerCase();
+        const tipo = document.getElementById('fTipo').value;
+        const marca = document.getElementById('fMarca').value;
+        const estado = document.getElementById('fEstado').value;
+        return materiales.filter(m => {
+            if (tipo && m.tipo !== tipo) return false;
+            if (marca && m.marca !== marca) return false;
+            if (estado === '__revision' && !m.en_revision) return false;
+            if (estado && estado !== '__revision' && m.al_dia !== estado) return false;
+            if (!q) return true;
+            const texto = [m.codigo, m.nombre, m.descripcion, ...(m.versiones || []).map(v => v.cambios)].join(' ').toLowerCase();
+            return texto.includes(q);
+        });
+    }
 
-            hideLoading();
-            btnLogin.disabled = false;
-            btnLogin.textContent = 'Iniciar sesión';
-
-            if (error) {
-                errDiv.textContent = '❌ Email o contraseña incorrectos';
-            }
-            // Si es exitoso, onAuthStateChange se encarga de mostrar la app
+    function render() {
+        renderKpis();
+        const lista = filtrados();
+        const tbody = document.getElementById('tabla');
+        if (!lista.length) {
+            tbody.innerHTML = '<tr><td colspan="8" class="vacio">Ningún material coincide con los filtros.</td></tr>';
+            return;
         }
-
-        // Link de acceso por correo (sin contraseña). Los @thinking.cl quedan como viewer al primer ingreso.
-        async function handleMagicLink() {
-            const email  = document.getElementById('loginEmail').value.trim();
-            const errDiv = document.getElementById('loginError');
-            const btn    = document.getElementById('btnMagicLink');
-
-            errDiv.textContent = '';
-            if (!email) {
-                errDiv.textContent = 'Ingresa tu email para recibir el link.';
-                return;
-            }
-
-            btn.disabled = true;
-            btn.textContent = 'Enviando...';
-            const { error } = await supabaseClient.auth.signInWithOtp({
-                email,
-                options: { emailRedirectTo: window.location.origin + window.location.pathname }
-            });
-            btn.disabled = false;
-            btn.textContent = '📧 Enviarme un link de acceso';
-
-            if (error) {
-                errDiv.textContent = '❌ No se pudo enviar el link: ' + error.message;
-            } else {
-                showMessage(`✓ Revisa tu correo (${email}) y abre el link de acceso`, 'success');
-            }
-        }
-
-        async function handleLogout() {
-            showLoading('Cerrando sesión...');
-            await supabaseClient.auth.signOut();
-            hideLoading();
-        }
-
-        // ─── ROL ──────────────────────────────────────────────────────────────
-        async function loadUserRole() {
-            // ensure_my_role() devuelve el rol y da de alta como viewer a los @thinking.cl sin rol.
-            // Sin rol = sin acceso (antes se asumía viewer por defecto).
-            try {
-                const { data, error } = await supabaseClient.rpc('ensure_my_role');
-                currentUserRole = (!error && data) ? data : null;
-            } catch {
-                currentUserRole = null;
-            }
-        }
-
-        function applyRoleUI(switchToDefault = false) {
-            const isOwner = currentUserRole === 'owner';
-
-            document.body.classList.toggle('is-owner', isOwner);
-            document.body.classList.toggle('is-aprobador', currentUserRole === 'aprobador');
-
-            document.getElementById('userEmailDisplay').textContent = currentUser.email;
-            const badge = document.getElementById('userRoleDisplay');
-            badge.textContent = ROLE_LABELS[currentUserRole].toUpperCase();
-            badge.className = `role-badge ${currentUserRole}`;
-
-            // Solo cambiar de tab en el primer login, no en refrescos de token
-            if (switchToDefault) {
-                switchTab('documentos', document.getElementById('tab-documentos'));
-            }
-
-            document.getElementById('loginPage').style.display = 'none';
-            document.getElementById('mainContent').classList.add('active');
-        }
-
-        function showLogin() {
-            document.getElementById('loginPage').style.display = 'flex';
-            document.getElementById('mainContent').classList.remove('active');
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
-            document.getElementById('loginError').textContent = loginNotice;
-            loginNotice = '';
-            resetForm();
-        }
-
-        // ─── LOADING ──────────────────────────────────────────────────────────
-        function showLoading(msg = 'Cargando...') {
-            document.getElementById('loadingText').textContent = msg;
-            document.getElementById('loadingOverlay').classList.add('active');
-        }
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.remove('active');
-        }
-
-        // ─── DOCUMENTOS ───────────────────────────────────────────────────────
-        async function loadDocuments() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('documents')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                if (error) throw error;
-                documents = data || [];
-            } catch (err) {
-                console.warn('Supabase offline:', err.message);
-                const stored = sessionStorage.getItem('documents_local');
-                documents = stored ? JSON.parse(stored) : [];
-            }
-            renderDocuments();
-            renderPendientes();
-            if (currentUserRole === 'owner') {
-                renderAprobadores();
-                renderCatalogAdmin(); // actualiza conteo de uso
-            }
-        }
-
-        function estadoBadge(estado) {
-            const cls = (estado || '').toLowerCase().replaceAll(' ', '-');
-            return `<span class="status-badge status-${cls}">${escapeHtml(estado || '-')}</span>`;
-        }
-
-        // Días desde la última revisión periódica (o desde la publicación); null si aún no se publica
-        function diasDesdePublicacion(doc) {
-            const base = doc.ultima_revision || doc.publicado;
-            if (!base) return null;
-            return Math.ceil((new Date() - new Date(base)) / (1000 * 60 * 60 * 24));
-        }
-
-        function renderDocuments(filtered = null) {
-            renderStats();
-            const tbody   = document.getElementById('documentTable');
-            const isOwner = currentUserRole === 'owner';
-            const list    = filtered ?? documents;
-
-            if (list.length === 0) {
-                const cols = isOwner ? 12 : 11;
-                const msg  = filtered ? 'Sin resultados para los filtros aplicados' : 'Sin documentos aún';
-                tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align: center; padding: 40px; color: #999;">${msg}</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = list.map(doc => {
-                const diasDesde = diasDesdePublicacion(doc);
-                const color     = diasDesde > 365 ? '#F32121' : '#333';
-
-                const linkHtml = (doc.data?.link && doc.data.link.startsWith('http'))
-                    ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" rel="noopener noreferrer" style="color: #F32121; text-decoration: none;" onclick="event.stopPropagation()">Abrir</a>`
-                    : '-';
-
-                const renovarBtn = (isOwner && diasDesde > 365 && doc.estado === 'Publicado')
-                    ? `<button class="btn-renovar btn-icon" title="Registrar revisión periódica" onclick="event.stopPropagation(); renovarDoc('${doc.id}')">🔁 Revisar</button>`
-                    : '';
-                // Solo borradores se eliminan; el resto se archiva (la BD además exige que no tenga historial)
-                const deleteBtn = doc.estado === 'Borrador'
-                    ? `<button class="btn-danger btn-icon" title="Eliminar borrador" onclick="event.stopPropagation(); deleteDocument('${doc.id}')">🗑️</button>`
-                    : '';
-
-                const accionesHtml = isOwner ? `
-                    <td>
-                        <div class="actions">
-                            ${renovarBtn}
-                            <button class="btn-secondary btn-icon" onclick="event.stopPropagation(); editDocument('${doc.id}')">✏️</button>
-                            ${deleteBtn}
-                        </div>
-                    </td>` : '';
-
-                const notesShort = doc.data?.notes
-                    ? (doc.data.notes.length > 30 ? escapeHtml(doc.data.notes.substring(0, 30)) + '...' : escapeHtml(doc.data.notes))
-                    : '-';
-
-                return `
-                <tr style="cursor:pointer;" onclick="openModal('${doc.id}')">
-                    <td><strong>${escapeHtml(doc.name)}</strong></td>
-                    <td><small>${escapeHtml(doc.codigo || '')}</small></td>
-                    <td><small>${escapeHtml(doc.tipo || '')}</small></td>
-                    <td><small>${escapeHtml(doc.alcance || '')}</small></td>
-                    <td>${estadoBadge(doc.estado)}</td>
-                    <td><small>${escapeHtml(doc.repositorio || '')}</small></td>
-                    <td><small>${doc.publicado || '-'}</small></td>
-                    <td><small>${escapeHtml(doc.version || '-')}</small></td>
-                    <td><small style="color: ${color}">${diasDesde === null ? '-' : diasDesde + ' días'}</small></td>
-                    <td>${linkHtml}</td>
-                    <td><small title="${escapeHtml(doc.data?.notes || '')}">${notesShort}</small></td>
-                    ${accionesHtml}
-                </tr>`;
-            }).join('');
-        }
-
-        // ─── ESTADÍSTICAS ────────────────────────────────────────────────────
-        function renderStats() {
-            const hoy = new Date();
-            const total      = documents.length;
-            const publicados = documents.filter(d => d.estado === 'Publicado').length;
-            const revision   = documents.filter(d => d.estado === 'En revisión' || d.estado === 'En aprobación').length;
-            // Mantención solo aplica a documentos vigentes
-            const vencidos   = documents.filter(d => d.estado === 'Publicado' && diasDesdePublicacion(d) > 365).length;
-
-            document.getElementById('statTotal').textContent      = total;
-            document.getElementById('statPublicados').textContent = publicados;
-            document.getElementById('statRevision').textContent   = revision;
-            document.getElementById('statVencidos').textContent   = vencidos;
-        }
-
-        // ─── CONTRASEÑA ───────────────────────────────────────────────────────
-        function openPasswordModal() {
-            document.getElementById('passwordForm').reset();
-            document.getElementById('passwordError').textContent = '';
-            document.getElementById('passwordModalOverlay').classList.add('active');
-        }
-
-        function closePasswordModal(event) {
-            if (event.target === document.getElementById('passwordModalOverlay')) closePasswordModalDirect();
-        }
-
-        function closePasswordModalDirect() {
-            document.getElementById('passwordModalOverlay').classList.remove('active');
-        }
-
-        async function handleChangePassword(e) {
-            e.preventDefault();
-            const newPwd     = document.getElementById('newPassword').value;
-            const confirmPwd = document.getElementById('confirmPassword').value;
-            const errDiv     = document.getElementById('passwordError');
-            const btn        = document.getElementById('btnChangePassword');
-
-            errDiv.textContent = '';
-
-            if (newPwd !== confirmPwd) {
-                errDiv.textContent = 'Las contraseñas no coinciden.';
-                return;
-            }
-
-            btn.disabled = true;
-            btn.textContent = 'Cambiando...';
-
-            const { error } = await supabaseClient.auth.updateUser({ password: newPwd });
-
-            btn.disabled = false;
-            btn.textContent = 'Cambiar contraseña';
-
-            if (error) {
-                errDiv.textContent = '❌ Error: ' + error.message;
-            } else {
-                closePasswordModalDirect();
-                showMessage('✓ Contraseña actualizada correctamente', 'success');
-            }
-        }
-
-        // ─── FILTROS ──────────────────────────────────────────────────────────
-        function applyFilters() {
-            const search = document.getElementById('searchInput').value.toLowerCase().trim();
-            const estado = document.getElementById('filterEstado').value;
-            const tipo   = document.getElementById('filterTipo').value;
-            const repo   = document.getElementById('filterRepositorio').value;
-            const area   = document.getElementById('filterArea').value;
-
-            const filtered = documents.filter(doc => {
-                const matchSearch = !search ||
-                    (doc.name || '').toLowerCase().includes(search) ||
-                    (doc.codigo || '').toLowerCase().includes(search);
-                const matchEstado = !estado || doc.estado === estado;
-                const matchTipo   = !tipo   || doc.tipo === tipo;
-                const matchRepo   = !repo   || doc.repositorio === repo;
-                const matchArea   = !area   || doc.area === area;
-                return matchSearch && matchEstado && matchTipo && matchRepo && matchArea;
-            });
-
-            const countEl = document.getElementById('filterCount');
-            if (search || estado || tipo || repo || area) {
-                countEl.textContent = `${filtered.length} de ${documents.length} documentos`;
-            } else {
-                countEl.textContent = '';
-            }
-
-            renderDocuments(filtered);
-        }
-
-        function clearFilters() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('filterEstado').value = '';
-            document.getElementById('filterTipo').value = '';
-            document.getElementById('filterRepositorio').value = '';
-            document.getElementById('filterArea').value = '';
-            document.getElementById('filterCount').textContent = '';
-            renderDocuments();
-        }
-
-        // ─── MODAL DETALLE ────────────────────────────────────────────────────
-        function openModal(id) {
-            const doc = documents.find(d => d.id === id);
-            if (!doc) return;
-
-            const diasDesde = diasDesdePublicacion(doc);
-            const colorDias = diasDesde > 365 ? '#F32121' : '#065f46';
-
-            const linkHtml = (doc.data?.link && doc.data.link.startsWith('http'))
-                ? `<a href="${escapeHtml(doc.data.link)}" target="_blank" rel="noopener noreferrer" style="color:#F32121;">Abrir documento</a>`
-                : '-';
-
-            document.getElementById('modalTitle').textContent = doc.name;
-            document.getElementById('modalContent').innerHTML = `
-                <div class="modal-field">
-                    <span class="modal-label">Código</span>
-                    <span class="modal-value">${escapeHtml(doc.codigo || '-')}</span>
-                </div>
-                <div class="modal-field">
-                    <span class="modal-label">Estado</span>
-                    <span class="modal-value">${estadoBadge(doc.estado)}</span>
-                </div>
-                <div class="modal-field">
-                    <span class="modal-label">Tipo</span>
-                    <span class="modal-value">${escapeHtml(doc.tipo || '-')}</span>
-                </div>
-                <div class="modal-field">
-                    <span class="modal-label">Alcance</span>
-                    <span class="modal-value">${escapeHtml(doc.alcance || '-')}</span>
-                </div>
-                <div class="modal-field">
-                    <span class="modal-label">Repositorio</span>
-                    <span class="modal-value">${escapeHtml(doc.repositorio || '-')}</span>
-                </div>
-                <div class="modal-field">
-                    <span class="modal-label">Versión</span>
-                    <span class="modal-value">${escapeHtml(doc.version || '-')}</span>
-                </div>
-                <div class="modal-field">
-                    <span class="modal-label">Publicado</span>
-                    <span class="modal-value">${doc.publicado || '-'}</span>
-                </div>
-                <div class="modal-field">
-                    <span class="modal-label">Mantención</span>
-                    <span class="modal-value" style="color:${colorDias}; font-weight:600;">${diasDesde === null ? '-' : diasDesde + ' días'}</span>
-                </div>
-                <hr class="modal-divider">
-                <div class="modal-field">
-                    <span class="modal-label">Área solicitante</span>
-                    <span class="modal-value">${escapeHtml(doc.area || '-')}</span>
-                </div>
-                <div class="modal-field">
-                    <span class="modal-label">Elaborador</span>
-                    <span class="modal-value">${escapeHtml(doc.elaborador || '-')}</span>
-                </div>
-                <div class="modal-field">
-                    <span class="modal-label">Revisor</span>
-                    <span class="modal-value">${escapeHtml(doc.revisor || 'Sin revisor')}</span>
-                </div>
-                <div class="modal-field">
-                    <span class="modal-label">Aprobador</span>
-                    <span class="modal-value">${escapeHtml(doc.aprobador || '-')}</span>
-                </div>
-                <div class="modal-field">
-                    <span class="modal-label">Link</span>
-                    <span class="modal-value">${linkHtml}</span>
-                </div>
-                <div class="modal-field full">
-                    <span class="modal-label">Notas</span>
-                    <span class="modal-value">${escapeHtml(doc.data?.notes || '-')}</span>
-                </div>
-            `;
-
-            document.getElementById('modalOverlay').classList.add('active');
-            renderWorkflow(doc);
-        }
-
-        // ─── FLUJO DE APROBACIÓN ──────────────────────────────────────────────
-        // Acciones que exigen comentario, con el mensaje que se muestra si falta
-        const WF_COMMENT_REQUIRED = {
-            observar:           'Escribe las observaciones antes de devolver el documento',
-            carga_historica:    'Indica en el comentario quién y cuándo aprobó el documento',
-            aprobar_owner:      'Escribe la justificación de la aprobación por excepción',
-            nueva_version:      'Escribe el motivo del cambio en el comentario',
-            revision_periodica: 'Escribe la conclusión de la revisión (ej: vigente sin cambios)',
-            archivar:           'Indica el motivo y confirma que se retiró del repositorio',
-            obsoleto:           'Indica el motivo y confirma que se retiró del repositorio'
-        };
-
-        // Acciones disponibles para el usuario actual. Espejo de doc_transition() en Supabase,
-        // que es quien realmente valida (esto solo decide qué botones mostrar).
-        function getWorkflowActions(doc) {
-            const me      = currentUser?.id;
-            const isOwner = currentUserRole === 'owner';
-            const acts    = [];
-            const enFlujo = ['En revisión', 'En aprobación'].includes(doc.estado);
-
-            if (doc.estado === 'En revisión' && doc.revisor_id === me) {
-                acts.push({ action: 'aprobar_revision', label: '✓ Aprobar revisión', cls: 'btn-primary' });
-            }
-            if (doc.estado === 'En aprobación' && doc.aprobador_id === me && doc.elaborador_id !== me) {
-                acts.push({ action: 'aprobar', label: '✓ Aprobar documento', cls: 'btn-primary' });
-            }
-            const asignado = (doc.estado === 'En revisión' && doc.revisor_id === me) ||
-                             (doc.estado === 'En aprobación' && doc.aprobador_id === me);
-            if (enFlujo && (asignado || isOwner)) {
-                acts.push({ action: 'observar', label: '↩ Observar', cls: 'btn-danger' });
-            }
-            if (isOwner) {
-                if (['Borrador', 'Observado'].includes(doc.estado)) {
-                    acts.push({ action: 'enviar_revision', label: doc.revisor_id ? '📤 Enviar a revisión' : '📤 Enviar a aprobación', cls: 'btn-primary' });
-                }
-                if (doc.estado === 'Aprobado') {
-                    acts.push({ action: 'publicar', label: '🚀 Publicar', cls: 'btn-primary' });
-                }
-                if (['Borrador', 'Observado', 'En revisión', 'En aprobación'].includes(doc.estado)) {
-                    acts.push({ action: 'aprobar_owner', label: '⚡ Aprobar por excepción', cls: 'btn-secondary' });
-                }
-                if (doc.estado === 'Publicado') {
-                    acts.push({ action: 'revision_periodica', label: '🔁 Revisión periódica', cls: 'btn-secondary' });
-                }
-                if (['Aprobado', 'Publicado'].includes(doc.estado)) {
-                    acts.push({ action: 'nueva_version', label: '🆕 Nueva versión', cls: 'btn-secondary' });
-                }
-                if (doc.estado === 'Borrador') {
-                    acts.push({ action: 'carga_historica', label: '📥 Carga histórica', cls: 'btn-secondary' });
-                }
-                if (!['Archivado', 'Obsoleto'].includes(doc.estado)) {
-                    acts.push({ action: 'archivar', label: 'Archivar', cls: 'btn-secondary' });
-                    acts.push({ action: 'obsoleto', label: 'Marcar obsoleto', cls: 'btn-secondary' });
-                }
-            }
-            return acts;
-        }
-
-        function workflowHint(doc) {
-            const me = currentUser?.id;
-            if (doc.estado === 'En revisión' && doc.revisor_id === me) return 'Eres el revisor. Abre el PDF, revísalo y decide.';
-            if (doc.estado === 'En aprobación' && doc.aprobador_id === me) {
-                return doc.elaborador_id === me
-                    ? 'Elaboraste este documento: no puedes aprobarlo. Un owner puede aprobarlo por excepción.'
-                    : 'Eres el aprobador. Valida que el contenido sea correcto y aplicable.';
-            }
-            if (currentUserRole !== 'owner') return '';
-            const hints = {
-                'Borrador':      'Asigna aprobador y, si aplica, revisor (✏️ Editar) y envía. Sin revisor va directo a aprobación. "Carga histórica" es solo para documentos ya aprobados fuera de la app.',
-                'Observado':     'Corrige según las observaciones y vuelve a enviar.',
-                'En revisión':   'Esperando al revisor. Si es necesario, puedes aprobar por excepción (queda registrado con tu justificación).',
-                'En aprobación': 'Esperando al aprobador. Si es necesario, puedes aprobar por excepción (queda registrado con tu justificación).',
-                'Aprobado':      'Registra el link al PDF aprobado y el repositorio (✏️ Editar) y publica.',
-                'Publicado':     'Revisión periódica: confirma que sigue vigente. Para cambiar el contenido, crea una nueva versión (vuelve a aprobación).',
-                'Archivado':     'Documento fuera de uso. Su historial y versiones se conservan como registro.',
-                'Obsoleto':      'Documento fuera de uso. Su historial y versiones se conservan como registro.'
-            };
-            return hints[doc.estado] || '';
-        }
-
-        async function renderWorkflow(doc) {
-            const panel = document.getElementById('modalWorkflow');
-            const current = WF_STEPS.indexOf(doc.estado);
-            const steps = WF_STEPS.map((s, i) => {
-                const cls = s === doc.estado ? 'current' : (current > i ? 'done' : '');
-                return `<span class="wf-step ${cls}">${s}</span>`;
-            }).join('<span style="color:#ccc;">›</span>');
-
-            const acts = getWorkflowActions(doc);
-            const obligatorias = acts.filter(a => WF_COMMENT_REQUIRED[a.action]).map(a => WF_ACTION_LABELS[a.action]);
-            const hint = workflowHint(doc);
-            const placeholder = obligatorias.length
-                ? 'Comentario (obligatorio para: ' + obligatorias.join(', ') + ')'
-                : 'Comentario (opcional)';
-            const actionsHtml = acts.length ? `
-                <div class="wf-actions">
-                    ${hint ? `<p class="wf-hint">${escapeHtml(hint)}</p>` : ''}
-                    <textarea id="wfComment" rows="2" placeholder="${escapeHtml(placeholder)}"></textarea>
-                    <div class="actions">
-                        ${acts.map(a => `<button class="${a.cls}" onclick="docTransition('${doc.id}', '${a.action}')">${a.label}</button>`).join('')}
-                    </div>
-                </div>` : (hint ? `<p class="wf-hint">${escapeHtml(hint)}</p>` : '');
-
-            const verVersiones = ['owner', 'aprobador'].includes(currentUserRole);
-            const motivoHtml = (doc.motivo_cambio && !['Publicado', 'Archivado', 'Obsoleto'].includes(doc.estado))
-                ? `<p class="wf-hint" style="margin-top:12px;"><strong>Motivo de esta versión:</strong> ${escapeHtml(doc.motivo_cambio)}</p>`
-                : '';
-            const versionesHtml = verVersiones
-                ? `<h4 style="margin-top:18px;">Versiones publicadas</h4>
-                   <div id="wfVersions"><small style="color:#999;">Cargando...</small></div>`
-                : '';
-
-            panel.innerHTML = `
-                <h4>Flujo de aprobación</h4>
-                <div class="wf-steps">${steps}${['Observado', 'Archivado', 'Obsoleto'].includes(doc.estado) ? ' ' + estadoBadge(doc.estado) : ''}</div>
-                ${actionsHtml}
-                ${motivoHtml}
-                ${versionesHtml}
-                <h4 style="margin-top:18px;">Historial</h4>
-                <div id="wfHistory"><small style="color:#999;">Cargando...</small></div>`;
-
-            if (verVersiones) renderVersions(doc);
-
-            const { data, error } = await supabaseClient
-                .from('document_approvals')
-                .select('action, from_estado, to_estado, version, user_email, comment, created_at')
-                .eq('document_id', doc.id)
-                .order('created_at', { ascending: false });
-
-            const histEl = document.getElementById('wfHistory');
-            if (!histEl) return;
-            if (error || !data?.length) {
-                histEl.innerHTML = '<small style="color:#999;">Sin movimientos registrados</small>';
-                return;
-            }
-            histEl.innerHTML = data.map(h => `
-                    <div class="wf-history-item">
-                        <strong>${escapeHtml(WF_ACTION_LABELS[h.action] || h.action)}</strong>
-                        → ${estadoBadge(h.to_estado)} <small>v${escapeHtml(h.version || '-')}</small><br>
-                        <span class="when">${formatFechaHora(h.created_at)} · ${escapeHtml(h.user_email || '')}</span>
-                        ${h.comment ? `<div class="comment">${escapeHtml(h.comment)}</div>` : ''}
-                    </div>`).join('');
-        }
-
-        // Versiones publicadas: evidencia de control de cambios (ISO 9001 · 7.5.3)
-        async function renderVersions(doc) {
-            const { data, error } = await supabaseClient
-                .from('document_versions')
-                .select('version, link, publicado, aprobado_por, motivo_cambio, published_email')
-                .eq('document_id', doc.id)
-                .order('created_at', { ascending: false });
-
-            const el = document.getElementById('wfVersions');
-            if (!el) return;
-            if (error || !data?.length) {
-                el.innerHTML = '<small style="color:#999;">Aún no tiene versiones publicadas</small>';
-                return;
-            }
-            el.innerHTML = data.map((v, i) => {
-                const vigente = i === 0 && doc.estado === 'Publicado';
-                const link = (v.link && v.link.startsWith('http'))
-                    ? `<a href="${escapeHtml(v.link)}" target="_blank" rel="noopener noreferrer" style="color:#F32121;">PDF</a>`
-                    : '';
-                return `
-                    <div class="wf-history-item">
-                        <strong>v${escapeHtml(v.version)}</strong> ${vigente ? estadoBadge('Publicado') : '<small style="color:#999;">(histórica)</small>'}
-                        · ${escapeHtml(v.publicado)} ${link}<br>
-                        <span class="when">Aprobó: ${escapeHtml(v.aprobado_por || '-')} · Publicó: ${escapeHtml(v.published_email || '-')}</span>
-                        ${v.motivo_cambio ? `<div class="comment">${escapeHtml(v.motivo_cambio)}</div>` : ''}
-                    </div>`;
-            }).join('');
-        }
-
-        function formatFechaHora(iso) {
-            const d = new Date(iso);
-            return d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' })
-                 + ' ' + d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
-        }
-
-        const WF_ACTION_LABELS = {
-            enviar_revision:    'Envió al flujo',
-            aprobar_revision:   'Aprobó la revisión',
-            observar:           'Observó',
-            aprobar:            'Aprobó',
-            aprobar_owner:      'Aprobó por excepción (owner)',
-            publicar:           'Publicó',
-            carga_historica:    'Carga histórica',
-            nueva_version:      'Nueva versión',
-            revision_periodica: 'Revisión periódica',
-            archivar:           'Archivó',
-            obsoleto:           'Marcó obsoleto'
-        };
-
-        async function docTransition(docId, action) {
-            const doc     = documents.find(d => d.id === docId);
-            const comment = document.getElementById('wfComment')?.value.trim() || '';
-            let version   = null;
-
-            if (WF_COMMENT_REQUIRED[action] && !comment) {
-                showMessage(WF_COMMENT_REQUIRED[action], 'error');
-                document.getElementById('wfComment')?.focus();
-                return;
-            }
-            if (action === 'nueva_version') {
-                version = prompt(`Versión actual: ${doc?.version || '-'}\nNueva versión:`)?.trim();
-                if (!version) return;
-            } else if (!confirm(`¿Confirmas "${WF_ACTION_LABELS[action]}" para "${doc?.name}"?`)) {
-                return;
-            }
-
-            showLoading('Actualizando flujo...');
-            const { data, error } = await supabaseClient.rpc('doc_transition', {
-                p_doc_id: docId, p_action: action, p_comment: comment || null, p_version: version
-            });
-            hideLoading();
-
-            if (error) {
-                showMessage('❌ ' + error.message, 'error');
-                return;
-            }
-            showMessage(`✓ Documento ahora en estado "${data}"`, 'success');
-            await loadDocuments();
-            if (currentUserRole === 'owner') await loadAudit();
-            if (documents.some(d => d.id === docId)) openModal(docId);
-            else closeModalDirect();
-        }
-
-        // ─── MIS PENDIENTES ───────────────────────────────────────────────────
-        function getPendientes() {
-            const me = currentUser?.id;
-            const isOwner = currentUserRole === 'owner';
-            return documents.map(doc => {
-                if (doc.estado === 'En revisión' && doc.revisor_id === me)     return { doc, tarea: 'Revisar' };
-                if (doc.estado === 'En aprobación' && doc.aprobador_id === me) return { doc, tarea: 'Aprobar' };
-                if (isOwner && doc.estado === 'Observado') return { doc, tarea: 'Corregir observaciones y reenviar' };
-                if (isOwner && doc.estado === 'Aprobado')  return { doc, tarea: 'Registrar link PDF y publicar' };
-                return null;
-            }).filter(Boolean);
-        }
-
-        function renderPendientes() {
-            const tbody = document.getElementById('pendientesTable');
-            const pend  = getPendientes();
-            document.getElementById('pendientesCount').textContent = pend.length || '';
-
-            if (!pend.length) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#999;">No tienes pendientes 🎉</td></tr>';
-                return;
-            }
-            tbody.innerHTML = pend.map(({ doc, tarea }) => `
-                <tr onclick="openModal('${doc.id}')">
-                    <td><strong>${escapeHtml(doc.name)}</strong></td>
-                    <td><small>${escapeHtml(doc.codigo || '')}</small></td>
-                    <td><small>${escapeHtml(doc.version || '-')}</small></td>
-                    <td>${estadoBadge(doc.estado)}</td>
-                    <td><small>${escapeHtml(tarea)}</small></td>
-                </tr>`).join('');
-        }
-
-        // ─── CATÁLOGOS (Tipo, Alcance, Repositorio) ───────────────────────────
-        const CATALOG_LABELS = { area: 'Área solicitante', tipo: 'Tipo', alcance: 'Alcance', repositorio: 'Repositorio' };
-        // Respaldo si la tabla catalog_options aún no existe
-        const CATALOG_DEFAULTS = {
-            area:        ['Data Ops', 'Soporte', 'Extract', 'Proyectos', 'Comunicaciones y Administración'],
-            tipo:        ['Manual', 'Procedimiento', 'Capacitación', 'QRG', 'Video'],
-            alcance:     ['Contratista', 'Empleados', 'Transversal', 'Thinking'],
-            repositorio: ['Contract Support', 'PMG Center', 'Reportabilidad HSS', 'Rutinas HSS', 'Contract Data Center']
-        };
-        let catalog = [];
-
-        async function loadCatalog() {
-            const { data, error } = await supabaseClient
-                .from('catalog_options')
-                .select('id, category, value, sort_order, active, default_aprobador_id')
-                .order('sort_order')
-                .order('value');
-            if (error) {
-                console.warn('Catálogos no disponibles, usando valores por defecto:', error.message);
-                catalog = Object.entries(CATALOG_DEFAULTS).flatMap(([category, values]) =>
-                    values.map((value, i) => ({ id: null, category, value, sort_order: i, active: true })));
-            } else {
-                catalog = data || [];
-            }
-            populateCatalogSelects();
-            renderCatalogAdmin();
-        }
-
-        function populateCatalogSelects() {
-            // Formulario: solo valores activos
-            document.querySelectorAll('select[data-catalog]').forEach(sel => {
-                const cat  = sel.dataset.catalog;
-                const prev = sel.value;
-                sel.innerHTML = '<option value="">-- Seleccionar --</option>' +
-                    catalog.filter(o => o.category === cat && o.active)
-                           .map(o => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.value)}</option>`).join('');
-                ensureOption(sel, prev);
-            });
-            // Filtros: todos, incluso inactivos (hay documentos antiguos que los usan)
-            document.querySelectorAll('select[data-catalog-filter]').forEach(sel => {
-                const cat  = sel.dataset.catalogFilter;
-                const prev = sel.value;
-                sel.innerHTML = `<option value="">${escapeHtml(sel.dataset.allLabel)}</option>` +
-                    catalog.filter(o => o.category === cat)
-                           .map(o => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.value)}</option>`).join('');
-                sel.value = prev;
-            });
-        }
-
-        // Si un documento usa un valor inactivo, se agrega al select para no perderlo al editar
-        function ensureOption(sel, value) {
-            if (!value) { sel.value = ''; return; }
-            if (![...sel.options].some(o => o.value === value)) {
-                sel.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(value)}">${escapeHtml(value)} (inactivo)</option>`);
-            }
-            sel.value = value;
-        }
-
-        // Selector del aprobador por defecto de un área (solo perfiles owner / revisor-aprobador)
-        function areaAprobadorSelect(o) {
-            const opts = staffUsers.map(u =>
-                `<option value="${u.user_id}" ${u.user_id === o.default_aprobador_id ? 'selected' : ''}>${escapeHtml(u.email)}</option>`).join('');
-            return `
-                <div class="catalog-item" style="padding-top:0;">
-                    <small style="color:var(--muted); white-space:nowrap;">Aprobador:</small>
-                    <select style="padding:5px 8px; font-size:12px;" onchange="setAreaAprobador('${o.id}', this.value)">
-                        <option value="">-- Sin definir --</option>${opts}
-                    </select>
-                </div>`;
-        }
-
-        async function setAreaAprobador(id, userId) {
-            const item = catalogItem(id);
-            if (!item) return;
-            const { error } = await supabaseClient
-                .from('catalog_options')
-                .update({ default_aprobador_id: userId || null })
-                .eq('id', id);
-            if (error) { showMessage('❌ ' + error.message, 'error'); return; }
-            await afterCatalogChange(`✓ Aprobador de ${item.value} actualizado`);
-        }
-
-        // Al elegir área, sugiere su aprobador por defecto (si no es el elaborador)
-        function applyAreaDefaultAprobador() {
-            const area = document.getElementById('docArea').value;
-            const def  = catalog.find(o => o.category === 'area' && o.value === area)?.default_aprobador_id;
-            const elab = document.getElementById('docElaborador').value;
-            if (def && def !== elab) document.getElementById('docAprobador').value = def;
-        }
-
-        function renderCatalogAdmin() {
-            if (currentUserRole !== 'owner') return;
-            document.querySelectorAll('[data-catalog-admin]').forEach(panel => {
-                const cat   = panel.dataset.catalogAdmin;
-                const items = catalog.filter(o => o.category === cat);
-                const enUso = v => documents.filter(d => d[cat] === v).length;
-
-                panel.innerHTML = `
-                    <div class="list-header">${CATALOG_LABELS[cat]}</div>
-                    ${items.map(o => `
-                        <div class="catalog-item ${o.active ? '' : 'inactive'}">
-                            <span class="name">${escapeHtml(o.value)} <small style="color:#999;">(${enUso(o.value)})</small></span>
-                            <button class="btn-secondary" title="Subir" onclick="moveCatalogOption('${o.id}', -1)">↑</button>
-                            <button class="btn-secondary" title="Renombrar" onclick="renameCatalogOption('${o.id}')">✏️</button>
-                            <button class="btn-secondary" title="${o.active ? 'Desactivar' : 'Activar'}" onclick="toggleCatalogOption('${o.id}')">${o.active ? '⏸' : '▶'}</button>
-                            <button class="btn-danger" title="Eliminar" onclick="deleteCatalogOption('${o.id}')">🗑️</button>
-                        </div>
-                        ${cat === 'area' ? areaAprobadorSelect(o) : ''}`).join('') || '<div class="catalog-item"><small style="color:#999;">Sin valores</small></div>'}
-                    <form class="catalog-add" onsubmit="addCatalogOption(event, '${cat}')">
-                        <input type="text" required placeholder="Nuevo valor...">
-                        <button type="submit" class="btn-secondary">+ Agregar</button>
-                    </form>`;
-            });
-        }
-
-        function catalogItem(id) {
-            const item = catalog.find(o => o.id === id);
-            if (!item || !item.id) {
-                showMessage('Primero corre la migración 002_catalogos.sql en Supabase', 'error');
-                return null;
-            }
-            return item;
-        }
-
-        async function afterCatalogChange(msg) {
-            showMessage(msg, 'success');
-            await loadCatalog();
-        }
-
-        async function addCatalogOption(e, cat) {
-            e.preventDefault();
-            const input = e.target.querySelector('input');
-            const value = input.value.trim();
-            if (!value) return;
-            if (catalog.some(o => o.category === cat && o.value.toLowerCase() === value.toLowerCase())) {
-                showMessage('Ese valor ya existe', 'error');
-                return;
-            }
-            const maxOrder = Math.max(0, ...catalog.filter(o => o.category === cat).map(o => o.sort_order));
-            const { error } = await supabaseClient
-                .from('catalog_options')
-                .insert([{ category: cat, value, sort_order: maxOrder + 1 }]);
-            if (error) { showMessage('❌ ' + error.message, 'error'); return; }
-            await afterCatalogChange(`✓ "${value}" agregado a ${CATALOG_LABELS[cat]}`);
-        }
-
-        async function renameCatalogOption(id) {
-            const item = catalogItem(id);
-            if (!item) return;
-            const nuevo = prompt(`Nuevo nombre para "${item.value}":`, item.value)?.trim();
-            if (!nuevo || nuevo === item.value) return;
-            if (catalog.some(o => o.category === item.category && o.id !== id && o.value.toLowerCase() === nuevo.toLowerCase())) {
-                showMessage('Ya existe un valor con ese nombre', 'error');
-                return;
-            }
-
-            const usados = documents.filter(d => d[item.category] === item.value).length;
-            if (usados && !confirm(`${usados} documento(s) usan "${item.value}". Se actualizarán a "${nuevo}". ¿Continuar?`)) return;
-
-            showLoading('Renombrando...');
-            const { error } = await supabaseClient.from('catalog_options').update({ value: nuevo }).eq('id', id);
-            if (!error && usados) {
-                const { error: docErr } = await supabaseClient
-                    .from('documents')
-                    .update({ [item.category]: nuevo, updated_at: new Date().toISOString() })
-                    .eq(item.category, item.value);
-                if (docErr) showMessage('⚠️ Catálogo renombrado, pero falló al actualizar documentos: ' + docErr.message, 'error');
-            }
-            hideLoading();
-            if (error) { showMessage('❌ ' + error.message, 'error'); return; }
-            await loadDocuments();
-            await afterCatalogChange(`✓ Renombrado a "${nuevo}"`);
-        }
-
-        async function toggleCatalogOption(id) {
-            const item = catalogItem(id);
-            if (!item) return;
-            const { error } = await supabaseClient.from('catalog_options').update({ active: !item.active }).eq('id', id);
-            if (error) { showMessage('❌ ' + error.message, 'error'); return; }
-            await afterCatalogChange(`✓ "${item.value}" ${item.active ? 'desactivado' : 'activado'}`);
-        }
-
-        async function deleteCatalogOption(id) {
-            const item = catalogItem(id);
-            if (!item) return;
-            const usados = documents.filter(d => d[item.category] === item.value).length;
-            if (usados) {
-                showMessage(`"${item.value}" está en uso en ${usados} documento(s). Desactívalo en vez de eliminarlo.`, 'error');
-                return;
-            }
-            if (!confirm(`¿Eliminar "${item.value}" de ${CATALOG_LABELS[item.category]}?`)) return;
-            const { error } = await supabaseClient.from('catalog_options').delete().eq('id', id);
-            if (error) { showMessage('❌ ' + error.message, 'error'); return; }
-            await afterCatalogChange(`✓ "${item.value}" eliminado`);
-        }
-
-        // Intercambia el orden con el valor anterior de la misma categoría
-        async function moveCatalogOption(id, dir) {
-            const item = catalogItem(id);
-            if (!item) return;
-            const items = catalog.filter(o => o.category === item.category);
-            const idx   = items.findIndex(o => o.id === id);
-            const other = items[idx + dir];
-            if (!other) return;
-            // Reasigna orden secuencial para evitar empates
-            const reordered = [...items];
-            [reordered[idx], reordered[idx + dir]] = [reordered[idx + dir], reordered[idx]];
-            showLoading('Reordenando...');
-            const results = await Promise.all(reordered.map((o, i) =>
-                supabaseClient.from('catalog_options').update({ sort_order: i + 1 }).eq('id', o.id)));
-            hideLoading();
-            const err = results.find(r => r.error)?.error;
-            if (err) { showMessage('❌ ' + err.message, 'error'); return; }
-            await loadCatalog();
-        }
-
-        // ─── REVISORES / APROBADORES ASIGNABLES ───────────────────────────────
-        async function loadStaffUsers() {
-            const { data, error } = await supabaseClient
-                .from('user_roles')
-                .select('user_id, email, role')
-                .in('role', ['owner', 'aprobador'])
-                .order('email');
-            staffUsers = error ? [] : (data || []);
-
-            const options = staffUsers
-                .map(u => `<option value="${u.user_id}">${escapeHtml(u.email)}${u.role === 'owner' ? ' (owner)' : ''}</option>`).join('');
-            ['docElaborador', 'docRevisor', 'docAprobador'].forEach(id => {
-                const sel = document.getElementById(id);
-                const prev = sel.value;
-                sel.innerHTML = `<option value="">${escapeHtml(sel.dataset.firstLabel)}</option>` + options;
-                sel.value = prev;
-            });
-            // Documento nuevo: el elaborador por defecto es quien lo registra
-            if (!editingDocId && !document.getElementById('docElaborador').value) {
-                document.getElementById('docElaborador').value = currentUser?.id || '';
-            }
-            renderCatalogAdmin(); // refresca los selectores de aprobador por área
-        }
-
-        function staffEmail(userId) {
-            return staffUsers.find(u => u.user_id === userId)?.email || '';
-        }
-
-        function closeModal(event) {
-            if (event.target === document.getElementById('modalOverlay')) closeModalDirect();
-        }
-
-        function closeModalDirect() {
-            document.getElementById('modalOverlay').classList.remove('active');
-        }
-
-        function renderAprobadores() {
-            const tbody = document.getElementById('aprobadoresTable');
-            if (documents.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">Sin documentos aún</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = documents.map(doc => `
-                <tr>
-                    <td><strong>${escapeHtml(doc.name)}</strong></td>
-                    <td><small>${escapeHtml(doc.codigo || '')}</small></td>
-                    <td><small>${escapeHtml(staffEmail(doc.elaborador_id) || doc.elaborador || '-')}</small></td>
-                    <td><small>${escapeHtml(staffEmail(doc.revisor_id) || doc.revisor || '-')}</small></td>
-                    <td><small>${escapeHtml(staffEmail(doc.aprobador_id) || doc.aprobador || '-')}</small></td>
-                    <td>${estadoBadge(doc.estado)}</td>
-                    <td><button class="btn-secondary btn-icon" onclick="editDocument('${doc.id}')">✏️</button></td>
-                </tr>
-            `).join('');
-        }
-
-        async function handleSaveDocument(e) {
-            e.preventDefault();
-            if (currentUserRole !== 'owner') return;
-
-            // El estado no se envía: al crear queda en Borrador y luego solo cambia vía doc_transition()
-            const revisorId   = document.getElementById('docRevisor').value || null;
-            const aprobadorId = document.getElementById('docAprobador').value || null;
-            // Documentos antiguos tienen revisor/aprobador como texto libre: se conserva si no se asigna usuario
-            const prevDoc     = editingDocId ? documents.find(d => d.id === editingDocId) : null;
-            const elaboradorId = document.getElementById('docElaborador').value || null;
-
-            // Segregación de funciones (la BD también lo valida)
-            if (!elaboradorId && !prevDoc?.elaborador) {
-                showMessage('Selecciona el elaborador', 'error');
-                return;
-            }
-            if (elaboradorId && (revisorId === elaboradorId || aprobadorId === elaboradorId)) {
-                showMessage('Revisor y aprobador deben ser distintos del elaborador', 'error');
-                return;
-            }
-
-            const data = {
-                name:         document.getElementById('docName').value,
-                codigo:       document.getElementById('docCodigo').value,
-                tipo:         document.getElementById('docTipo').value,
-                alcance:      document.getElementById('docAlcance').value,
-                repositorio:  document.getElementById('docRepositorio').value,
-                publicado:    document.getElementById('docPublicado').value || null,
-                version:      document.getElementById('docVersion').value,
-                area:          document.getElementById('docArea').value,
-                elaborador_id: elaboradorId,
-                elaborador:    elaboradorId ? staffEmail(elaboradorId) : (prevDoc?.elaborador || ''),
-                revisor_id:   revisorId,
-                aprobador_id: aprobadorId,
-                revisor:      revisorId   ? staffEmail(revisorId)   : (prevDoc?.revisor || ''),
-                aprobador:    aprobadorId ? staffEmail(aprobadorId) : (prevDoc?.aprobador || ''),
-                created_by:   currentUser.id,
-                data: {
-                    link:             document.getElementById('docLink').value,
-                    notes:            document.getElementById('docNotes').value,
-                    created_by_email: currentUser.email
-                }
-            };
-
-            try {
-                if (editingDocId) {
-                    const { error } = await supabaseClient
-                        .from('documents')
-                        .update({ ...data, updated_at: new Date().toISOString() })
-                        .eq('id', editingDocId);
-                    if (error) throw error;
-                    await logAudit(editingDocId, 'updated', data);
-                    showMessage('✓ Documento actualizado', 'success');
-                } else {
-                    const { data: newDoc, error } = await supabaseClient
-                        .from('documents')
-                        .insert([data])
-                        .select();
-                    if (error) throw error;
-                    await logAudit(newDoc[0].id, 'created', data);
-                    showMessage('✓ Documento creado', 'success');
-                }
-            } catch (err) {
-                console.warn('Error al guardar:', err.message);
-                showMessage('❌ Error al guardar: ' + err.message, 'error');
-                return;
-            }
-
-            resetForm();
-            await loadDocuments();
-            await loadAudit();
-        }
-
-        function editDocument(id) {
-            if (currentUserRole !== 'owner') return;
-            const doc = documents.find(d => d.id === id);
-            if (!doc) return;
-
-            editingDocId = id;
-            document.getElementById('formTitle').textContent = 'Editar documento';
-            document.getElementById('docName').value        = doc.name || '';
-            document.getElementById('docCodigo').value      = doc.codigo || '';
-            populateCatalogSelects(); // limpia opciones "(inactivo)" de una edición anterior
-            ensureOption(document.getElementById('docTipo'), doc.tipo);
-            ensureOption(document.getElementById('docAlcance'), doc.alcance);
-            ensureOption(document.getElementById('docRepositorio'), doc.repositorio);
-            ensureOption(document.getElementById('docArea'), doc.area);
-            document.getElementById('docEstadoInfo').value  = doc.estado || '';
-            document.getElementById('docPublicado').value   = doc.publicado || '';
-            document.getElementById('docVersion').value     = doc.version || '';
-            document.getElementById('docElaborador').value  = doc.elaborador_id || '';
-            document.getElementById('docRevisor').value     = doc.revisor_id || '';
-            document.getElementById('docAprobador').value   = doc.aprobador_id || '';
-            document.getElementById('docLink').value        = doc.data?.link || '';
-            document.getElementById('docNotes').value       = doc.data?.notes || '';
-            // Publicado: PDF y versión solo cambian con "Nueva versión" (la BD también lo bloquea)
-            const publicado = doc.estado === 'Publicado';
-            document.getElementById('docLink').disabled    = publicado;
-            document.getElementById('docVersion').disabled = publicado;
-            document.getElementById('btnCancel').style.display = 'inline-block';
-
-            switchTab('crear', document.getElementById('tab-crear'));
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        async function deleteDocument(id) {
-            if (currentUserRole !== 'owner') return;
-            if (!confirm('¿Eliminar borrador? Esta acción no se puede deshacer.')) return;
-
-            try {
-                const { data: borrados, error } = await supabaseClient
-                    .from('documents').delete().eq('id', id).select('id');
-                if (error) throw error;
-                if (!borrados?.length) {
-                    showMessage('Solo se eliminan borradores que nunca entraron al flujo. Archívalo para conservar su historial.', 'error');
-                    return;
-                }
-                await logAudit(id, 'deleted', {});
-                showMessage('✓ Documento eliminado', 'success');
-            } catch (err) {
-                console.warn('Error al eliminar:', err.message);
-                showMessage('❌ Error al eliminar', 'error');
-                return;
-            }
-
-            await loadDocuments();
-            await loadAudit();
-        }
-
-        function resetForm() {
-            const form = document.getElementById('documentForm');
-            if (form) form.reset();
-            editingDocId = null;
-            const ei = document.getElementById('docEstadoInfo');
-            if (ei) ei.value = 'Borrador';
-            const el = document.getElementById('docElaborador');
-            if (el && currentUser) el.value = currentUser.id;
-            ['docLink', 'docVersion'].forEach(id => {
-                const inp = document.getElementById(id);
-                if (inp) inp.disabled = false;
-            });
-            const ft = document.getElementById('formTitle');
-            if (ft) ft.textContent = 'Nuevo documento';
-            const bc = document.getElementById('btnCancel');
-            if (bc) bc.style.display = 'none';
-        }
-
-        async function renovarDoc(id) {
-            if (currentUserRole !== 'owner') return;
-            const doc = documents.find(d => d.id === id);
-            if (!doc) return;
-            const conclusion = prompt(
-                `Revisión periódica de "${doc.name}" (v${doc.version || '-'})\n\n` +
-                'Conclusión de la revisión (ej: "Vigente sin cambios").\n' +
-                'Si requiere cambios, cancela y usa "Nueva versión".')?.trim();
-            if (!conclusion) return;
-
-            showLoading('Registrando revisión...');
-            const { error } = await supabaseClient.rpc('doc_transition', {
-                p_doc_id: id, p_action: 'revision_periodica', p_comment: conclusion, p_version: null
-            });
-            hideLoading();
-            if (error) {
-                showMessage('❌ ' + error.message, 'error');
-                return;
-            }
-            showMessage(`✓ Revisión periódica registrada para "${doc.name}"`, 'success');
-            await loadDocuments();
-            await loadAudit();
-        }
-
-        // ─── AUDITORÍA ────────────────────────────────────────────────────────
-        async function logAudit(docId, action, changes) {
-            try {
-                await supabaseClient.from('audit_log').insert([{
-                    document_id: docId,
-                    action:      action,
-                    user_id:     currentUser.id,
-                    user_email:  currentUser.email,
-                    changes:     changes
-                }]);
-            } catch (err) {
-                console.warn('Audit error:', err.message);
-            }
-        }
-
-        async function loadAudit() {
-            if (currentUserRole !== 'owner') return;
-            try {
-                const { data, error } = await supabaseClient
-                    .from('audit_log')
-                    .select('*')
-                    .order('timestamp', { ascending: false });
-                if (error) throw error;
-                auditLogs = data || [];
-            } catch (err) {
-                console.warn('Audit offline');
-                auditLogs = [];
-            }
-            renderAudit();
-        }
-
-        function renderAudit() {
-            const auditList = document.getElementById('auditList');
-            if (!auditList) return;
-            if (auditLogs.length === 0) {
-                auditList.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Sin cambios registrados</div>';
-                return;
-            }
-
-            const actionLabel = { created: 'Creó', updated: 'Actualizó', deleted: 'Eliminó', renovated: 'Renovó', password_reset: 'Envió reset de contraseña a', ...WF_ACTION_LABELS };
-            const actionColor = { created: '#10b981', updated: '#f59e0b', deleted: '#ef4444', renovated: '#3b82f6',
-                                  aprobar: '#0f9d63', aprobar_revision: '#0f9d63', publicar: '#0f9d63',
-                                  observar: '#b91c1c', enviar_revision: '#6d28d9' };
-
-            const fieldLabel = {
-                name: 'Nombre', codigo: 'Código', tipo: 'Tipo', alcance: 'Alcance',
-                estado: 'Estado', repositorio: 'Repositorio', publicado: 'Publicado',
-                version: 'Versión', elaborador: 'Elaborador', revisor: 'Revisor', aprobador: 'Aprobador',
-                comentario: 'Comentario'
-            };
-
-            auditList.innerHTML = auditLogs.map(log => {
-                const date    = new Date(log.timestamp);
-                const timeStr = date.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' })
-                              + ' ' + date.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
-                const quien   = log.user_email ? escapeHtml(log.user_email) : 'Sistema';
-                const accion  = actionLabel[log.action] || log.action;
-                const color   = actionColor[log.action] || '#999';
-                const c       = log.changes || {};
-                const docName = c.name ? `<strong>${escapeHtml(c.name)}</strong>` : `<em>documento eliminado</em>`;
-
-                // Campos relevantes en formato legible
-                const campos = Object.entries(fieldLabel)
-                    .filter(([key]) => c[key])
-                    .map(([key, label]) => `<span style="background:#f0f0f0;padding:2px 8px;border-radius:12px;font-size:11px;margin:2px;display:inline-block;">
-                        <strong>${label}:</strong> ${escapeHtml(String(c[key]))}
-                    </span>`)
-                    .join('');
-
-                const linkHtml = c.data?.link
-                    ? `<span style="background:#f0f0f0;padding:2px 8px;border-radius:12px;font-size:11px;margin:2px;display:inline-block;">
-                        <strong>Link:</strong> <a href="${escapeHtml(c.data.link)}" target="_blank" rel="noopener" style="color:#F32121;">ver documento</a>
-                       </span>`
-                    : '';
-
-                return `
-                    <div class="audit-item">
-                        <div class="audit-header">
-                            <span class="audit-action" style="color:${color};">${accion} ${docName}</span>
-                            <span class="audit-time">${timeStr} · ${quien}</span>
-                        </div>
-                        <div style="margin-top:8px;line-height:2;">${campos}${linkHtml}</div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // ─── TABS ─────────────────────────────────────────────────────────────
-        function switchTab(tab, btnEl) {
-            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            if (btnEl) btnEl.classList.add('active');
-            const tabContent = document.getElementById(`${tab}-tab`);
-            if (tabContent) tabContent.classList.add('active');
-        }
-
-        // ─── UTILS ────────────────────────────────────────────────────────────
-        function showMessage(msg, type) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${type}`;
-            msgDiv.textContent = msg;
-            document.body.appendChild(msgDiv);
-            setTimeout(() => msgDiv.remove(), 3000);
-        }
-
-        function escapeHtml(text) {
-            if (text == null) return '';
+        tbody.innerHTML = lista.map(m => `
+            <tr class="fila" onclick="abrirDetalle('${esc(m.id)}')">
+                <td class="codigo">${esc(m.codigo || 'QRG')}</td>
+                <td class="nombre">${esc(m.nombre)}</td>
+                <td>${esc(m.tipo)}</td>
+                <td class="col-opcional">${esc(m.marca)}</td>
+                <td class="version">${esc(m.version)}</td>
+                <td class="fecha col-opcional">${fecha(m.fecha_version)}</td>
+                <td>${pillPublicacion(m)}</td>
+                <td>${pillAlDia(m.al_dia)}</td>
+            </tr>`).join('');
+    }
+
+    function renderKpis() {
+        const n = f => materiales.filter(f).length;
+        const kpis = [
+            { valor: materiales.length, etiqueta: 'Materiales', accion: () => limpiarFiltros() },
+            { valor: n(m => m.tipo === 'Manual'), etiqueta: 'Manuales', accion: () => filtrar('fTipo', 'Manual') },
+            { valor: n(m => m.tipo === 'QRG'), etiqueta: 'QRG', accion: () => filtrar('fTipo', 'QRG') },
+            { valor: n(m => m.al_dia === 'Cambios pendientes'), etiqueta: 'Con cambios pendientes', alerta: true, accion: () => filtrar('fEstado', 'Cambios pendientes') },
+            { valor: n(m => m.en_revision), etiqueta: 'Versión nueva en revisión', accion: () => filtrar('fEstado', '__revision') },
+        ];
+        const cont = document.getElementById('kpis');
+        cont.innerHTML = '';
+        kpis.forEach(k => {
             const div = document.createElement('div');
-            div.textContent = String(text);
-            return div.innerHTML;
-        }
+            div.className = 'kpi' + (k.alerta && k.valor ? ' alerta' : '');
+            div.innerHTML = `<div class="valor">${k.valor}</div><div class="etiqueta">${k.etiqueta}</div>`;
+            div.onclick = k.accion;
+            cont.appendChild(div);
+        });
+    }
 
-        // ─── USUARIOS ─────────────────────────────────────────────────────────
-        let users = [];
+    function filtrar(id, valor) { limpiarFiltros(false); document.getElementById(id).value = valor; render(); }
+    function limpiarFiltros(volverARender = true) {
+        ['fBuscar', 'fTipo', 'fMarca', 'fEstado'].forEach(id => document.getElementById(id).value = '');
+        if (volverARender) render();
+    }
 
-        async function loadUsers() {
-            if (currentUserRole !== 'owner') return;
-            try {
-                const { data, error } = await supabaseClient
-                    .from('user_roles')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                if (error) throw error;
-                users = data || [];
-            } catch (err) {
-                console.warn('Error cargando usuarios:', err.message);
-                users = [];
-            }
-            renderUsers();
-        }
+    function pillPublicacion(m) {
+        const base = m.publicacion === 'Publicado' ? '<span class="pill ok">Publicado</span>' : `<span class="pill warn">${esc(m.publicacion || 'Sin publicar')}</span>`;
+        return m.en_revision ? base + ' <span class="pill info">Nueva en revisión</span>' : base;
+    }
 
-        function renderUsers() {
-            const tbody = document.getElementById('usersTable');
-            if (!tbody) return;
+    function pillAlDia(valor) {
+        const clase = { 'Al día': 'ok', 'Cambios pendientes': 'bad', 'Por revisar': 'warn' }[valor] || 'info';
+        return `<span class="pill ${clase}">${esc(valor || '—')}</span>`;
+    }
 
-            if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:#999;">Sin usuarios registrados</td></tr>';
-                return;
-            }
+    function abrirDetalle(id) {
+        const m = materiales.find(x => x.id === id);
+        if (!m) return;
+        const versiones = m.versiones || [];
+        document.getElementById('panel').innerHTML = `
+            <button class="cerrar" onclick="cerrarDetalle()" aria-label="Cerrar">×</button>
+            <div class="tipo">${esc(m.tipo)}${m.codigo ? ' · ' + esc(m.codigo) : ''}</div>
+            <h2>${esc(m.nombre)}</h2>
+            ${m.descripcion ? `<p class="desc">${esc(m.descripcion)}</p>` : ''}
+            <div class="datos">
+                <div class="dato"><span>Versión vigente</span><strong>${esc(m.version)}</strong></div>
+                <div class="dato"><span>Fecha</span><strong>${fecha(m.fecha_version)}</strong></div>
+                <div class="dato"><span>Publicación</span><strong>${pillPublicacion(m)}</strong></div>
+                <div class="dato"><span>Bóveda</span><strong>${pillAlDia(m.al_dia)}</strong></div>
+                <div class="dato"><span>Marca</span><strong>${esc(m.marca || '—')}</strong></div>
+                <div class="dato"><span>Versiones registradas</span><strong>${versiones.length}</strong></div>
+            </div>
+            ${m.archivo ? `<div class="archivo">SharePoint · Version Editables / ${esc(m.archivo)}</div>` : ''}
+            <h3>Historial de versiones</h3>
+            ${versiones.length ? `<ul class="timeline">${versiones.map(v => `
+                <li>
+                    <span class="v">v${esc(v.version)}</span><span class="f">${fecha(v.fecha)}</span>
+                    <p>${esc(v.cambios)}</p>
+                </li>`).join('')}</ul>` : '<p class="desc">Sin historial registrado.</p>'}
+        `;
+        document.getElementById('detalle').classList.add('active');
+    }
 
-            tbody.innerHTML = users.map(u => {
-                const isMe = u.user_id === currentUser?.id;
-                const fecha = u.created_at ? new Date(u.created_at).toLocaleDateString('es-CL') : '-';
-                const roleBadge = `<span class="role-badge ${escapeHtml(u.role)}">${escapeHtml((ROLE_LABELS[u.role] || u.role || '').toUpperCase())}</span>`;
-                const roleSelect = `
-                    <select onchange="changeUserRole('${u.user_id}', this.value, this)" style="padding:5px 8px; font-size:12px;">
-                        ${['viewer', 'aprobador', 'owner'].map(r => `<option value="${r}" ${r === u.role ? 'selected' : ''}>${ROLE_LABELS[r]}</option>`).join('')}
-                    </select>`;
+    function cerrarDetalle() { document.getElementById('detalle').classList.remove('active'); }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarDetalle(); });
 
-                return `
-                <tr>
-                    <td><strong>${escapeHtml(u.email || '-')}</strong>${isMe ? ' <small style="color:#999;">(tú)</small>' : ''}</td>
-                    <td>${roleBadge}</td>
-                    <td><small>${fecha}</small></td>
-                    <td>
-                        <div class="actions">
-                            ${!isMe ? `
-                            ${roleSelect}
-                            <button class="btn-secondary btn-icon" title="Enviar link para restablecer contraseña"
-                                onclick="sendPasswordReset('${escapeHtml(u.email || '')}')">
-                                🔑
-                            </button>
-                            <button class="btn-danger btn-icon" title="Quitar acceso"
-                                onclick="removeUser('${u.user_id}', '${escapeHtml(u.email || '')}')">
-                                🗑️
-                            </button>` : '<small style="color:#999;">—</small>'}
-                        </div>
-                    </td>
-                </tr>`;
-            }).join('');
-        }
+    // ─── UTILIDADES ──────────────────────────────────────────────────────
+    function esc(t) {
+        if (t == null) return '';
+        const d = document.createElement('div');
+        d.textContent = String(t);
+        return d.innerHTML.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+    }
 
-        async function handleCreateUser(e) {
-            e.preventDefault();
-            const email    = document.getElementById('newUserEmail').value.trim();
-            const password = document.getElementById('newUserPassword').value;
-            const role     = document.getElementById('newUserRole').value;
-            const btn      = document.getElementById('btnCreateUser');
+    function fecha(iso) {
+        if (!iso) return '—';
+        const [a, m, d] = String(iso).slice(0, 10).split('-');
+        return d && m && a ? `${d}-${m}-${a}` : esc(iso);
+    }
 
-            btn.disabled = true;
-            btn.textContent = 'Creando...';
-            showLoading('Creando usuario...');
-
-            try {
-                // 1) Si ya tiene cuenta en Supabase Auth (p. ej. se le quitó el acceso), solo se asigna el rol
-                const { data: existia, error: rpcErr } = await supabaseClient
-                    .rpc('assign_role_by_email', { p_email: email, p_role: role });
-                if (rpcErr) throw new Error(rpcErr.message);
-
-                if (existia) {
-                    showMessage(`✓ ${email} ya tenía cuenta: se le asignó el rol ${role}`, 'success');
-                } else {
-                    // 2) Cuenta nueva. Sin contraseña se genera una aleatoria y la persona entra con el link por correo.
-                    const pwd = password || crypto.randomUUID() + 'Aa1!';
-                    const { data: { session } } = await supabaseClient.auth.getSession();
-                    // La edge function create-user solo conoce owner/viewer: el rol final se asigna después
-                    const res = await supabaseClient.functions.invoke('create-user', {
-                        body: { email, password: pwd, role: role === 'aprobador' ? 'viewer' : role },
-                        headers: { Authorization: `Bearer ${session.access_token}` }
-                    });
-
-                    if (res.error || res.data?.error) {
-                        // En respuestas no-2xx el detalle viene en error.context (Response)
-                        let detalle = res.data?.error;
-                        if (!detalle && res.error?.context?.json) {
-                            try { detalle = (await res.error.context.json())?.error; } catch { /* sin cuerpo JSON */ }
-                        }
-                        throw new Error(detalle || res.error.message);
-                    }
-
-                    if (role === 'aprobador') {
-                        const { error } = await supabaseClient
-                            .rpc('assign_role_by_email', { p_email: email, p_role: 'aprobador' });
-                        if (error) throw new Error('Usuario creado, pero no se pudo asignar rol aprobador: ' + error.message);
-                    }
-
-                    showMessage(`✓ Usuario ${email} creado como ${role}`, 'success');
-                }
-                await loadStaffUsers();
-                document.getElementById('userForm').reset();
-                await loadUsers();
-            } catch (err) {
-                showMessage('❌ Error: ' + err.message, 'error');
-            } finally {
-                hideLoading();
-                btn.disabled = false;
-                btn.textContent = 'Crear usuario';
-            }
-        }
-
-        async function changeUserRole(userId, newRole, selectEl) {
-            if (!confirm(`¿Cambiar rol a ${newRole}?`)) {
-                await loadUsers(); // revierte el select
-                return;
-            }
-
-            try {
-                selectEl.disabled = true;
-                const { error } = await supabaseClient
-                    .from('user_roles')
-                    .update({ role: newRole })
-                    .eq('user_id', userId);
-                if (error) throw error;
-                showMessage(`✓ Rol actualizado a ${newRole}`, 'success');
-                await loadUsers();
-                await loadStaffUsers();
-            } catch (err) {
-                showMessage('❌ Error al cambiar rol: ' + err.message, 'error');
-                await loadUsers();
-            }
-        }
-
-        // El owner no define la contraseña: envía un link y el usuario elige la suya
-        async function sendPasswordReset(email) {
-            if (!email) return;
-            if (!confirm(`¿Enviar a ${email} un link para restablecer su contraseña?`)) return;
-
-            showLoading('Enviando link...');
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + window.location.pathname
-            });
-            hideLoading();
-
-            if (error) {
-                showMessage('❌ No se pudo enviar: ' + error.message, 'error');
-            } else {
-                showMessage(`✓ Link de restablecimiento enviado a ${email}`, 'success');
-                await logAudit(null, 'password_reset', { name: email });
-            }
-        }
-
-        async function removeUser(userId, email) {
-            if (!confirm(`¿Quitar acceso a ${email}? El usuario seguirá existiendo en Supabase Auth pero no podrá ingresar a la app.`)) return;
-
-            try {
-                const { error } = await supabaseClient
-                    .from('user_roles')
-                    .delete()
-                    .eq('user_id', userId);
-                if (error) throw error;
-                showMessage(`✓ Acceso removido para ${email}`, 'success');
-                await loadUsers();
-            } catch (err) {
-                showMessage('❌ Error al remover usuario: ' + err.message, 'error');
-            }
-        }
-
-        // ─── ARRANQUE ─────────────────────────────────────────────────────────
-        init();
-    </script>
+    init();
+</script>
 </body>
 </html>
